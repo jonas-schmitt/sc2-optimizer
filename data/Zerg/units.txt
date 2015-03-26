@@ -1,0 +1,16 @@
+Unit		Mineral	Vespene	Supply	BuildTime	BuildFrom				Requirements			Vanish_Req
+Larva		0		0		0		0			Hatchery,Lair,Hive		0						0
+Drone		50		0		1		17			Hatchery,Lair,Hive		0						Larva
+Overlord	100		0		0		25			Hatchery,Lair,Hive		0						Larva
+Zergling	50		0		1		24			Hatchery,Lair,Hive		SpawningPool			Larva
+Queen		150		0		2		50			Hatchery,Lair,Hive		SpawningPool			0
+Hydralisk	100		50		2		33			Hatchery,Lair,Hive		HydraliskDen			Larva
+Baneling	25		25		0		20			Hatchery,Lair,Hive		BanelingNest			Zergling
+Overseer	50		50		0		17			Hatchery,Lair,Hive		Lair/Hive				Overlord
+Roach		75		25		2		27			Hatchery,Lair,Hive		RoachWarren				Larva
+Infestor	100		150		2		50			Hatchery,Lair,Hive		InfestationPit			Larva
+Mutalisk	100		100		2		33			Hatchery,Lair,Hive		Spire/GreaterSpire		Larva
+Corruptor	150		100		2		40			Hatchery,Lair,Hive		Spire/GreaterSpire		Larva
+NydusWorm	100		100		0		20			NydusNetwork			Lair					0
+Ultralisk	300		200		6		55			Hatchery,Lair,Hive		Hive,UltraliskCavern	Larva
+BroodLord	150		150		2		34			Hatchery,Lair,Hive		GreaterSpire			Corruptor

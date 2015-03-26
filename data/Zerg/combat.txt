@@ -1,0 +1,14 @@
+Name		Mineral	Vespene	GDPS    ADPS	GRange  ARange	Health  Plasma	Armor   Sight   Speed	Accelerat	AirUnit Size
+Drone		50	0	3.3	0	0.1	0	40	0	0	8	2.812	2.50		0       0.75
+Queen		150	0	8	9	5	7	175	0	1	9	0.938	1000		0       1.75
+Zergling	25	0	7.2	0	0.1	0	35	0	0	8	2.9531	1000		0       0.75
+Overlord	100	0	0	0	0	0	200	0	0	11	0.586	1.06		1       0
+Roach		75	25	8	0	4	0	145	0	1	9	2.25	1000		0       1      
+Hydralisk	100	50	16	16	5	5	80	0	0	9	2.25	1000		0       1.25
+Baneling	25	25	20	0	0.25	0	30	0	0	8	2.5	1000		0	0.75
+Overseer	50	50	0	0	0	0	200	0	1	11	1.88	2.13		1	2
+Infestor	100	150	0	0	0	0	90	0	0	10	2.25	1000		0	1.5
+Ultralisk	300	200	40.65	0	1	0	500	0	1	9	2.9531	1000		0       2
+Mutalisk	100	100	5.9	5.9	3	3	120	0	0	11	4	3.25		1       0
+Corruptor	150	100	0	7.4	0	6	200	0	2	10	2.95	2.63		1       0
+BroodLord	150	150	8	0	9.5	0	225	0	1	12	1.406	1.06		1       0
