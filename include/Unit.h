@@ -16,6 +16,7 @@
 #include "UnitGenes.h"
 
 using std::pair;
+using std::tuple;
 using std::function;
 using std::pow;
 using std::sqrt;
@@ -23,10 +24,6 @@ using std::list;
 using std::string;
 using std::vector;
 
-enum class AttackModus
-{
-    splash, projectile, linear
-};
 
 enum class Attribute
 {
@@ -36,58 +33,37 @@ enum class Attribute
 
 struct UnitStats
 {
-    UnitStats()
-    {
-        minerals = 0;
-        gas = 0;
-        gdps = 0;
-        adps = 0;
-        groundRange = 0;
-        airRange = 0;
-        health = 0;
-        maxHealth = 0;
-        shield = 0;
-        maxShield = 0;
-        armor = 0;
-        shieldArmor = 0;
-        sight = 0;
-        speed = 0;
-        acceleration = 0;
-        energy = 0;
-        maxEnergy = 0;
-        size = 0;
-        airUnit = false;
-    }
+    float minerals = 0;
+    float gas = 0;
+    float gdps = 0;
+    float adps = 0;
+    float groundRange = 0;
+    float airRange = 0;
+    double health = 0;
+    double maxHealth = 0;
+    double shield = 0;
+    double maxShield = 0;
+    float armor = 0;
+    float armorUpgrade = 0;
+    float speed = 0;
+    double energy = 0;
+    double maxEnergy = 0;
+    float size = 0;
+    bool airUnit = false;
 
-    UnitStats(const UnitStats& stats)
-        : minerals(stats.minerals), gas(stats.gas), gdps(stats.gdps), adps(stats.adps), groundRange(stats.groundRange),
-          airRange(stats.airRange), health(stats.health), maxHealth(stats.maxHealth), shield(stats.shield), maxShield(stats.maxShield), armor(stats.armor), shieldArmor(stats.shieldArmor), sight(stats.sight),
-          speed(stats.speed), acceleration(stats.acceleration), energy(stats.energy), maxEnergy(stats.maxEnergy), size(stats.size), airUnit(stats.airUnit), attributes(stats.attributes),
-          bonusDps(stats.bonusDps), attackMods(stats.attackMods)
-    {};
+    float groundDamage = 0;
+    float gdupgrade = 0;
 
-    float minerals;
-    float gas;
-    float gdps;
-    float adps;
-    float groundRange;
-    float airRange;
-    double health;
-    double maxHealth;
-    double shield;
-    double maxShield;
-    float armor;
-    float shieldArmor = 0;
-    float sight;
-    float speed;
-    float acceleration;
-    double energy;
-    double maxEnergy;
-    float size;
-    bool airUnit;
+    float airDamage = 0;
+    float adupgrade = 0;
+    int groundCooldown = 0;
+    int airCooldown = 0;
+
+    int upgrade = 0;
+
     vector<Attribute> attributes;
-    vector<pair<float,Attribute> > bonusDps;
-    vector<AttackModus> attackMods; 
+    vector<tuple<float,float,Attribute>> bonuses;
+
 };
 
 class BaseUnit
@@ -104,6 +80,10 @@ protected:
     bool mTracking = false;
     vector<pair<float,float>> mPath;
     vector<BaseUnit *> mInRange;
+
+    int mTimeSlice;
+
+    int mTimer;
 
     string mName;
 
@@ -335,8 +315,6 @@ public:
 
     float getArmor() const;
 
-    float getShieldArmor() const;
-
     float getSight() const;
 
     float getSpeed() const;
@@ -363,15 +341,27 @@ public:
 
     void decArmor();
 
-    void incShieldArmor();
-
-    void decShieldArmor();
-
     void resetHealth();
 
     void resetShield();
 
     void resetEnergy();
+
+    float getGroundDamage() const;
+
+    float getAirDamage() const;
+
+    int getGroundCooldown() const;
+
+    int getAirCooldown() const;
+
+    float getGDUpgrade() const;
+
+    float getADUpgrade() const;
+
+    float getArmorUpgrade() const;
+
+
 
     pair<double,double> getPos() const;
 
@@ -594,6 +584,14 @@ public:
     void reservePathStorage(size_t const sz);
     vector<pair<float,float>> getPath() const;
     void clearPath();
+
+    int getTimer() const;
+    void setTimer(int value);
+
+    void decTimer();
+
+    int getTimeSlice() const;
+    void setTimeSlice(int value);
 
 };
 

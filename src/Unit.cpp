@@ -131,25 +131,12 @@ float BaseUnit::getArmor() const
     return mStats.armor;
 }
 
-float BaseUnit::getShieldArmor() const
-{
-    return mStats.shieldArmor;
-}
-
-float BaseUnit::getSight() const
-{
-    return mStats.sight;
-}
 
 float BaseUnit::getSpeed() const
 {
     return mStats.speed;
 }
 
-float BaseUnit::getAcceleration() const
-{
-    return mStats.acceleration;
-}
 
 double BaseUnit::getEnergy() const
 {
@@ -254,16 +241,6 @@ void BaseUnit::decArmor()
     --mStats.armor;
 }
 
-void BaseUnit::incShieldArmor()
-{
-    --mStats.shieldArmor;
-}
-
-void BaseUnit::decShieldArmor()
-{
-    ++mStats.shieldArmor;
-}
-
 pair<double,double> BaseUnit::getPos() const
 {
     return mPos;
@@ -360,6 +337,7 @@ float BaseUnit::getResources() const
     return mStats.minerals+GASTOMINERALS*mStats.gas;
 }
 
+
 double BaseUnit::computeDamageDealt(BaseUnit const& unit)
 {
     if(unit.getHealth() < EPS)
@@ -407,7 +385,7 @@ bool BaseUnit::attack(BaseUnit* unit)
     {
         return false;
     }
-    damage -= unit->getShieldArmor();
+    damage -= unit->getArmor();
     if(damage-0.5 < EPS)
     {
         damage = 0.5;
@@ -694,3 +672,66 @@ void Reaper::regenerate()
 
 }
 
+
+
+float BaseUnit::getAirDamage() const
+{
+    return mStats.airDamage;
+}
+
+
+int BaseUnit::getGroundCooldown() const
+{
+    return mStats.groundCooldown;
+}
+
+
+int BaseUnit::getAirCooldown() const
+{
+    return mStats.airCooldown;
+}
+
+float BaseUnit::getGroundDamage() const
+{
+    return mStats.groundDamage;
+}
+
+int BaseUnit::getTimer() const
+{
+    return mTimer;
+}
+void BaseUnit::setTimer(int value)
+{
+    mTimer = value;
+}
+
+
+void BaseUnit::decTimer()
+{
+    mTimer -= mTimeSlice;
+
+}
+
+int BaseUnit::getTimeSlice() const
+{
+    return mTimeSlice;
+}
+
+void BaseUnit::setTimeSlice(int value)
+{
+    mTimeSlice = value;
+}
+
+float BaseUnit::getGDUpgrade() const
+{
+    return mStats.gdupgrade;
+}
+float BaseUnit::getADUpgrade() const
+{
+    return mStats.adupgrade;
+}
+
+float BaseUnit::getArmorUpgrade() const
+{
+    return mStats.armorUpgrade;
+}

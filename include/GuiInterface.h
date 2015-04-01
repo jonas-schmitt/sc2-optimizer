@@ -44,7 +44,7 @@ public:
     void collectGarbage();
     void setTracking(bool const tracking);
     void setTracking(bool const tracking, size_t const steps);
-    void setSteps(size_t steps);
+    void setTimeSteps(size_t steps);
     void clearUnitPaths();
 
     void getPotentialField(){MicroSimulation<T,U>::getPotentialField();}

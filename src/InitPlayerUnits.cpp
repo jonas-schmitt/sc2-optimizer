@@ -44,7 +44,7 @@ void InitPlayerUnits<Race>::readStats()
 	UnitStats stats;
 	std::string name;
 
-	std::unordered_map<std::string, UnitStats> mappe;
+    std::unordered_map<std::string, UnitStats> statMap;
 
 	while (!((line = reader.getLine()).empty()))
 	{
@@ -57,27 +57,26 @@ void InitPlayerUnits<Race>::readStats()
 		if (!(stream
 			>> stats.minerals
 			>> stats.gas
-			>> stats.gdps
-			>> stats.adps
-			>> stats.groundRange
-			>> stats.airRange
-			>> stats.health
-			>> stats.shield
-			>> stats.armor
-			>> stats.sight
-			>> stats.speed
-			>> stats.acceleration
-            >> stats.airUnit
-            >> stats.size))
+            >> stats.size
+            >> stats.armor
+            >> stats.armorUpgrade
+            >> stats.health
+            >> stats.shield))
 		{
 			continue;
 		}
+        if(!(stream >> attrStr))
+        {
+            continue;
+        }
+
+
         stats.maxHealth = stats.health;
         stats.maxShield = stats.shield;
         stats.maxEnergy = stats.energy;
-		mappe[name] = stats;
+        statMap[name] = stats;
 	}
-	mFactory.setUmap(mappe);
+    mFactory.setUmap(statMap);
 }
 
 

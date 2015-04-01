@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
         microSim->getPotentialField();
         return 0;
     }
-    microSim->setSteps(1200);
+    microSim->setTimeSteps(1200);
     microSim->run();
     OutputParameters param(initialGenes, UOB->getHighscores(), selectionRate, reproductionRate, mutationRate, UOB->getSurvivalAverage());
     writeOutput(microSim->getPlayer1Result(), microSim->getPlayer2Result(), param);

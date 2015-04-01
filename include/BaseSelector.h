@@ -25,7 +25,7 @@ class BaseSelector
 		virtual void setTracking(const bool, const size_t)=0;
 		virtual void setTracking(const bool)=0;
 
-		virtual void setSteps(size_t)=0;
+        virtual void setTimeSteps(size_t)=0;
 		
 		virtual void setPlayer1Genes(UnitGenes const& genes)=0;
 		virtual void setPlayer2Genes(UnitGenes const& genes)=0;

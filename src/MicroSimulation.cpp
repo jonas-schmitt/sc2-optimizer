@@ -423,7 +423,7 @@ template<class T, class U>
 bool MicroSimulation<T, U>::run(size_t const steps)
 {
     bool pl1Finished = true, pl2Finished = true;
-    for(size_t i = 0; i < steps; ++i)
+    for(size_t i = 0; i < steps; i += mTimeFrame)
     {
         pl1Finished = true;
         pl2Finished = true;
@@ -479,9 +479,15 @@ bool MicroSimulation<T, U>::run(size_t const steps)
 }
 
 template <class T, class U>
-void MicroSimulation<T, U>::setSteps(size_t steps)
+void MicroSimulation<T, U>::setTimeSteps(size_t timeSteps)
 {
-    mSteps = steps;
+    mTimeSteps = timeSteps;
+}
+
+template <class T, class U>
+void MicroSimulation<T, U>::setTimeFrame(size_t timeFrame)
+{
+    mTimeFrame = timeFrame;
 }
 
 template <class T, class U>
@@ -490,7 +496,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
     initPotentialFields();
     pl1.unitCount = pl1.unitList.size();
     pl2.unitCount = pl2.unitList.size();
-    for(size_t i = 0; i < mSteps; ++i)
+    for(size_t i = 0; i < mTimeSteps; i += mTimeFrame)
     {
         if(pl1.unitCount == 0 || pl2.unitCount == 0)
         {

@@ -149,9 +149,9 @@ void GuiInterface<T, U>::setTracking(bool const tracking, size_t const steps)
     MicroSimulation<T,U>::setTracking(tracking, steps);
 }
 template<class T, class U>
-void GuiInterface<T, U>::setSteps(size_t steps)
+void GuiInterface<T, U>::setTimeSteps(size_t steps)
 {
-    MicroSimulation<T,U>::setSteps(steps);
+    MicroSimulation<T,U>::setTimeSteps(steps);
 }
 
 template<class T, class U>

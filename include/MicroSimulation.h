@@ -47,7 +47,8 @@ private:
     PlayerState<T> pl1;
     PlayerState<U> pl2;
     bool mTracking = false;
-    size_t mSteps = 450;
+    size_t mTimeSteps = 450000;
+    size_t mTimeFrame = 10;
     template<typename UnitType> double sumUnitListCosts(list<UnitType> const& units);
     double sumPlayer1UnitCosts();
     double sumPlayer2UnitCosts();
@@ -80,7 +81,8 @@ public:
     string getFilePath2() const;
     bool run(size_t steps);
     Fitness run(bool const reset);
-    void setSteps(size_t steps);
+    void setTimeSteps(size_t timeSteps);
+    void setTimeFrame(size_t timeFrame);
 
     string determineWinner();
 
