@@ -1,8 +1,8 @@
-Name	Minerals	Gas	Size	Armor	Ar.-Upgrade	Health	Shield	Attr.	GA	GA-Upgrade	AA	AA-Upgrade	Bonus	Bonus-Upgrade	GA-Cooldown	AA-Cooldown	Speed	GA-Range	AA-Range	Air-Unit
-SCV	50		0	0.75	0	1		45	0	L,B,M	5	0		0	0		-	-		1.5		0		2.8125	0.1	0	0
-Marine	50		0	0.75	0	1		45	0	L,B	6	1		6	1		-	-		0.8608		0.8608		2.25	5	5	0
-Marauder	100	25	1.125	1	1		125	0	A,B	10	1		0	0		A:10	A:1		1.5		0		2.25	6	0	0
-Reaper	50		50	0.75	0	1		60	0	L,B	8	2		0	0		0	0		1.1		0		3.75	4.5	0	0
-Hellion	100		0	1.25	0	1		90	0	L,M	8	1		0	0		L:6	L:1		2.5		0		4.25	5	0	0
-Hellbat	100		0	1.25	0	1		135	0	L,B	18	2		0	0		-	L:1		2		0		2.25	2	0	0
+Name	Minerals	Gas	Size	Armor	Ar.-Upgrade	Health	Shield	Attr.	GA	GA-Upgrade	AA	AA-Upgrade	Bonus	Bonus-Upgrade	GA-Cooldown	AA-Cooldown	Speed	GA-Range	AA-Range
+SCV	50		0	0.75	0	1		45	0	L,B,M	5	0		0	0		-	-		1.5		0		2.8125	0.1		0	
+Marine	50		0	0.75	0	1		45	0	L,B	6	1		6	1		-	-		0.8608		0.8608		2.25	5		5	
+Marauder	100	25	1.125	1	1		125	0	A,B	10	1		0	0		A:10	A:1		1.5		0		2.25	6		0	
+Reaper	50		50	0.75	0	1		60	0	L,B	8	2		0	0		0	0		1.1		0		3.75	4.5		0	
+Hellion	100		0	1.25	0	1		90	0	L,M	8	1		0	0		L:6	L:1		2.5		0		4.25	5		0	
+Hellbat	100		0	1.25	0	1		135	0	L,B	18	2		0	0		-	L:1		2		0		2.25	2		0	
 

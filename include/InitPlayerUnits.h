@@ -23,6 +23,8 @@ class InitPlayerUnits : public Race
 private:
     UnitFactory<Race> mFactory;
 	std::string mFilePath;
+    vector<string>& split(const string &s, char delim, vector<string> &tokens);
+    vector<string> split(string const &s, char delim);
 public:
 	InitPlayerUnits();
 	InitPlayerUnits(const std::string& filePath);

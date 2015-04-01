@@ -674,26 +674,26 @@ void Reaper::regenerate()
 
 
 
-float BaseUnit::getAirDamage() const
+float BaseUnit::getAirAttack() const
 {
-    return mStats.airDamage;
+    return mStats.airAttack;
 }
 
 
-int BaseUnit::getGroundCooldown() const
+int BaseUnit::getGACooldown() const
 {
-    return mStats.groundCooldown;
+    return mStats.gaCooldown;
 }
 
 
-int BaseUnit::getAirCooldown() const
+int BaseUnit::getAACooldown() const
 {
-    return mStats.airCooldown;
+    return mStats.aaCooldown;
 }
 
-float BaseUnit::getGroundDamage() const
+float BaseUnit::getGroundAttack() const
 {
-    return mStats.groundDamage;
+    return mStats.groundAttack;
 }
 
 int BaseUnit::getTimer() const
@@ -722,13 +722,13 @@ void BaseUnit::setTimeSlice(int value)
     mTimeSlice = value;
 }
 
-float BaseUnit::getGDUpgrade() const
+float BaseUnit::getGAUpgrade() const
 {
-    return mStats.gdupgrade;
+    return mStats.gaUpgrade;
 }
-float BaseUnit::getADUpgrade() const
+float BaseUnit::getAAUpgrade() const
 {
-    return mStats.adupgrade;
+    return mStats.aaUpgrade;
 }
 
 float BaseUnit::getArmorUpgrade() const

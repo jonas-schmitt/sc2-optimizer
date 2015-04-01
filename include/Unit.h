@@ -25,9 +25,20 @@ using std::string;
 using std::vector;
 
 
-enum class Attribute
+enum Attribute
 {
-    light, armored, biological, psyonic, massive, structure
+    light = 0, armored = 1, biological = 2, psyonic = 3, massive = 4, air = 5
+};
+
+struct Bonus
+{
+    float base;
+    float upgrade;
+    vector<Attribute> attributes;
+    Bonus() : base(0.f), upgrade(0.f)
+    {}
+    Bonus(Bonus const& other) : base(other.base), upgrade(other.upgrade), attributes(other.attributes)
+    {}
 };
 
 
@@ -51,18 +62,18 @@ struct UnitStats
     float size = 0;
     bool airUnit = false;
 
-    float groundDamage = 0;
-    float gdupgrade = 0;
+    float groundAttack = 0;
+    float gaUpgrade = 0;
 
-    float airDamage = 0;
-    float adupgrade = 0;
-    int groundCooldown = 0;
-    int airCooldown = 0;
+    float airAttack = 0;
+    float aaUpgrade = 0;
+    int gaCooldown = 0;
+    int aaCooldown = 0;
 
     int upgrade = 0;
 
     vector<Attribute> attributes;
-    vector<tuple<float,float,Attribute>> bonuses;
+    vector<Bonus> bonuses;
 
 };
 
@@ -347,17 +358,17 @@ public:
 
     void resetEnergy();
 
-    float getGroundDamage() const;
+    float getGroundAttack() const;
 
-    float getAirDamage() const;
+    float getAirAttack() const;
 
-    int getGroundCooldown() const;
+    int getGACooldown() const;
 
-    int getAirCooldown() const;
+    int getAACooldown() const;
 
-    float getGDUpgrade() const;
+    float getGAUpgrade() const;
 
-    float getADUpgrade() const;
+    float getAAUpgrade() const;
 
     float getArmorUpgrade() const;
 
