@@ -61,7 +61,6 @@ void InitPlayerUnits<Race>::readStats()
 
 	DataReader reader(mFilePath);
 	std::string line;
-	UnitStats stats;
 	std::string name;
 
     std::unordered_map<std::string, UnitStats> statMap;
@@ -74,24 +73,25 @@ void InitPlayerUnits<Race>::readStats()
 			continue;
 
 		}
+        UnitStats stats;
         string str;
-		if (!(stream
-			>> stats.minerals
-			>> stats.gas
-            >> stats.size
-            >> stats.armor
-            >> stats.armorUpgrade
-            >> stats.health
-            >> stats.shield))
-		{
-            std::cout << "Skip " << name << " " << 1 << std::endl;
-			continue;
-		}
+        if (!(stream
+              >> stats.minerals
+              >> stats.gas
+              >> stats.size
+              >> stats.armor
+              >> stats.armorUpgrade
+              >> stats.health
+              >> stats.shield))
+        {
+
+            continue;
+        }
+
 
 
         if(!(stream >> str))
         {
-                        std::cout << "Skip " << name << " " << 2 << std::endl;
             continue;
         }
 
@@ -110,6 +110,10 @@ void InitPlayerUnits<Race>::readStats()
             else if(attr == "B")
             {
                 stats.attributes.push_back (Attribute::biological);
+            }
+            else if(attr == "M")
+            {
+                stats.attributes.push_back(Attribute::mechanical);
             }
             else if(attr == "P")
             {
@@ -132,13 +136,11 @@ void InitPlayerUnits<Race>::readStats()
              >> stats.airAttack
              >> stats.aaUpgrade))
         {
-                        std::cout << "Skip " << name << " " << 3 << std::endl;
             continue;
         }
 
         if(!(stream >> str))
         {
-                        std::cout << "Skip " << name << " " << 4 << std::endl;
             continue;
         }
 
@@ -173,6 +175,10 @@ void InitPlayerUnits<Race>::readStats()
                     {
                         bonus.attributes.push_back (Attribute::biological);
                     }
+                    else if(attr == "M")
+                    {
+                        bonus.attributes.push_back(Attribute::mechanical);
+                    }
                     else if(attr == "P")
                     {
                         bonus.attributes.push_back (Attribute::psyonic);
@@ -193,7 +199,6 @@ void InitPlayerUnits<Race>::readStats()
         //parse bonus upgrades
         if(!(stream >> str))
         {
-                        std::cout << "Skip " << name << " " << 5 << std::endl;
             continue;
         }
         if(str != "-")
@@ -217,6 +222,10 @@ void InitPlayerUnits<Race>::readStats()
                     else if(attr == "B")
                     {
                         bonus.attributes.push_back (Attribute::biological);
+                    }
+                    else if(attr == "M")
+                    {
+                        bonus.attributes.push_back(Attribute::mechanical);
                     }
                     else if(attr == "P")
                     {
@@ -260,29 +269,28 @@ void InitPlayerUnits<Race>::readStats()
                 }
             }
         }
-        if(!(stream >> stats.gaCooldown))
+        double tmp;
+
+        // the cooldown needs to be rounded to milliseconds
+        if(!(stream >> tmp))
         {
-            std::cout << "Skip " << name << ": gaCooldown" << std::endl;
             continue;
         }
-        if(!(stream >> stats.aaCooldown))
+        stats.gaCooldown = static_cast<int>(std::round(1000*tmp));
+        if(!(stream >> tmp))
         {
-            std::cout << "Skip " << name << ": aaCooldown" << std::endl;
             continue;
-
-
         }
+        stats.aaCooldown = static_cast<int>(std::round(1000*tmp));
         if(!(stream >> stats.speed))
         {
-            std::cout << "Skip " << name << ": speed" << std::endl;
             continue;
         }
         if(!(stream
              >> stats.groundRange
              >> stats.airRange))
         {
-            std::cout << "Skip " << name << ": range" << std::endl;
-continue;
+            continue;
         }
         stats.maxHealth = stats.health;
         stats.maxShield = stats.shield;

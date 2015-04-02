@@ -27,7 +27,7 @@ using std::vector;
 
 enum Attribute
 {
-    light = 0, armored = 1, biological = 2, psyonic = 3, massive = 4, air = 5
+    light = 0, armored = 1, biological = 2, mechanical = 3, psyonic = 4, massive = 5, air = 6
 };
 
 struct Bonus
@@ -92,9 +92,9 @@ protected:
     vector<pair<float,float>> mPath;
     vector<BaseUnit *> mInRange;
 
-    int mTimeSlice;
+    int mTimeSlice = 10;
 
-    int mTimer;
+    int mTimer = 0;
 
     string mName;
 
