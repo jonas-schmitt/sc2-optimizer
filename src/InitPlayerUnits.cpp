@@ -288,13 +288,14 @@ void InitPlayerUnits<Race>::readStats()
         }
         if(!(stream
              >> stats.groundRange
-             >> stats.airRange))
+             >> stats.airRange
+             >> stats.energy
+             >> stats.maxEnergy))
         {
             continue;
         }
         stats.maxHealth = stats.health;
         stats.maxShield = stats.shield;
-        stats.maxEnergy = stats.energy;
         statMap[name] = stats;
 
 	}
