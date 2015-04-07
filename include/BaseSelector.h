@@ -10,7 +10,6 @@
 class BaseSelector
 {
 	public:
-		virtual void setGuiWindow(GuiWindow *gui)=0;
         virtual bool run(size_t intervals)=0;
         virtual void run()=0;
         virtual void reset()=0;

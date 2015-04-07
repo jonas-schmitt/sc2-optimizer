@@ -76,82 +76,82 @@ template <class Race> struct PlayerState : public Race
     list<typename Race::RUT*>unitList;
     size_t unitCount;
 
-    void regenerate()
+    template<typename T> void timestep(PlayerState<T>& other)
     {
-        for(auto & unit : unitList0)
+        for(auto& elem : this->unitList0)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList1)
+        for(auto& elem : this->unitList1)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList2)
+        for(auto& elem : this->unitList2)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList3)
+        for(auto& elem : this->unitList3)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList4)
+        for(auto& elem : this->unitList4)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList5)
+        for(auto& elem : this->unitList5)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList6)
+        for(auto& elem : this->unitList6)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList7)
+        for(auto& elem : this->unitList7)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList8)
+        for(auto& elem : this->unitList8)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList9)
+        for(auto& elem : this->unitList9)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList10)
+        for(auto& elem : this->unitList10)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList11)
+        for(auto& elem : this->unitList11)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList12)
+        for(auto& elem : this->unitList12)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList13)
+        for(auto& elem : this->unitList13)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList14)
+        for(auto& elem : this->unitList14)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList15)
+        for(auto& elem : this->unitList15)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList16)
+        for(auto& elem : this->unitList16)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-        for(auto & unit : unitList17)
+        for(auto& elem : this->unitList17)
         {
-            unit.first.regenerate();
+            elem.first.timestep(*this, other);
         }
-
     }
+
 
     template<typename T> void eraseUnit(typename list<pair<T,unitIterator>>::iterator it, list<pair<T,unitIterator>>& unitListT)
     {

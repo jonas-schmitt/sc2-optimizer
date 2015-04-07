@@ -20,7 +20,7 @@ private:
 public:
     GuiInterface(const pair<double, double> minPos, const pair<double, double> maxPos, const string& filePath1, const string& filePath2);
     void setGuiWindow(GuiWindow *gui);
-    bool run(size_t const intervals);
+    bool run(int const steps);
     void run();
     void reset();
 
@@ -47,7 +47,6 @@ public:
     void setTimeSteps(size_t steps);
     void clearUnitPaths();
 
-    void getPotentialField(){MicroSimulation<T,U>::getPotentialField();}
 
 };
 

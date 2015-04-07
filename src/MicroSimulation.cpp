@@ -263,136 +263,7 @@ void MicroSimulation<T,U>::resetBothPlayers()
     pl2.reset();
 }
 
-template<class T, class U>
-template<class UnitType>
-double MicroSimulation<T, U>::sumUnitListCosts(const list<UnitType>& units)
-{
 
-    double sum = 0.;
-    for (const UnitType& unit : units)
-    {
-        sum += unit.getMinerals();
-        sum += GASTOMINERALS*unit.getGas();
-    }
-    return sum;
-}
-
-template<class T, class U>
-double MicroSimulation<T, U>::sumPlayer1UnitCosts()
-{
-    double sum = 0;
-    for(auto unitPtr : pl1.unitList)
-    {
-        sum += unitPtr->getMinerals();
-        sum += GASTOMINERALS*unitPtr->getGas();
-    }
-    return sum;
-}
-
-template<class T, class U>
-double MicroSimulation<T, U>::sumPlayer2UnitCosts()
-{
-    double sum = 0;
-    for(auto unitPtr : pl2.unitList)
-    {
-        sum += unitPtr->getMinerals();
-        sum += GASTOMINERALS*unitPtr->getGas();
-    }
-    return sum;
-}
-
-template <class T, class U>
-double MicroSimulation<T, U>::compareCosts()
-{
-    double sum1 = sumPlayer1UnitCosts();
-    double sum2 = sumPlayer2UnitCosts();
-    return sum1 - sum2;
-}
-
-
-template<class T, class U>
-PlayerStats MicroSimulation<T, U>::sumPlayer1UnitStats()
-{
-    PlayerStats stats;
-    for(auto unitPtr : pl1.unitList)
-    {
-        if(unitPtr->isAirUnit())
-        {
-            stats.airArmor += unitPtr->getArmor();
-            stats.airHealth += unitPtr->getHealth();
-        }
-        else
-        {
-            stats.groundArmor += unitPtr->getArmor();
-            stats.groundHealth += unitPtr->getHealth();
-        }
-        stats.airDps += unitPtr->getAdps();
-        stats.groundDps += unitPtr->getGdps();
-    }
-    return stats;
-}
-
-template<class T, class U>
-PlayerStats MicroSimulation<T, U>::sumPlayer2UnitStats()
-{
-    PlayerStats stats;
-    for(auto unitPtr : pl2.unitList)
-    {
-        if(unitPtr->isAirUnit())
-        {
-            stats.airArmor += unitPtr->getArmor();
-            stats.airHealth += unitPtr->getHealth();
-        }
-        else
-        {
-            stats.groundArmor += unitPtr->getArmor();
-            stats.groundHealth += unitPtr->getHealth();
-        }
-        stats.airDps += unitPtr->getAdps();
-        stats.groundDps += unitPtr->getGdps();
-    }
-    return stats;
-}
-
-
-template <class T, class U>
-int MicroSimulation<T, U>::compareStats()
-{
-    PlayerStats stats1 = sumPlayer1UnitStats();
-    PlayerStats stats2 = sumPlayer2UnitStats();
-    double oldGround1, oldGround2, oldAir1, oldAir2, subGround1, subGround2, subAir1, subAir2;
-    for(;;)
-    {
-        if(stats1.groundHealth <= 0 && stats2.groundHealth <= 0 && stats1.groundHealth <= 0 && stats2.airHealth <= 0)
-        {
-            return 0;
-        }
-        else if(stats1.groundHealth <= 0 && stats1.airHealth <= 0)
-        {
-            return -1;
-        }
-        else if(stats2.groundHealth <= 0 && stats2.airHealth <= 0)
-        {
-            return 1;
-        }
-        oldGround1 = stats1.groundHealth;
-        oldAir1 = stats1.airHealth;
-        oldGround2 = stats2.groundHealth;
-        oldAir2 = stats2.airHealth;
-        subGround1 = stats2.groundDps-stats1.groundArmor;
-        subAir1 = stats2.airDps-stats2.airArmor;
-        subGround2 = stats1.groundDps-stats2.groundArmor;
-        subAir2 = stats1.airDps-stats1.airArmor;
-        stats1.groundHealth = stats1.groundHealth-subGround1 > 0 ? stats1.groundHealth-subGround1 : 0;
-        stats1.airHealth = stats1.airHealth-subAir1 > 0 ? stats1.airHealth-subAir1 : 0;
-        stats2.groundHealth = stats2.groundHealth-subGround2 > 0 ? stats2.groundHealth-subGround2 : 0;
-        stats2.airHealth = stats2.airHealth-subAir2 > 0 ? stats1.airHealth-subAir2 : 0;
-        if(oldGround1 == stats1.groundHealth && oldGround2 == stats2.groundHealth && oldAir1 == stats1.airHealth && oldAir2 == stats2.airHealth)
-        {
-            return 0;
-        }
-    }
-}
 
 template <class T, class U>
 void MicroSimulation<T, U>::setPlayer1Pos(std::pair<double,double> const pos)
@@ -420,62 +291,18 @@ PlayerState<U>const& MicroSimulation<T,U>::getPlayer2() const
 
 
 template<class T, class U>
-bool MicroSimulation<T, U>::run(size_t const steps)
+bool MicroSimulation<T, U>::run(int const steps)
 {
-    bool pl1Finished = true, pl2Finished = true;
-    for(size_t i = 0; i < steps; i += mTimeSlice)
+    for(int i = 0; i < steps; ++i)
     {
-        pl1Finished = true;
-        pl2Finished = true;
-        for(auto unit : pl1.unitList)
-        {
-            unit->attack(pl2);
-        }
-        for(auto unit : pl2.unitList)
-        {
-            unit->attack(pl1);
-        }
-        for(auto unit : pl1.unitList)
-        {
-            if(unit->getHealth() > EPS)
-            {
-                pl1Finished = false;
-            }
-            else
-            {
-                continue;
-            }
-            unit->move(pl1,pl2);
-            unit->regenerate();
-        }
-        for(auto& unit : pl2.unitList)
-        {
-            if(unit->getHealth() > EPS)
-            {
-                pl2Finished = false;
-            }
-            else
-            {
-                continue;
-            }
-            unit->move(pl2,pl1);
-            unit->regenerate();
-        }
+        timestep();
     }
     collectGarbage();
     if(pl1.unitList.empty() || pl2.unitList.empty())
     {
         return true;
     }
-
-    if(pl1Finished || pl2Finished)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 template <class T, class U>
@@ -499,43 +326,26 @@ void MicroSimulation<T, U>::setTimeSlice(int timeSlice)
 }
 
 template <class T, class U>
+void MicroSimulation<T, U>::timestep()
+{
+    pl1.timestep(pl2);
+    pl2.timestep(pl1);
+}
+
+template <class T, class U>
 Fitness MicroSimulation<T, U>::run(bool const reset)
 {
     initPotentialFields();
     pl1.unitCount = pl1.unitList.size();
     pl2.unitCount = pl2.unitList.size();
-    for(size_t i = 0; i < mTimeSteps; i += mTimeSlice)
+    for(int i = 0; i < mTimeSteps; ++i)
     {
         if(pl1.unitCount == 0 || pl2.unitCount == 0)
         {
             break;
         }
-        for(auto unit : pl1.unitList)
-        {
-            unit->attack(pl2);
-        }
-        for(auto unit : pl2.unitList)
-        {
-            unit->attack(pl1);
-        }
-        for(auto unit : pl1.unitList)
-        {
-            if(unit->getHealth() < EPS)
-            {
-                continue;
-            }
-            unit->move(pl1,pl2);
-        }
-        for(auto& unit : pl2.unitList)
-        {
-            if(unit->getHealth() < EPS)
-            {
-                continue;
-            }
-            unit->move(pl2,pl1);
-        }
-        pl1.regenerate();
-        pl2.regenerate();
+        timestep();
+
     }
     Fitness res;
     double maxHealth = 0;

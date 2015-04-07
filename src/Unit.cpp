@@ -338,6 +338,43 @@ float BaseUnit::getResources() const
 }
 
 
+float BaseUnit::getAirAttack() const
+{
+    return mStats.airAttack;
+}
+
+
+int BaseUnit::getGACooldown() const
+{
+    return mStats.gaCooldown;
+}
+
+
+int BaseUnit::getAACooldown() const
+{
+    return mStats.aaCooldown;
+}
+
+float BaseUnit::getGroundAttack() const
+{
+    return mStats.groundAttack;
+}
+
+float BaseUnit::getGAUpgrade() const
+{
+    return mStats.gaUpgrade;
+}
+float BaseUnit::getAAUpgrade() const
+{
+    return mStats.aaUpgrade;
+}
+
+float BaseUnit::getArmorUpgrade() const
+{
+    return mStats.armorUpgrade;
+}
+
+
 double BaseUnit::computeDamageDealt(BaseUnit const& unit)
 {
     if(unit.getHealth() < EPS)
@@ -352,13 +389,13 @@ double BaseUnit::computeDamageDealt(BaseUnit const& unit)
         dist = 0.;
     }
     double result = 0;
-    if(unit.isAirUnit() && this->getGroundRange()+EPS > dist)
+    if(unit.isAirUnit() && this->getAirRange() > dist)
     {
-        result = this->getAdps()-unit.getArmor();
+        result = this->getAirAttack()-unit.getArmor();
     }
-    else if(!unit.isAirUnit() && this->getGroundRange()+EPS > dist)
+    else if(!unit.isAirUnit() && this->getGroundRange() > dist)
     {
-        result = this->getGdps()-unit.getArmor();
+        result = this->getGroundAttack()-unit.getArmor();
     }
     return result < EPS ? 0 : result;
 }
@@ -369,6 +406,7 @@ bool BaseUnit::attack(BaseUnit* unit)
     {
         return false;
     }
+
     double&& x = unit->getX() - this->getX();
     double&& y = unit->getY() - this->getY();
     double dist = std::sqrt(pow(x,2)+pow(y,2));
@@ -406,6 +444,14 @@ bool BaseUnit::attack(BaseUnit* unit)
     {
         kill = true;
     }
+    if(unit->isAirUnit())
+    {
+        this->setAttackTimer(this->getAACooldown());
+    }
+    else
+    {
+        this->setAttackTimer(this->getGACooldown());
+    }
     unit->subHealth(damage);
     return kill;
 }
@@ -426,10 +472,7 @@ pair<double,double> BaseUnit::normVecSafe(pair<double,double>const& vec, double 
             result.first = -STDLEN;
         }
         else
-        {   /*
-            std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
-            std::uniform_int_distribution<int> distribution(0,1);
-            result.first = distribution(generator) < eps ? -stdlen : stdlen;*/
+        {
             result.first = 0;
         }
         if(vec.second > EPS)
@@ -442,9 +485,6 @@ pair<double,double> BaseUnit::normVecSafe(pair<double,double>const& vec, double 
         }
         else
         {
-            /*std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
-            std::uniform_int_distribution<int> distribution(0,1);
-            result.second = distribution(generator) < eps ? -stdlen : stdlen;*/
             result.second = 0;
         }
     }
@@ -462,7 +502,7 @@ double BaseUnit::getMaxDist() const
     double const y = this->mMaxPos.second-this->mMinPos.second;
     return std::sqrt(pow(x,2)+pow(y,2));
 }
-double BaseUnit::computeDps(BaseUnit const& other) const
+double BaseUnit::computeDamage(BaseUnit const& other) const
 {
     return other.isAirUnit() ? this->getAdps()-other.getArmor() : this->getGdps()-other.getArmor();
 }
@@ -506,8 +546,71 @@ void BaseUnit::clearPath()
     mPath.clear();
 }
 
+int BaseUnit::getMovementTimer() const
+{
+    return mMovementTimer;
+}
+
+void BaseUnit::setMovementTimer(int value)
+{
+    mMovementTimer = value;
+}
+
+void BaseUnit::decMovementTimer()
+{
+    if(mMovementTimer < mTimeSlice)
+    {
+        mMovementTimer = 0;
+        return;
+    }
+    mMovementTimer -= mTimeSlice;
+}
+
+void BaseUnit::resetMovementTimer()
+{
+    mMovementTimer = mMovementUpdate;
+}
+
+int BaseUnit::getMovementUpdate() const
+{
+    return mMovementUpdate;
+}
+
+void BaseUnit::setMovementUpdate(int value)
+{
+    mMovementUpdate = value;
+}
 
 
+int BaseUnit::getAttackTimer() const
+{
+    return mAttackTimer;
+}
+void BaseUnit::setAttackTimer(int value)
+{
+    mAttackTimer = value;
+}
+
+void BaseUnit::decAttackTimer()
+{
+    if(mAttackTimer < mTimeSlice)
+    {
+        mAttackTimer = 0;
+        return;
+    }
+    mAttackTimer -= mTimeSlice;
+}
+
+
+int BaseUnit::getTimeSlice() const
+{
+    return mTimeSlice;
+}
+
+void BaseUnit::setTimeSlice(int value)
+{
+    mTimeSlice = value;
+}
 
 
 
@@ -538,6 +641,7 @@ TerranUnit::TerranUnit(BaseUnit const& baseUnit)
 
 void TerranUnit::regenerate()
 {}
+
 
 
 
@@ -572,6 +676,8 @@ void ZergUnit::regenerate()
         BaseUnit::addHealth(0.27);
     }
 }
+
+
 
 
 
@@ -625,6 +731,7 @@ void ProtossUnit::regenerate()
 
 
 
+
 Reaper::Reaper()
     : TerranUnit(), regenCount(0)
 {}
@@ -673,65 +780,3 @@ void Reaper::regenerate()
 }
 
 
-
-float BaseUnit::getAirAttack() const
-{
-    return mStats.airAttack;
-}
-
-
-int BaseUnit::getGACooldown() const
-{
-    return mStats.gaCooldown;
-}
-
-
-int BaseUnit::getAACooldown() const
-{
-    return mStats.aaCooldown;
-}
-
-float BaseUnit::getGroundAttack() const
-{
-    return mStats.groundAttack;
-}
-
-int BaseUnit::getTimer() const
-{
-    return mTimer;
-}
-void BaseUnit::setTimer(int value)
-{
-    mTimer = value;
-}
-
-
-void BaseUnit::decTimer()
-{
-    mTimer -= mTimeSlice;
-
-}
-
-int BaseUnit::getTimeSlice() const
-{
-    return mTimeSlice;
-}
-
-void BaseUnit::setTimeSlice(int value)
-{
-    mTimeSlice = value;
-}
-
-float BaseUnit::getGAUpgrade() const
-{
-    return mStats.gaUpgrade;
-}
-float BaseUnit::getAAUpgrade() const
-{
-    return mStats.aaUpgrade;
-}
-
-float BaseUnit::getArmorUpgrade() const
-{
-    return mStats.armorUpgrade;
-}

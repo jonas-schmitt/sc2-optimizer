@@ -13,14 +13,10 @@ QMAKE_CXXFLAGS += -D_GLIBCXX_USE_NANOSLEEP -g -std=c++11 -Wall -Wextra
 # Input
 HEADERS += include/DataReader.h \
            include/Debug.h \
-           include/GuiWindow.h \
            include/InitPlayerUnits.h \
            include/MicroSimulation.h \
            include/PlayerState.h \
-	   include/PlayerToolbar.h \
-	   include/PlayGround.h \
 	   include/BaseSelector.h \
-	   include/GuiInterface.h \
            include/Race.h \
            include/raceSelector.h \
            include/TemplateInit.h \
@@ -33,13 +29,9 @@ HEADERS += include/DataReader.h \
 #           src/InitPlayerUnits.cpp \
 #           src/MicroSimulation.cpp
 SOURCES += src/DataReader.cpp \
-           src/GuiWindow.cpp \
 	   src/raceSelector.cpp \
            src/InitPlayerUnits.cpp \
            src/Unit.cpp \
            src/MicroSimulation.cpp \
-	   src/GuiInterface.cpp \
-	   src/PlayerToolbar.cpp \
-           src/PlayGround.cpp \
 	   src/UnitOptimizer.cpp \
 	   src/main.cpp

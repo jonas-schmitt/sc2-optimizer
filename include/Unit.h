@@ -94,7 +94,10 @@ protected:
 
     int mTimeSlice = 10;
 
-    int mTimer = 0;
+    int mAttackTimer = 0;
+    int mMovementTimer = 0;
+
+    int mMovementUpdate = 1000;
 
     string mName;
 
@@ -171,7 +174,7 @@ protected:
         pair<double,double> const maxPos = enemy.getMaxPos();
         if(dist > ownRange)
         {
-			val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*own.computeDps(enemy)+own.getYGene(2);
+            val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*own.computeDamage(enemy)+own.getYGene(2);
 			val *= (dist-ownRange);
         }
         else if(dist < ownRange-(ownRange*static_cast<double>(own.getYGene(3))/YMAX/4.))
@@ -196,7 +199,7 @@ protected:
         double const enemyRange = enemy.computeRange(own);
         if(dist < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
         {
-            val2 = (-own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemy.computeDps(own));
+            val2 = (-own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemy.computeDamage(own));
 			//val2 *= dist;
 			val2 *= (dist-(enemyRange+own.getYGene(5)/YMAX/4.));
            for (int i = static_cast<int>(std::round(std::max(minPos.first,  enemy.getPos().first - enemy.getGroundRange()))); i < static_cast<int>(std::round(std::min(maxPos.first, enemy.getPos().first+enemy.getGroundRange()))); ++i)
@@ -236,7 +239,7 @@ protected:
         if(dist > ownRange)
         {
             res1 = own.normVecSafe(pair<double,double>(x,y), dist);
-            double const val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*own.computeDps(enemy)+own.getYGene(2);
+            double const val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*own.computeDamage(enemy)+own.getYGene(2);
             res1.first *= val;
             res1.second *= val;
         }
@@ -255,7 +258,7 @@ protected:
         if(dist < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
         {
             res2 = own.normVecSafe(pair<double,double>(x,y), dist);
-            double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemy.computeDps(own);
+            double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemy.computeDamage(own);
             res2.first *= val;
             res2.second *= val;
         }
@@ -400,7 +403,7 @@ public:
 
     void setEnemyForce(function<pair<double,double>(BaseUnit const &, BaseUnit const &)> func);
 
-    double computeDps(BaseUnit const& other) const;
+    double computeDamage(BaseUnit const& other) const;
 
     double computeRange(BaseUnit const& other) const;
 
@@ -431,6 +434,18 @@ public:
 		return std::max(-1e8, std::min(1e8,me));
 	}
 
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        if(!(attack(other)))
+        {
+            move(own, other);
+        }
+        decAttackTimer();
+        decMovementTimer();
+    }
+
+
+
     template <typename T, typename U> void move(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(this->getHealth () < EPS)
@@ -441,59 +456,48 @@ public:
         {
             mPath.push_back(std::make_pair(static_cast<float>(mPos.first),static_cast<float>(mPos.second)));
         }
-        pair<double,double> force(0,0);
-        for(const auto& pot : own.potentialList)
+        if(getMovementTimer() <= 0)
         {
-            const pair<double,double> generatedForce = pot.computeForce(*this);
-            force.first += generatedForce.first;
-            force.second += generatedForce.second;
-        }
-        for(auto buddy :  own.unitList)
-        {
-            if(buddy->getHealth() < EPS)
+            pair<double,double> force(0.0,0.0);
+            for(const auto& pot : own.potentialList)
             {
-                continue;
+                const pair<double,double> generatedForce = pot.computeForce(*this);
+                force.first += generatedForce.first;
+                force.second += generatedForce.second;
             }
-            /*
-            double const x = buddy->getX()-this->getX();
-            double const y = buddy->getY()-this->getY();
-            double  dist = std::sqrt(pow(x,2)+pow(y,2));
-            if(this->getHash() != buddy->getHash() && dist < buddy->getSize() + this->getSize() + this->getSpeed())
+            for(auto buddy :  own.unitList)
             {
-                mInRange.emplace_back(buddy);
+                if(buddy->getHealth() < EPS)
+                {
+                    continue;
+                }
 
-            }*/
-            const pair<double,double> generatedForce = this->computeFriendForce(*buddy);
-            force.first += generatedForce.first;
-            force.second += generatedForce.second;
-        }
-        for(auto enemy :  other.unitList)
-        {
-            if(enemy->getHealth() < EPS)
-            {
-                continue;
+                const pair<double,double> generatedForce = this->computeFriendForce(*buddy);
+                force.first += generatedForce.first;
+                force.second += generatedForce.second;
             }
-            /*
-            double const x = enemy->getX()-this->getX();
-            double const y = enemy->getY()-this->getY();
-            double  dist = std::sqrt(pow(x,2)+pow(y,2));
-            if(dist < enemy->getSize() + this->getSize() + this->getSpeed())
+            for(auto enemy :  other.unitList)
             {
-                mInRange.emplace_back(enemy);
+                if(enemy->getHealth() < EPS)
+                {
+                    continue;
+                }
 
-            }*/
-            const pair<double,double> generatedForce = this->computeEnemyForce(*enemy);
-            force.first += generatedForce.first;
-            force.second += generatedForce.second;
+                const pair<double,double> generatedForce = this->computeEnemyForce(*enemy);
+                force.first += generatedForce.first;
+                force.second += generatedForce.second;
+            }
+            double const norm = sqrt(pow(force.first,2)+pow(force.second,2));
+            currentForce = this->normVecSafe(force,norm);
+            resetMovementTimer();
         }
 
-        currentForce.first = fmin(fmax(currentForce.first+force.first,-LIMIT),LIMIT);
-        currentForce.second = fmin(fmax(currentForce.second+force.second,-LIMIT),LIMIT);
-        double norm = sqrt(pow(currentForce.first,2)+pow(currentForce.second,2));
 
-        auto res = this->normVecSafe(currentForce,norm);
-        setX(res.first*getSpeed()+getX());
-        setY(res.second*getSpeed()+getY());
+        setX(currentForce.first*getSpeed()+getX());
+        setY(currentForce.second*getSpeed()+getY());
+
+        // Collision detection, include it again if needed
+        /*
         for(auto unit : other.unitList)
         {
             double x = this->getX()-unit->getX();
@@ -524,24 +528,21 @@ public:
             }
 
         }
+        */
 
     }
 
-    template<typename T> void attack(PlayerState<T>& other)
+    template<typename T> bool attack(PlayerState<T>& other)
     {
-        if(this->getHealth() < EPS)
+        if(this->getHealth() < EPS || other.unitList.empty())
         {
-            return;
-        }
-        if(other.unitList.empty())
-        {
-            return;
+            return false;
         }
 
         auto aim = *(other.unitList.begin());
         double maxDmg = computeDamageDealt(*aim);
-        double dmg = 0;
-        double wastedDmg = 0;
+        double dmg = 0.0;
+        double wastedDmg = 0.0;
         bool kill = false;
         for(auto enemy : other.unitList)
         {
@@ -551,7 +552,7 @@ public:
             }
 
             dmg = computeDamageDealt(*enemy);
-            if(3./4.*dmg > enemy->getHealth()+enemy->getShield())
+            if(0.75 * dmg > enemy->getHealth()+enemy->getShield())
             {
                 if(kill)
                 {
@@ -578,12 +579,13 @@ public:
         }
         if(maxDmg < EPS)
         {
-            return;
+            return false;
         }
         if(attack(aim))
         {
             --other.unitCount;
         }
+        return true;
     }
 
     int getXGene(size_t pos) const;
@@ -596,14 +598,20 @@ public:
     vector<pair<float,float>> getPath() const;
     void clearPath();
 
-    int getTimer() const;
-    void setTimer(int value);
-
-    void decTimer();
+    int getAttackTimer() const;
+    void setAttackTimer(int value);
+    void decAttackTimer();
 
     int getTimeSlice() const;
     void setTimeSlice(int value);
 
+    int getMovementTimer() const;
+    void setMovementTimer(int value);
+    void decMovementTimer();
+    void resetMovementTimer();
+
+    int getMovementUpdate() const;
+    void setMovementUpdate(int value);
 };
 
 
@@ -625,6 +633,12 @@ public:
     TerranUnit(BaseUnit const& baseUnit);
 
     void regenerate();
+
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        BaseUnit::timestep(own, other);
+        regenerate();
+    }
 };
 
 class ZergUnit : public BaseUnit
@@ -643,6 +657,12 @@ public:
     ZergUnit(BaseUnit const& baseUnit);
 
     void regenerate();
+
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        BaseUnit::timestep(own, other);
+        regenerate();
+    }
 
 };
 
@@ -666,6 +686,12 @@ public:
     void subShield(double const value);
 
     void regenerate();
+
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        BaseUnit::timestep(own, other);
+        regenerate();
+    }
 };
 
 
@@ -706,6 +732,11 @@ public:
 
     void regenerate();
 
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        TerranUnit::timestep(own, other);
+        regenerate();
+    }
 };
 
 class Ghost final : public TerranUnit

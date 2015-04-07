@@ -6,7 +6,7 @@ GuiInterface<T, U>::GuiInterface(const pair<double, double> minPos, const pair<d
 {}
 
 template<class T, class U>
-bool GuiInterface<T, U>::run(size_t const intervals)
+bool GuiInterface<T, U>::run(int const intervals)
 {
 	/*
 	while (*intervals == -1)

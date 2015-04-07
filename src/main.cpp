@@ -6,7 +6,6 @@
 #include <random>
 #include <chrono>
 
-#include "../include/GuiWindow.h"
 
 #include "../include/TemplateInit.h"
 
@@ -16,7 +15,6 @@
 #include "../include/MicroSimulation.h"
 #include "../include/UnitOptimizer.h"
 #include "../include/UnitOptimizerBase.h"
-#include "GuiInterface.h"
 #include "../include/raceSelector.h"
 #include "../include/BaseSelector.h"
 
@@ -93,28 +91,11 @@ void parseInputFile(std::string file, std::vector<int> &pl1, std::vector<int> &p
 
 int main(int argc, char *argv[])
 {
-    bool loadGenes = false;
-    bool skipGUI = false; //false;
-    bool potTest = false;
     if (argc < 3)
     {
         std::cerr << "Usage: opt inputFile[Player1] inputFile[Player2]" << std::endl;
         return 1;
     }
-    std::string geneFile;
-    if (argc >= 4)
-    {
-        loadGenes = true;
-        geneFile = argv[3];
-        if (argc >=5)
-            if (std::string(argv[4])== "x")
-                skipGUI = true;
-        if (argc >=5)
-            if (std::string(argv[4]) == "t")
-                potTest = true;
-    }
-    // TODO Comment this out again after the results are generated
-    skipGUI = true;
     std::string file1 = argv[1];
     std::string file2 = argv[2];
 
@@ -147,7 +128,6 @@ int main(int argc, char *argv[])
     std::string outPath = baseDir+"./results/" + race1 + "_" + race2 + "/" + tmp1 + "_" + tmp2 + ".txt";
     std::cout << outPath << std::endl;
     size_t const iterations = 10, stepsPerIteration = 50, initialPopulationSize = 1000;
-    double fieldSize = 150;
 
     int const x = (XMAX-XMIN)/2;
     int const y = (YMAX-YMIN)/2;
@@ -162,56 +142,44 @@ int main(int argc, char *argv[])
     if (race1 == "Terran" && race2 == "Protoss")
     {
         UOB = new UnitOptimizer<Terran,Protoss>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Terran, Protoss>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Terran" && race2 == "Zerg")
     {
         UOB = new UnitOptimizer<Terran, Zerg>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Terran, Zerg>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Protoss" && race2 == "Zerg")
     {
         UOB = new UnitOptimizer<Protoss, Zerg>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Protoss, Zerg>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Protoss" && race2 == "Terran")
     {
         UOB = new UnitOptimizer<Protoss, Terran>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Protoss, Terran>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Zerg" && race2 == "Terran")
     {
         UOB = new UnitOptimizer<Zerg, Terran>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Zerg, Terran>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Zerg" && race2 == "Protoss")
     {
         UOB = new UnitOptimizer<Zerg, Protoss>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Zerg, Protoss>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Zerg" && race2 == "Zerg")
     {
         UOB = new UnitOptimizer<Zerg, Zerg>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Zerg, Zerg>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Protoss" && race2 == "Protoss")
     {
         UOB = new UnitOptimizer<Protoss, Protoss>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Protoss, Protoss>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else if (race1 == "Terran" && race2 == "Terran")
     {
         UOB = new UnitOptimizer<Terran, Terran>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
-        microSim = new GuiInterface<Terran, Terran>(pair<double,double>(0,0), pair<double,double>(fieldSize,fieldSize), filePath1, filePath2);
     }
     else
     {
         return 4;
     }
 
-    microSim->initBothPlayers(units1, units2);
-    if (loadGenes == false)
-    {
         std::ofstream outF(outPath.c_str(), std::ofstream::out);
         UOB->optimize(iterations, stepsPerIteration, initialPopulationSize, selectionRate, reproductionRate, mutationRate);
         auto a = UOB->getOptimum();
@@ -220,54 +188,8 @@ int main(int argc, char *argv[])
         outF << "Player2:" << std::endl;
         outF << a.second << std::endl;
         outF.close();
-        microSim->setPlayer1Genes(UOB->getOptimum().first);
-        microSim->setPlayer2Genes(UOB->getOptimum().second);
-    }
-    else
-    {
-        std::vector<int> pl1;
-        std::vector<int> pl2;
-        parseInputFile(geneFile, pl1, pl2);
-        microSim->setPlayer1Genes(UnitGenes(pl1));
-        microSim->setPlayer2Genes(UnitGenes(pl2));
-    }
-    microSim->setTracking(true, 600);
-    if (potTest == true)
-    {
-        microSim->getPotentialField();
-        return 0;
-    }
-    microSim->setTimeSteps(1200);
-    microSim->run();
-    OutputParameters param(initialGenes, UOB->getHighscores(), selectionRate, reproductionRate, mutationRate, UOB->getSurvivalAverage());
-    writeOutput(microSim->getPlayer1Result(), microSim->getPlayer2Result(), param);
-    //kill this after we finished creating results
-    microSim->clearBothPlayers();
-    microSim->initBothPlayers(units1, units2);
-    if (loadGenes==true)
-    {
-        std::vector<int> pl1;
-        std::vector<int> pl2;
-        parseInputFile(geneFile, pl1, pl2);
-        microSim->setPlayer1Genes(UnitGenes(pl1));
-        microSim->setPlayer2Genes(UnitGenes(pl2));
-    }
-    if (skipGUI == true)
-        return 0;
-    microSim->setTracking(false);
-    microSim->initPotentialFields();
-
-    int retval = 0;
-    QApplication app(argc, argv);
-    app.setStyle("plastique");
-    GuiWindow window;
-    window.show();
-    window.setStartFunc(run);
-    microSim->setGuiWindow(&window);
-    retval = app.exec();
     free(UOB);
-    free(microSim);
-    return retval;
+    return 0;
 }
 
 void writeOutput(SimulationResult const &res1, SimulationResult const &res2, OutputParameters const &param)
