@@ -326,6 +326,17 @@ void MicroSimulation<T, U>::setTimeSlice(int timeSlice)
 }
 
 template <class T, class U>
+void MicroSimulation<T, U>::resetTime()
+{
+    pl1.time = 0;
+    pl1.movementTimer= pl1.movementUpdate;
+    pl1.regenerationUpdate = pl1.regenerationUpdate;
+    pl2.time = 0;
+    pl2.movementTimer= pl2.movementUpdate;
+    pl2.regenerationUpdate = pl2.regenerationUpdate;
+}
+
+template <class T, class U>
 void MicroSimulation<T, U>::timestep()
 {
     pl1.timestep(pl2);
@@ -336,8 +347,10 @@ template <class T, class U>
 Fitness MicroSimulation<T, U>::run(bool const reset)
 {
     initPotentialFields();
+    resetTime();
     pl1.unitCount = pl1.unitList.size();
     pl2.unitCount = pl2.unitList.size();
+
     for(int i = 0; i < mTimeSteps; ++i)
     {
         if(pl1.unitCount == 0 || pl2.unitCount == 0)

@@ -79,6 +79,7 @@ public:
     void setTimeSteps(size_t timeSteps);
     void setTimeSlice(int timeSlice);
 
+    void resetTime();
     void timestep();
 
     string determineWinner();

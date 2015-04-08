@@ -76,8 +76,21 @@ template <class Race> struct PlayerState : public Race
     list<typename Race::RUT*>unitList;
     size_t unitCount;
 
+    int timeSlice = 10;
+    long time = 0;
+    int regenerationTimer = 0;
+    int movementTimer = 0;
+
+    int regenerationUpdate = 100;
+    int movementUpdate = 100;
+
+
     template<typename T> void timestep(PlayerState<T>& other)
     {
+
+        time += timeSlice;
+        regenerationTimer -= timeSlice;
+        movementTimer -= timeSlice;
         for(auto& elem : this->unitList0)
         {
             elem.first.timestep(*this, other);
@@ -149,6 +162,14 @@ template <class Race> struct PlayerState : public Race
         for(auto& elem : this->unitList17)
         {
             elem.first.timestep(*this, other);
+        }
+        if(regenerationTimer < 0)
+        {
+            regenerationTimer = regenerationUpdate;
+        }
+        if(movementTimer < 0)
+        {
+            movementTimer = movementUpdate;
         }
     }
 

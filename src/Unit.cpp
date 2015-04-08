@@ -48,13 +48,13 @@ pair<double,double> BaseUnit::computeEnemyForce(BaseUnit const& other)
     return mEnemyFunc(*this,other);
 }
 
-double BaseUnit::computeFriendPot(BaseUnit const& other)
+double BaseUnit::computeFriendPot(BaseUnit const&)
 {
 	//return mFriendFuncPot(*this, other);
 	return 0;
 }
 
-double BaseUnit::computeEnemyPot(BaseUnit const& other)
+double BaseUnit::computeEnemyPot(BaseUnit const&)
 {
 	//return mEnemyFuncPot(*this, other);
 	return 0;
@@ -180,18 +180,10 @@ void BaseUnit::subHealth(double const value)
 {
     if(mStats.health < EPS)
     {
-        mStats.health = 0;
+        mStats.health = 0.0;
         return;
     }
-    double newHealth = mStats.health - value;
-    if(newHealth < EPS)
-    {
-        mStats.health = 0.;
-    }
-    else
-    {
-        mStats.health = newHealth;
-    }
+    mStats.health = mStats.health > value ? mStats.health - value : 0.0;
 }
 
 void BaseUnit::addShield(double const value)
@@ -360,91 +352,186 @@ float BaseUnit::getGroundAttack() const
     return mStats.groundAttack;
 }
 
-float BaseUnit::getGAUpgrade() const
+float BaseUnit::getGAUpgradeBonus() const
 {
-    return mStats.gaUpgrade;
+    return mStats.gaUpgradeBonus;
 }
-float BaseUnit::getAAUpgrade() const
+float BaseUnit::getAAUpgradeBonus() const
 {
-    return mStats.aaUpgrade;
-}
-
-float BaseUnit::getArmorUpgrade() const
-{
-    return mStats.armorUpgrade;
+    return mStats.aaUpgradeBonus;
 }
 
+float BaseUnit::getArmorUpgradeBonus() const
+{
+    return mStats.armorUpgradeBonus;
+}
 
-double BaseUnit::computeDamageDealt(BaseUnit const& unit)
+int BaseUnit::getAttackUpgrade() const
+{
+    return mAttackUpgrade;
+}
+
+int BaseUnit::getArmorUpgrade() const
+{
+    return mArmorUpgrade;
+}
+
+vector<Attribute> const& BaseUnit::getAttributes() const
+{
+    return mStats.attributes;
+}
+
+vector<Bonus> const& BaseUnit::getBonuses() const
+{
+    return mStats.bonuses;
+}
+
+
+int BaseUnit::getShieldUpgrade() const
+{
+    return mShieldUpgrade;
+}
+
+void BaseUnit::setShieldUpgrade(int value)
+{
+    mShieldUpgrade = value;
+}
+
+double BaseUnit::getAttackMultiplier() const
+{
+    return mAttackMultiplier;
+}
+
+void BaseUnit::setAttackMultiplier(double value)
+{
+    mAttackMultiplier = value;
+}
+
+double BaseUnit::getDefenseMultiplier() const
+{
+    return mDefenseMultiplier;
+}
+
+void BaseUnit::setDefenseMultiplier(double value)
+{
+    mDefenseMultiplier = value;
+}
+
+double BaseUnit::getDefenseSubtractor() const
+{
+    return mDefenseSubtractor;
+}
+
+void BaseUnit::setDefenseSubtractor(double value)
+{
+    mDefenseSubtractor = value;
+}
+
+
+Damage BaseUnit::computeTheoreticalDamage(BaseUnit const& other) const
+{
+    double totalDamage = 0.0;
+    if(other.isAirUnit())
+    {
+        totalDamage += mAttackUpgrade * mStats.aaUpgradeBonus + mStats.airAttack;
+    }
+    else
+    {
+        totalDamage += mAttackUpgrade * mStats.gaUpgradeBonus + mStats.groundAttack;
+    }
+    for(Bonus const& bonus : mStats.bonuses)
+    {
+        vector<Attribute> const& attributes = other.getAttributes();
+        if(std::includes(attributes.begin(), attributes.end(), bonus.attributes.begin(), bonus.attributes.end()))
+        {
+            totalDamage += mAttackUpgrade * bonus.upgrade + bonus.base;
+        }
+    }
+    double const shield = other.getShield();
+    totalDamage *= mAttackMultiplier;
+    if(shield > 0)
+    {
+        totalDamage -= other.getShieldUpgrade() * other.getDefenseMultiplier();
+    }
+    totalDamage -= other.getDefenseSubtractor();
+    double shieldDamage;
+    double healthDamage = totalDamage - shield;
+    if(healthDamage > 0)
+    {
+        shieldDamage = shield;
+        healthDamage -= (other.getArmorUpgrade() * other.getArmorUpgradeBonus() + other.getArmor()) * other.getDefenseMultiplier();
+        if(healthDamage < 0.0)
+        {
+            healthDamage = 0.0;
+        }
+    }
+    else
+    {
+        shieldDamage = totalDamage;
+        healthDamage = 0.0;
+    }
+    Damage damage;
+    damage.shield = shieldDamage;
+    damage.health = healthDamage;
+    damage.total = totalDamage;
+    if(damage.total < 0.5)
+    {
+        damage.total = 0.5;
+        if(shield > 0.5)
+        {
+            damage.shield = 0.5;
+            damage.health = 0.0;
+        }
+        else
+        {
+            damage.shield = shield;
+            damage.health = 0.5 - shield;
+        }
+    }
+    return damage;
+
+}
+
+Damage BaseUnit::computeDamage(BaseUnit const& unit) const
 {
     if(unit.getHealth() < EPS)
     {
-        return 0;
+        return Damage();
     }
-    double&& x = unit.getX() - this->getX();
-    double&& y = unit.getY() - this->getY();
+    double const x = unit.getX() - this->getX();
+    double const y = unit.getY() - this->getY();
     double dist = std::sqrt(pow(x,2)+pow(y,2));
     if(std::isnan(dist))
     {
-        dist = 0.;
+        dist = 0.0;
     }
-    double result = 0;
-    if(unit.isAirUnit() && this->getAirRange() > dist)
+    if((unit.isAirUnit() && this->getAirRange() > dist)
+            || (!unit.isAirUnit() && this->getGroundRange() > dist))
     {
-        result = this->getAirAttack()-unit.getArmor();
+        return computeTheoreticalDamage(unit);
     }
-    else if(!unit.isAirUnit() && this->getGroundRange() > dist)
-    {
-        result = this->getGroundAttack()-unit.getArmor();
-    }
-    return result < EPS ? 0 : result;
+    return Damage();
 }
 
-bool BaseUnit::attack(BaseUnit* unit)
+    //TODO Fix this method
+bool BaseUnit::attack(BaseUnit& unit)
 {
-    if(this->getHealth() < EPS || unit->getHealth() < EPS)
+    if(unit.getHealth() < EPS)
     {
         return false;
     }
 
-    double&& x = unit->getX() - this->getX();
-    double&& y = unit->getY() - this->getY();
-    double dist = std::sqrt(pow(x,2)+pow(y,2));
-    if(std::isnan(dist))
-    {
-        dist = 0.;
-    }
-    if((unit->isAirUnit() && dist > this->getAirRange()) || (!unit->isAirUnit() && dist > this->getGroundRange()))
+    Damage const damage = computeDamage(unit);
+    if(damage.total < EPS)
     {
         return false;
     }
-    double damage = unit->isAirUnit() ? this->getAdps() : this->getGdps();
-    if(damage < EPS)
+    if(damage.shield > 0)
     {
-        return false;
+        unit.subShield(damage.shield);
     }
-    damage -= unit->getArmor();
-    if(damage-0.5 < EPS)
-    {
-        damage = 0.5;
-    }
-    double oldShield = unit->getShield();
-    unit->subShield(damage);
-    if(damage-oldShield < EPS)
-    {
-        return false;
-    }
-    damage -= unit->getArmor();
-    if(damage-0.5 < EPS)
-    {
-        damage = 0.5;
-    }
-    bool kill = false;
-    if(unit->getHealth() > EPS && damage > unit->getHealth())
-    {
-        kill = true;
-    }
-    if(unit->isAirUnit())
+    unit.subHealth(damage.health);
+    if(unit.isAirUnit())
     {
         this->setAttackTimer(this->getAACooldown());
     }
@@ -452,8 +539,7 @@ bool BaseUnit::attack(BaseUnit* unit)
     {
         this->setAttackTimer(this->getGACooldown());
     }
-    unit->subHealth(damage);
-    return kill;
+    return unit.getHealth() < EPS;
 }
 
 pair<double,double> BaseUnit::normVecSafe(pair<double,double>const& vec, double const norm) const
@@ -502,10 +588,7 @@ double BaseUnit::getMaxDist() const
     double const y = this->mMaxPos.second-this->mMinPos.second;
     return std::sqrt(pow(x,2)+pow(y,2));
 }
-double BaseUnit::computeDamage(BaseUnit const& other) const
-{
-    return other.isAirUnit() ? this->getAdps()-other.getArmor() : this->getGdps()-other.getArmor();
-}
+
 
 double BaseUnit::computeRange(BaseUnit const& other) const
 {
@@ -546,40 +629,6 @@ void BaseUnit::clearPath()
     mPath.clear();
 }
 
-int BaseUnit::getMovementTimer() const
-{
-    return mMovementTimer;
-}
-
-void BaseUnit::setMovementTimer(int value)
-{
-    mMovementTimer = value;
-}
-
-void BaseUnit::decMovementTimer()
-{
-    if(mMovementTimer < mTimeSlice)
-    {
-        mMovementTimer = 0;
-        return;
-    }
-    mMovementTimer -= mTimeSlice;
-}
-
-void BaseUnit::resetMovementTimer()
-{
-    mMovementTimer = mMovementUpdate;
-}
-
-int BaseUnit::getMovementUpdate() const
-{
-    return mMovementUpdate;
-}
-
-void BaseUnit::setMovementUpdate(int value)
-{
-    mMovementUpdate = value;
-}
 
 
 int BaseUnit::getAttackTimer() const
@@ -615,6 +664,8 @@ void BaseUnit::setTimeSlice(int value)
 
 
 
+
+
 TerranUnit::TerranUnit()
     : BaseUnit()
 {}
@@ -638,10 +689,6 @@ TerranUnit::TerranUnit(TerranUnit const& terranUnit)
 TerranUnit::TerranUnit(BaseUnit const& baseUnit)
     : BaseUnit(baseUnit)
 {}
-
-void TerranUnit::regenerate()
-{}
-
 
 
 
@@ -669,15 +716,6 @@ ZergUnit::ZergUnit(BaseUnit const& baseUnit)
     : BaseUnit(baseUnit)
 {}
 
-void ZergUnit::regenerate()
-{
-    if(mStats.health > EPS && mStats.health < mStats.maxHealth)
-    {
-        BaseUnit::addHealth(0.27);
-    }
-}
-
-
 
 
 
@@ -686,97 +724,69 @@ void ZergUnit::regenerate()
 
 
 ProtossUnit::ProtossUnit()
-    : BaseUnit(), shieldCount(0)
+    : BaseUnit(), mShieldRegenCount(0)
 {}
 
 ProtossUnit::ProtossUnit(string name)
-    : BaseUnit(name), shieldCount(0)
+    : BaseUnit(name), mShieldRegenCount(0)
 {}
 
 ProtossUnit::ProtossUnit(const UnitStats& baseStats)
-    : BaseUnit(baseStats), shieldCount(0)
+    : BaseUnit(baseStats), mShieldRegenCount(0)
 {}
 
 ProtossUnit::ProtossUnit(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max)
-    : BaseUnit(baseStats,min,max), shieldCount(0)
+    : BaseUnit(baseStats,min,max), mShieldRegenCount(0)
 {}
 
 ProtossUnit::ProtossUnit(ProtossUnit const& protossUnit)
- : BaseUnit(protossUnit), shieldCount(0)
+ : BaseUnit(protossUnit), mShieldRegenCount(0)
 {}
 
 ProtossUnit::ProtossUnit(BaseUnit const& baseUnit)
-    : BaseUnit(baseUnit), shieldCount(0)
+    : BaseUnit(baseUnit), mShieldRegenCount(0)
 {}
 
 
 void ProtossUnit::subShield(double const value)
 {
-    shieldCount = 10;
+    mShieldRegenCount = 10;
     BaseUnit::subShield(value);
 }
 
-void ProtossUnit::regenerate()
-{
-    if(shieldCount == 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
-    {
-        BaseUnit::addShield(2.0);
-    }
-    else
-    {
-        --shieldCount;
-    }
-
-}
-
-
-
 
 Reaper::Reaper()
-    : TerranUnit(), regenCount(0)
+    : TerranUnit(), mHealthRegenCount(0)
 {}
 
 Reaper::Reaper(string name)
-    : TerranUnit(name), regenCount(0)
+    : TerranUnit(name), mHealthRegenCount(0)
 {}
 
 Reaper::Reaper(const UnitStats& baseStats)
-    : TerranUnit(baseStats), regenCount(0)
+    : TerranUnit(baseStats), mHealthRegenCount(0)
 {}
 
 Reaper::Reaper(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max)
-    : TerranUnit(baseStats,min,max), regenCount(0)
+    : TerranUnit(baseStats,min,max), mHealthRegenCount(0)
 {}
 
 Reaper::Reaper(Reaper const& Reaper)
- : TerranUnit(Reaper), regenCount(0)
+ : TerranUnit(Reaper), mHealthRegenCount(0)
 {}
 
 Reaper::Reaper(BaseUnit const& baseUnit)
-    : TerranUnit(baseUnit), regenCount(0)
+    : TerranUnit(baseUnit), mHealthRegenCount(0)
 {}
 
 Reaper::Reaper(TerranUnit const& terranUnit)
-    : TerranUnit(terranUnit), regenCount(0)
+    : TerranUnit(terranUnit), mHealthRegenCount(0)
 {}
 
 void Reaper::subHealth(double const value)
 {
-    regenCount = 10;
+    mHealthRegenCount = 10;
     BaseUnit::subHealth(value);
-}
-
-void Reaper::regenerate()
-{
-    if(regenCount == 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
-    {
-        BaseUnit::addHealth(2.0);
-    }
-    else
-    {
-        --regenCount;
-    }
-
 }
 
 

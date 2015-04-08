@@ -80,7 +80,7 @@ void InitPlayerUnits<Race>::readStats()
               >> stats.gas
               >> stats.size
               >> stats.armor
-              >> stats.armorUpgrade
+              >> stats.armorUpgradeBonus
               >> stats.health
               >> stats.shield))
         {
@@ -132,9 +132,9 @@ void InitPlayerUnits<Race>::readStats()
         sort(stats.attributes.begin (), stats.attributes.end ());
         if(!(stream
              >> stats.groundAttack
-             >> stats.gaUpgrade
+             >> stats.gaUpgradeBonus
              >> stats.airAttack
-             >> stats.aaUpgrade))
+             >> stats.aaUpgradeBonus))
         {
             continue;
         }

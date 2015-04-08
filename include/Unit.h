@@ -41,6 +41,15 @@ struct Bonus
     {}
 };
 
+struct Damage
+{
+    double shield;
+    double health;
+    double total;
+    Damage() : shield(0.0), health(0.0), total(0.0) {}
+    Damage(double const s, double const h, double const t) : shield(s), health(h), total(t) {}
+};
+
 
 struct UnitStats
 {
@@ -55,7 +64,7 @@ struct UnitStats
     double shield = 0;
     double maxShield = 0;
     float armor = 0;
-    float armorUpgrade = 0;
+    float armorUpgradeBonus = 0;
     float speed = 0;
     double energy = 0;
     double maxEnergy = 0;
@@ -63,14 +72,13 @@ struct UnitStats
     bool airUnit = false;
 
     float groundAttack = 0;
-    float gaUpgrade = 0;
+    float gaUpgradeBonus = 0;
 
     float airAttack = 0;
-    float aaUpgrade = 0;
+    float aaUpgradeBonus = 0;
     int gaCooldown = 0;
     int aaCooldown = 0;
 
-    int upgrade = 0;
 
     vector<Attribute> attributes;
     vector<Bonus> bonuses;
@@ -95,9 +103,15 @@ protected:
     int mTimeSlice = 10;
 
     int mAttackTimer = 0;
-    int mMovementTimer = 0;
 
-    int mMovementUpdate = 1000;
+    int mAttackUpgrade = 0;
+    int mArmorUpgrade = 0;
+    int mShieldUpgrade = 0;
+
+    double mAttackMultiplier = 1.0;
+    double mDefenseMultiplier = 1.0;
+
+    double mDefenseSubtractor = 0.0;
 
     string mName;
 
@@ -172,9 +186,11 @@ protected:
 		double val2 = 0.0f;
         pair<double,double> const minPos = enemy.getMinPos();
         pair<double,double> const maxPos = enemy.getMaxPos();
+        Damage enemyDamage = enemy.computeTheoreticalDamage(own);
+        Damage ownDamage = own.computeTheoreticalDamage(enemy);
         if(dist > ownRange)
         {
-            val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*own.computeDamage(enemy)+own.getYGene(2);
+            val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*ownDamage.total+own.getYGene(2);
 			val *= (dist-ownRange);
         }
         else if(dist < ownRange-(ownRange*static_cast<double>(own.getYGene(3))/YMAX/4.))
@@ -199,7 +215,7 @@ protected:
         double const enemyRange = enemy.computeRange(own);
         if(dist < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
         {
-            val2 = (-own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemy.computeDamage(own));
+            val2 = (-own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemyDamage.total);
 			//val2 *= dist;
 			val2 *= (dist-(enemyRange+own.getYGene(5)/YMAX/4.));
            for (int i = static_cast<int>(std::round(std::max(minPos.first,  enemy.getPos().first - enemy.getGroundRange()))); i < static_cast<int>(std::round(std::min(maxPos.first, enemy.getPos().first+enemy.getGroundRange()))); ++i)
@@ -236,10 +252,12 @@ protected:
 		   res.second *= pot;
 		   return res;
        }*/
+        Damage enemyDamage = enemy.computeTheoreticalDamage(own);
+        Damage ownDamage = own.computeTheoreticalDamage(enemy);
         if(dist > ownRange)
         {
             res1 = own.normVecSafe(pair<double,double>(x,y), dist);
-            double const val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*own.computeDamage(enemy)+own.getYGene(2);
+            double const val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*ownDamage.total+own.getYGene(2);
             res1.first *= val;
             res1.second *= val;
         }
@@ -258,7 +276,7 @@ protected:
         if(dist < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
         {
             res2 = own.normVecSafe(pair<double,double>(x,y), dist);
-            double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemy.computeDamage(own);
+            double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemyDamage.total;
             res2.first *= val;
             res2.second *= val;
         }
@@ -270,9 +288,10 @@ protected:
         return pair<double,double>(res1.first+res2.first, res1.second+res2.second);
     };
 
-    double computeDamageDealt(BaseUnit const& unit);
+    Damage computeTheoreticalDamage(BaseUnit const& unit) const;
+    Damage computeDamage(BaseUnit const& unit) const;
 
-    bool attack(BaseUnit* unit);
+    bool attack(BaseUnit& unit);
 
 public:
 
@@ -369,11 +388,19 @@ public:
 
     int getAACooldown() const;
 
-    float getGAUpgrade() const;
+    float getGAUpgradeBonus() const;
 
-    float getAAUpgrade() const;
+    float getAAUpgradeBonus() const;
 
-    float getArmorUpgrade() const;
+    float getArmorUpgradeBonus() const;
+
+    int getArmorUpgrade() const;
+
+    int getAttackUpgrade() const;
+
+    vector<Attribute> const& getAttributes() const;
+
+    vector<Bonus> const& getBonuses() const;
 
 
 
@@ -402,8 +429,6 @@ public:
     void setFriendForce(function<pair<double,double>(BaseUnit const &, BaseUnit const &)> func);
 
     void setEnemyForce(function<pair<double,double>(BaseUnit const &, BaseUnit const &)> func);
-
-    double computeDamage(BaseUnit const& other) const;
 
     double computeRange(BaseUnit const& other) const;
 
@@ -441,7 +466,6 @@ public:
             move(own, other);
         }
         decAttackTimer();
-        decMovementTimer();
     }
 
 
@@ -456,7 +480,7 @@ public:
         {
             mPath.push_back(std::make_pair(static_cast<float>(mPos.first),static_cast<float>(mPos.second)));
         }
-        if(getMovementTimer() <= 0)
+        if(own.movementTimer <= 0)
         {
             pair<double,double> force(0.0,0.0);
             for(const auto& pot : own.potentialList)
@@ -489,7 +513,6 @@ public:
             }
             double const norm = sqrt(pow(force.first,2)+pow(force.second,2));
             currentForce = this->normVecSafe(force,norm);
-            resetMovementTimer();
         }
 
 
@@ -534,15 +557,13 @@ public:
 
     template<typename T> bool attack(PlayerState<T>& other)
     {
-        if(this->getHealth() < EPS || other.unitList.empty())
+        if(this->mAttackTimer > 0 || this->getHealth() < EPS || other.unitList.empty())
         {
             return false;
         }
 
         auto aim = *(other.unitList.begin());
-        double maxDmg = computeDamageDealt(*aim);
-        double dmg = 0.0;
-        double wastedDmg = 0.0;
+        double maxDamage = 0.0;
         bool kill = false;
         for(auto enemy : other.unitList)
         {
@@ -550,38 +571,39 @@ public:
             {
                 continue;
             }
-
-            dmg = computeDamageDealt(*enemy);
-            if(0.75 * dmg > enemy->getHealth()+enemy->getShield())
+            double const damage = computeDamage(*enemy).total;
+            bool const newKill = 0.75 * damage > enemy->getHealth() + enemy->getShield();
+            bool const higher = damage > maxDamage;
+            if(newKill)
             {
                 if(kill)
                 {
-                    if(dmg-enemy->getHealth()-enemy->getShield() < wastedDmg)
+                    if(higher)
                     {
-                        wastedDmg = dmg-enemy->getHealth()-enemy->getShield();
-                        maxDmg = dmg;
+                        maxDamage = damage;
                         aim = enemy;
                     }
                 }
                 else
                 {
-                    wastedDmg = dmg-enemy->getHealth();
-                    maxDmg = dmg;
-                    kill = true;
+                    maxDamage = damage;
                     aim = enemy;
                 }
             }
-            else if(!kill && dmg > maxDmg)
+            else
             {
-                maxDmg = dmg;
-                aim = enemy;
+                if(higher)
+                {
+                    maxDamage = damage;
+                    aim = enemy;
+                }
             }
         }
-        if(maxDmg < EPS)
+        if(maxDamage < EPS)
         {
             return false;
         }
-        if(attack(aim))
+        if(attack(*aim))
         {
             --other.unitCount;
         }
@@ -605,13 +627,14 @@ public:
     int getTimeSlice() const;
     void setTimeSlice(int value);
 
-    int getMovementTimer() const;
-    void setMovementTimer(int value);
-    void decMovementTimer();
-    void resetMovementTimer();
-
-    int getMovementUpdate() const;
-    void setMovementUpdate(int value);
+    int getShieldUpgrade() const;
+    void setShieldUpgrade(int value);
+    double getAttackMultiplier() const;
+    void setAttackMultiplier(double value);
+    double getDefenseMultiplier() const;
+    void setDefenseMultiplier(double value);
+    double getDefenseSubtractor() const;
+    void setDefenseSubtractor(double value);
 };
 
 
@@ -632,17 +655,18 @@ public:
 
     TerranUnit(BaseUnit const& baseUnit);
 
-    void regenerate();
+    template <typename T> void regenerate(PlayerState<T>&) {}
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
-        regenerate();
+        regenerate(own);
     }
 };
 
 class ZergUnit : public BaseUnit
 {
+
 public:
     ZergUnit();
 
@@ -656,12 +680,21 @@ public:
 
     ZergUnit(BaseUnit const& baseUnit);
 
-    void regenerate();
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer >= 1000)
+        {
+            if(mStats.health > EPS && mStats.health < mStats.maxHealth)
+            {
+                BaseUnit::addHealth(0.27);
+            }
+        }
+    }
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
-        regenerate();
+        regenerate(own);
     }
 
 };
@@ -669,7 +702,7 @@ public:
 class ProtossUnit : public BaseUnit
 {
 protected:
-    int shieldCount;
+    int mShieldRegenCount = 0;
 public:
     ProtossUnit();
 
@@ -685,12 +718,26 @@ public:
 
     void subShield(double const value);
 
-    void regenerate();
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer >= 1000)
+        {
+            if(mShieldRegenCount == 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
+            {
+                BaseUnit::addShield(2.0);
+            }
+            else
+            {
+                --mShieldRegenCount;
+            }
+        }
+
+    }
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
-        regenerate();
+        regenerate(own);
     }
 };
 
@@ -712,8 +759,9 @@ class Marauder final : public TerranUnit
 class Reaper final : public TerranUnit
 {
 protected:
-    int regenCount;
+    int mHealthRegenCount = 0;
 public:
+
     Reaper();
 
     Reaper(string name);
@@ -730,12 +778,25 @@ public:
 
     void subHealth(double const value);
 
-    void regenerate();
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer >= 1000)
+        {
+            if(mHealthRegenCount == 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
+            {
+                BaseUnit::addHealth(2.0);
+            }
+            else
+            {
+                --mHealthRegenCount;
+            }
+        }
+    }
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         TerranUnit::timestep(own, other);
-        regenerate();
+        regenerate(own);
     }
 };
 
