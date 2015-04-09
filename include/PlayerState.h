@@ -81,16 +81,13 @@ template <class Race> struct PlayerState : public Race
     int regenerationTimer = 0;
     int movementTimer = 0;
 
-    int regenerationUpdate = 100;
+    int regenerationUpdate = 1000;
     int movementUpdate = 100;
 
 
     template<typename T> void timestep(PlayerState<T>& other)
     {
 
-        time += timeSlice;
-        regenerationTimer -= timeSlice;
-        movementTimer -= timeSlice;
         for(auto& elem : this->unitList0)
         {
             elem.first.timestep(*this, other);
@@ -171,6 +168,9 @@ template <class Race> struct PlayerState : public Race
         {
             movementTimer = movementUpdate;
         }
+        time += timeSlice;
+        regenerationTimer -= timeSlice;
+        movementTimer -= timeSlice;
     }
 
 

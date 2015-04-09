@@ -330,10 +330,10 @@ void MicroSimulation<T, U>::resetTime()
 {
     pl1.time = 0;
     pl1.movementTimer= pl1.movementUpdate;
-    pl1.regenerationUpdate = pl1.regenerationUpdate;
+    pl1.regenerationTimer = pl1.regenerationUpdate;
     pl2.time = 0;
     pl2.movementTimer= pl2.movementUpdate;
-    pl2.regenerationUpdate = pl2.regenerationUpdate;
+    pl2.regenerationTimer = pl2.regenerationUpdate;
 }
 
 template <class T, class U>

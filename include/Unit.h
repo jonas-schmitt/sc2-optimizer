@@ -682,7 +682,7 @@ public:
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        if(state.regenerationTimer >= 1000)
+        if(state.regenerationTimer == 0)
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
@@ -720,7 +720,7 @@ public:
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        if(state.regenerationTimer >= 1000)
+        if(state.regenerationTimer == 0)
         {
             if(mShieldRegenCount == 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
             {
@@ -780,7 +780,7 @@ public:
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        if(state.regenerationTimer >= 1000)
+        if(state.regenerationTimer == 0)
         {
             if(mHealthRegenCount == 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
             {

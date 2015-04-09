@@ -642,10 +642,9 @@ void BaseUnit::setAttackTimer(int value)
 
 void BaseUnit::decAttackTimer()
 {
-    if(mAttackTimer < mTimeSlice)
+    if(mAttackTimer < 0)
     {
-        mAttackTimer = 0;
-        return;
+	return;
     }
     mAttackTimer -= mTimeSlice;
 }

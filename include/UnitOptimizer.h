@@ -45,7 +45,7 @@ private:
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;
     size_t mInitialPopulationSize;
-    size_t const NSTRATEGIES = 10;
+    size_t const NSTRATEGIES = 1;
     int const DELTA = 5;
     vector<MicroSimulation<Race1,Race2> > mSim1;
     vector<MicroSimulation<Race2,Race1> > mSim2;
