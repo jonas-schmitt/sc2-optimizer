@@ -2,6 +2,7 @@
 #include "../src/InitPlayerUnits.cpp"
 #include "../src/MicroSimulation.cpp"
 #include "../src/UnitOptimizer.cpp"
+#include "../src/GuiInterface.cpp"
 
 template class InitPlayerUnits<Zerg>;
 template class InitPlayerUnits<Terran>;
@@ -30,4 +31,17 @@ template class UnitOptimizer<Protoss, Protoss>;
 template class UnitOptimizer<Zerg, Protoss>;
 template class UnitOptimizer<Zerg, Terran>;
 template class UnitOptimizer<Zerg, Zerg>;
+
+
+template class GuiInterface<Terran, Protoss>;
+template class GuiInterface<Terran, Zerg>;
+template class GuiInterface<Terran, Terran>;
+
+template class GuiInterface<Protoss, Zerg>;
+template class GuiInterface<Protoss, Terran>;
+template class GuiInterface<Protoss, Protoss>;
+
+template class GuiInterface<Zerg, Protoss>;
+template class GuiInterface<Zerg, Terran>;
+template class GuiInterface<Zerg, Zerg>;
 

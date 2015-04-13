@@ -78,23 +78,31 @@ void GuiWindow::scaleFactor(std::pair<double,double>size)
 template<typename T, typename U>
 void GuiWindow::setUnits(T *pl1, U *pl2)
 {
-	scaleFactor(std::make_pair(pl1->maxPos.first-pl1->minPos.first, pl1->maxPos.second-pl1->minPos.second));
+    scaleFactor(std::make_pair(pl1->maxPos.x-pl1->minPos.x, pl1->maxPos.y-pl1->minPos.y));
 	std::vector<std::pair<double,double>> coord1;
 	std::vector<std::pair<double,double>> coord2;
 	std::vector<double> sizes;
 	std::vector<double> ranges;
 	for (auto in : pl1->unitList)
 	{
+        if(in->getHealth() < EPS)
+        {
+            continue;
+        }
 		std::pair<double,double> tmp;
-		tmp = std::make_pair(in->getPos().first*scale.first, in->getPos().second*scale.second);
+        tmp = std::make_pair(in->getPos().x*scale.first, in->getPos().y*scale.second);
 		coord1.push_back(tmp);
 		sizes.push_back((in->getSize())*scale.first);
-		ranges.push_back((std::max(in->getAirRange(), in->getGroundRange()))*scale.first);
+        ranges.push_back((std::max(in->getAirRange(), in->getGroundRange()))*scale.first);
 	}
 	for (auto in : pl2->unitList)
 	{
+        if(in->getHealth() < EPS)
+        {
+            continue;
+        }
 		std::pair<double,double> tmp;
-		tmp = std::make_pair(in->getPos().first*scale.first, in->getPos().second*scale.second);
+        tmp = std::make_pair(in->getPos().x*scale.first, in->getPos().y*scale.second);
 		coord2.push_back(tmp);
 		sizes.push_back((in->getSize())*scale.first);
 		ranges.push_back((std::max(in->getAirRange(), in->getGroundRange()))*scale.first);
@@ -112,6 +120,10 @@ void GuiWindow::setUnits(T *pl1, U *pl2)
 	stats.push_back("ADPS");
 	for (auto in : pl1->unitList)
 	{
+        if(in->getHealth() < EPS)
+        {
+            continue;
+        }
 		std::string name = in->getName();
 		names.push_back(name);
 		i++;
@@ -123,13 +135,16 @@ void GuiWindow::setUnits(T *pl1, U *pl2)
 	mPlayer1->setUnitNames(names);
 	mPlayer1->setUnitStats(stats);
 	mPlayer1->setStatValues(values);
-	//mPlayer1->showUnits();
 
 	i = 0;
 	names.clear();
 	values.clear();
 	for (auto in : pl2->unitList)
 	{
+        if(in->getHealth() < EPS)
+        {
+            continue;
+        }
 		std::string name = in->getName();
 		names.push_back(name);
 
@@ -140,7 +155,6 @@ void GuiWindow::setUnits(T *pl1, U *pl2)
 	mPlayer2->setUnitNames(names);
 	mPlayer2->setUnitStats(stats);
 	mPlayer2->setStatValues(values);
-	//mPlayer2->showUnits();
 }
 
 void GuiWindow::setStartFunc(bool (*func)(size_t const b))
@@ -206,7 +220,7 @@ void GuiWindow::playButtonPressed()
 {
 	std::cout << "Play Button Pressed" << std::endl;
 	if (playable==true)
-		updateIntervals = 1;
+        updateIntervals = 5;
 }
 
 void GuiWindow::pauseButtonPressed()
@@ -220,7 +234,7 @@ void GuiWindow::forwardButtonPressed()
 {
 	std::cout << "Forward Button Pressed" << std::endl;
 	if (playable==true)
-		updateIntervals = 20;
+        updateIntervals = 100;
 }
 
 void GuiWindow::coordinatesPlayer1(int coord)

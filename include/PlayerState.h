@@ -18,17 +18,17 @@ using std::vector;
 
 template<typename Race> struct PotentialField : public Race
 {
-    PotentialField(pair<double,double> p, function<pair<double,double>(pair<double,double> const&,typename Race::BUT const&)> f)
+    PotentialField(Vec2D p, function<Vec2D(Vec2D const&,typename Race::BUT const&)> f)
         : pos(p), func(f)
     {}
-    pair<double,double> computeForce(typename Race::BUT const& unit) const
+    Vec2D computeForce(typename Race::BUT const& unit) const
     {
         return func(pos,unit);
     }
 
 private:
-    pair<double,double> pos;
-    function<pair<double,double>(pair<double,double>const&,typename Race::BUT const&)> func;
+    Vec2D pos;
+    function<Vec2D(Vec2D const&,typename Race::BUT const&)> func;
 
 };
 
@@ -39,16 +39,16 @@ struct SimulationResult
     double damagePercent = 0;
     double minerals = 0, gas = 0;
     size_t survivors = 0;
-    vector<vector<pair<float,float>>> paths;
+    vector<vector<Vec2Df>> paths;
 };
 
 template <class Race> struct PlayerState : public Race
 {
 
-	pair<double,double> startPos;
+    Vec2D startPos;
 
-    pair<double,double> minPos;
-    pair<double,double> maxPos;
+    Vec2D minPos;
+    Vec2D maxPos;
 
     list<PotentialField<Race>> potentialList;
 
@@ -251,7 +251,7 @@ template <class Race> struct PlayerState : public Race
             res.paths.push_back(unit->getPath());
         }
         res.damagePercent = res.damage*100. / maxDamage;
-        auto cmp = [] (vector<pair<float,float>> const& a, vector<pair<float,float>> const& b)
+        auto cmp = [] (vector<Vec2Df> const& a, vector<Vec2Df> const& b)
         {
             return a.size() > b.size();
         };

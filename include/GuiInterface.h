@@ -4,7 +4,6 @@
 #include <iostream>
 #include <unistd.h>
 
-//#include "GuiWindow.h"
 #include "MicroSimulation.h"
 #include "Unit.h"
 #include "BaseSelector.h"
@@ -18,7 +17,7 @@ private:
     GuiWindow *mGui;
 
 public:
-    GuiInterface(const pair<double, double> minPos, const pair<double, double> maxPos, const string& filePath1, const string& filePath2);
+    GuiInterface(Vec2D minPos, Vec2D maxPos, const string& filePath1, const string& filePath2);
     void setGuiWindow(GuiWindow *gui);
     bool run(int const steps);
     void run();
@@ -26,7 +25,6 @@ public:
 
     void initBothPlayers(const vector<string>&, const vector<string>&);
     void initPotentialFields();
-    double compareCosts();
 
     PlayerState<T>const& getPlayer1() const;
     PlayerState<U>const& getPlayer2() const;
@@ -40,7 +38,6 @@ public:
 
     void setPositions(std::pair<int, int> &, std::pair<int, int> &);
 
-    int compareStats();
     void collectGarbage();
     void setTracking(bool const tracking);
     void setTracking(bool const tracking, size_t const steps);

@@ -14,6 +14,117 @@ static int const XMAX = static_cast<int>(std::min(INTLIMIT,BOUND1));
 static int const YMIN = 0;
 static int const YMAX = static_cast<int>(std::min(INTLIMIT,BOUND2));
 
+struct Vec2D
+{
+
+    double x;
+    double y;
+
+    Vec2D() : x(0.0), y(0.0) {}
+    Vec2D(double val) : x(val), y(val) {}
+    Vec2D(double x_init, double y_init) : x(x_init), y(y_init) {}
+    Vec2D(Vec2D const& vec) : x(vec.x), y(vec.y) {}
+
+    double computeLength() const
+    {
+        return std::sqrt(x*x+y*y);
+    }
+    Vec2D getNormedVec(double const len) const
+    {
+        Vec2D result(x / len, y / len);
+        if(std::isinf (result.x) || std::isnan(result.x) || std::isinf (result.y) || std::isnan(result.y) || len < EPS)
+        {
+            // choose direction that brings the unit as much away from the border as possible
+
+            if(x > EPS)
+            {
+                result.x = STDLEN;
+            }
+            else if(x < -EPS)
+            {
+                result.x = -STDLEN;
+            }
+            else
+            {
+                result.x = 0;
+            }
+            if(y > EPS)
+            {
+                result.y = STDLEN;
+            }
+            else if(y < -EPS)
+            {
+                result.y = -STDLEN;
+            }
+            else
+            {
+                result.y = 0;
+            }
+        }
+        return result;
+    }
+    Vec2D getNormedVec() const
+    {
+        return getNormedVec (computeLength ());
+    }
+};
+struct Vec2Df
+{
+
+    float x;
+    float y;
+
+    Vec2Df() : x(0.0), y(0.0) {}
+    Vec2Df(float val) : x(val), y(val) {}
+    Vec2Df(float x_init, float y_init) : x(x_init), y(y_init) {}
+    Vec2Df(Vec2Df const& vec) : x(vec.x), y(vec.y) {}
+    Vec2Df(Vec2D const& vec) : x(static_cast<float>(vec.x)), y(static_cast<float>(vec.y)) {}
+
+    float computeLength() const
+    {
+        return std::sqrt(x*x+y*y);
+    }
+    Vec2Df getNormedVec(float const len) const
+    {
+        Vec2Df result(x / len, y / len);
+        if(std::isinf (result.x) || std::isnan(result.x) || std::isinf (result.y) || std::isnan(result.y) || len < EPS)
+        {
+            // choose direction that brings the unit as much away from the border as possible
+
+            if(x > EPS)
+            {
+                result.x = STDLEN;
+            }
+            else if(x < -EPS)
+            {
+                result.x = -STDLEN;
+            }
+            else
+            {
+                result.x = 0;
+            }
+            if(y > EPS)
+            {
+                result.y = STDLEN;
+            }
+            else if(y < -EPS)
+            {
+                result.y = -STDLEN;
+            }
+            else
+            {
+                result.y = 0;
+            }
+        }
+        return result;
+    }
+    Vec2Df getNormedVec() const
+    {
+        return getNormedVec(computeLength ());
+    }
+};
+
+
 struct Fitness
 {
     double damage;

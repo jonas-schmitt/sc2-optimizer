@@ -9,6 +9,8 @@
 #include<random>
 #include<string>
 #include<vector>
+#include<typeinfo>
+#include<array>
 
 
 #include "PlayerState.h"
@@ -23,6 +25,7 @@ using std::sqrt;
 using std::list;
 using std::string;
 using std::vector;
+using std::array;
 
 
 enum Attribute
@@ -46,8 +49,11 @@ struct Damage
     double shield;
     double health;
     double total;
-    Damage() : shield(0.0), health(0.0), total(0.0) {}
-    Damage(double const s, double const h, double const t) : shield(s), health(h), total(t) {}
+    bool valid;
+
+    Damage() : shield(0.0), health(0.0), total(0.0), valid(false) {}
+    Damage(double const s, double const h, double const t) : shield(s), health(h), total(t), valid(true) {}
+    Damage(Damage const& damage) : shield(damage.shield), health(damage.health), total(damage.total), valid(damage.valid) {}
 };
 
 
@@ -92,12 +98,12 @@ protected:
     UnitGenes mGenes;
     UnitStats mStats;
 
-    pair<double,double> currentForce;
-    pair<double,double> mPos;
-    pair<double,double> mMinPos;
-    pair<double,double> mMaxPos;
+    Vec2D currentForce;
+    Vec2D mPos;
+    Vec2D mMinPos;
+    Vec2D mMaxPos;
     bool mTracking = false;
-    vector<pair<float,float>> mPath;
+    vector<Vec2Df> mPath;
     vector<BaseUnit *> mInRange;
 
     int mTimeSlice = 10;
@@ -115,187 +121,96 @@ protected:
 
     string mName;
 
-    std::function<double(BaseUnit const& own, BaseUnit const& buddy, std::vector<std::vector<double>> &field, double off)> mFriendFuncPot = [] (BaseUnit const& own, BaseUnit const& buddy, std::vector<std::vector<double>> &field, double off)
+    int mId;
+
+
+
+
+
+
+
+    std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mFriendFunc = [] (BaseUnit & own, BaseUnit & buddy)
     {
-       double const x = buddy.getX()-own.getX();
-       double const y = buddy.getY()-own.getY();
-       double  dist = std::sqrt(pow(x,2)+pow(y,2));
-       pair<double,double> const minPos = buddy.getMinPos();
-       pair<double,double> const maxPos = buddy.getMaxPos();
+       Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
 
-	   double val;
-       if(dist < own.getMaxDist()*(static_cast<double>(own.getYGene(0))/YMAX))
+       if(distVec.computeLength() < own.getMaxDist()*(static_cast<double>(own.getYGene(0))/YMAX))
        {
-           val = own.getXGene(0)*buddy.getResources()+own.getYGene(1);
-	   		//val *= (dist+own.getMaxDist()*own.getYGene(0)/YMAX);
-		   val *= dist;
-	   	//val *= (dist-own.getMaxDist()*own.getYGene(0)/YMAX);
-           for (int i = static_cast<int>(std::round(std::max(minPos.first, buddy.getPos().first - buddy.getSize()))); i < static_cast<int>(std::round(std::min(maxPos.first, buddy.getPos().first+buddy.getSize()))); ++i)
-		   {
-                for (int j = static_cast<int>(std::round(std::max(minPos.second, buddy.getPos().second - buddy.getSize()))); j < static_cast<int>(std::round(std::min(maxPos.second, buddy.getPos().second+buddy.getSize()))); ++j)
-				{
-					field.at(i).at(j) += (val/off);
-				}
-				//v.at(buddy->getPos().first).at(buddy->getPos().second) += mFriendFuncPot(*this,*buddy);
-			}
-	   }
-       else
-       {
-		   val = 0.0f;
-       }
-	   //val *= (dist-own.getYGene(0));
-	   return val;
-    };
-
-    std::function<pair<double,double>(BaseUnit const& own, BaseUnit const& buddy)> mFriendFunc = [] (BaseUnit const& own, BaseUnit const& buddy)
-    {
-       double const x = buddy.getX()-own.getX();
-       double const y = buddy.getY()-own.getY();
-       double const dist =  std::sqrt(pow(x,2)+pow(y,2));
-
-       /*if (dist < (own.getSize()+buddy.getSize())*1.0f)
-	   {
-           pair<double,double> res = own.normVecSafe(pair<double,double>(x,y), dist);
-		   double const pot = -LIMIT;
-		   res.first *= pot;
-		   res.second *= pot;
-		   return res;
-       }*/
-
-       if(dist < own.getMaxDist()*(static_cast<double>(own.getYGene(0))/YMAX))
-       {
-           pair<double,double> res = own.normVecSafe(pair<double,double>(x,y), dist);
+           Vec2D res = distVec.getNormedVec();
            double const val = own.getXGene(0)*buddy.getResources()+own.getYGene(1);
-           res.first *= val;
-           res.second *= val;
+           res.x *= val;
+           res.y *= val;
            return res;
        }
        else
        {
-           return pair<double,double>(0.,0.);
+           return Vec2D(0.);
        }
     };
 
-    std::function<double(BaseUnit const& own, BaseUnit const& enemy, std::vector<std::vector<double>> &field, double off)> mEnemyFuncPot = [] (BaseUnit const& own, BaseUnit const& enemy, std::vector<std::vector<double>> &field, double off)
-	{
-        double const x = enemy.getX()-own.getX();
-        double const y = enemy.getY()-own.getY();
-        double dist =  std::sqrt(pow(x,2)+pow(y,2));
-        double const ownRange = own.computeRange(enemy);
-       	double val=0.0f;
-		double val2 = 0.0f;
-        pair<double,double> const minPos = enemy.getMinPos();
-        pair<double,double> const maxPos = enemy.getMaxPos();
-        Damage enemyDamage = enemy.computeTheoreticalDamage(own);
-        Damage ownDamage = own.computeTheoreticalDamage(enemy);
-        if(dist > ownRange)
-        {
-            val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*ownDamage.total+own.getYGene(2);
-			val *= (dist-ownRange);
-        }
-        else if(dist < ownRange-(ownRange*static_cast<double>(own.getYGene(3))/YMAX/4.))
-        {
-            val = -own.getYGene(4);
-			//val *= (dist-own.getYGene(3)/YMAX/4.);
-			val *= dist;
-        }
-        else
-        {
-			val = 0.0f;
-        }
-		//val *= dist;
-           for (int i = static_cast<int>(std::round(std::max(minPos.first, enemy.getPos().first - enemy.getSize()))); i < static_cast<int>(std::round(std::min(maxPos.first, enemy.getPos().first+enemy.getSize()))); ++i)
-		   {
-                for (int j = static_cast<int>(std::round(std::max(minPos.second, enemy.getPos().second - enemy.getSize()))); j < static_cast<int>(std::round(std::min(maxPos.second, enemy.getPos().second+enemy.getSize()))); ++j)
-                {
-					field.at(i).at(j) += (val/off);
-				}
-				//v.at(buddy->getPos().first).at(buddy->getPos().second) += mFriendFuncPot(*this,*buddy);
-			}
-        double const enemyRange = enemy.computeRange(own);
-        if(dist < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
-        {
-            val2 = (-own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemyDamage.total);
-			//val2 *= dist;
-			val2 *= (dist-(enemyRange+own.getYGene(5)/YMAX/4.));
-           for (int i = static_cast<int>(std::round(std::max(minPos.first,  enemy.getPos().first - enemy.getGroundRange()))); i < static_cast<int>(std::round(std::min(maxPos.first, enemy.getPos().first+enemy.getGroundRange()))); ++i)
-		   {
-                for (int j = static_cast<int>(std::round(std::max(minPos.second,  enemy.getPos().second - enemy.getGroundRange()))); j < static_cast<int>(std::round(std::min(maxPos.second, enemy.getPos().second+enemy.getGroundRange()))); ++j)
-				{
-					field.at(i).at(j) += (val2/off);
-				}
-				//v.at(buddy->getPos().first).at(buddy->getPos().second) += mFriendFuncPot(*this,*buddy);
-			}
-        }
-        else
-        {
-        }
-		//val2 /= 1e4;
-		//val /= 1e4;
-		return std::max(-1e10, std::min(1e10,val+val2));
 
-	};
 
-    std::function<pair<double,double>(BaseUnit const& own, BaseUnit const& buddy)> mEnemyFunc = [] (BaseUnit const& own, BaseUnit const& enemy)
+    std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mEnemyFunc = [] (BaseUnit & own, BaseUnit & enemy)
     {
-        double const x = enemy.getX()-own.getX();
-        double const y = enemy.getY()-own.getY();
-        double const dist =  std::sqrt(pow(x,2)+pow(y,2));
+
+        Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
         double const ownRange = own.computeRange(enemy);
-        pair<double,double> res1;
-        /*
-	   if (dist < (own.getSize()+enemy.getSize())*1.0f)
-	   {
-           pair<double,double> res = own.normVecSafe(pair<double,double>(x,y), dist);
-		   double const pot = -LIMIT;
-		   res.first *= pot;
-		   res.second *= pot;
-		   return res;
-       }*/
-        Damage enemyDamage = enemy.computeTheoreticalDamage(own);
-        Damage ownDamage = own.computeTheoreticalDamage(enemy);
-        if(dist > ownRange)
+        Vec2D res1;
+
+        int const ownId = own.getIdentifier();
+        int const enemyId = enemy.getIdentifier();
+        if(!own.mPossibleDamage[enemyId].valid)
         {
-            res1 = own.normVecSafe(pair<double,double>(x,y), dist);
+            own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
+        }
+        if(!enemy.mPossibleDamage[ownId].valid)
+        {
+            enemy.mPossibleDamage[ownId] = enemy.computeDamage(own);
+        }
+        Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
+        Damage const& ownDamage = own.mPossibleDamage[enemyId];
+
+        double const len = distVec.computeLength ();
+        if(len > ownRange)
+        {
+            res1 = distVec.getNormedVec();
             double const val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*ownDamage.total+own.getYGene(2);
-            res1.first *= val;
-            res1.second *= val;
+            res1.x *= val;
+            res1.y *= val;
         }
-        else if(dist < ownRange-(ownRange*static_cast<double>(own.getYGene(3))/YMAX/4.))
+        else if(len < ownRange-(ownRange*static_cast<double>(own.getYGene(3))/YMAX/4.))
         {
-            res1 = own.normVecSafe(pair<double,double>(x,y), dist);
-            res1.first *= -own.getYGene(4);
-            res1.second *= -own.getYGene(4);
+            res1 = distVec.getNormedVec();
+            res1.x *= -own.getYGene(4);
+            res1.y *= -own.getYGene(4);
         }
         else
         {
-            res1 = pair<double,double>(0.,0.);
+            res1 = Vec2D(0.0);
         }
-        pair<double,double> res2;
+        Vec2D res2;
         double const enemyRange = enemy.computeRange(own);
-        if(dist < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
+        if(len < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
         {
-            res2 = own.normVecSafe(pair<double,double>(x,y), dist);
+            res2 = distVec.getNormedVec();
             double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemyDamage.total;
-            res2.first *= val;
-            res2.second *= val;
+            res2.x *= val;
+            res2.y *= val;
         }
         else
         {
-            res2 = pair<double,double>(0.,0.);
+            res2 = Vec2D(0.0);
         }
 
-        return pair<double,double>(res1.first+res2.first, res1.second+res2.second);
+        return Vec2D(res1.x+res2.x, res1.y+res2.y);
     };
 
-    Damage computeTheoreticalDamage(BaseUnit const& unit) const;
     Damage computeDamage(BaseUnit const& unit) const;
 
     bool attack(BaseUnit& unit);
 
 public:
 
-
+    Damage mPossibleDamage[18];
 
     BaseUnit();
 
@@ -303,17 +218,14 @@ public:
 
     BaseUnit(const UnitStats& baseStats);
 
-    BaseUnit(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max);
+    BaseUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
     BaseUnit(BaseUnit const& baseUnit);
 
 
-    pair<double,double> computeFriendForce(BaseUnit const & other);
+    Vec2D computeFriendForce(BaseUnit & other);
 
-    pair<double,double> computeEnemyForce(BaseUnit const & other);
-
-	double computeFriendPot(BaseUnit const & other);
-	double computeEnemyPot(BaseUnit const & other);
+    Vec2D computeEnemyForce(BaseUnit & other);
 
     void setName(string name);
 
@@ -404,11 +316,11 @@ public:
 
 
 
-    pair<double,double> getPos() const;
+    Vec2D getPos() const;
 
-    pair<double,double> getMinPos() const;
+    Vec2D getMinPos() const;
 
-    pair<double,double> getMaxPos() const;
+    Vec2D getMaxPos() const;
 
     double getX() const;
 
@@ -416,48 +328,23 @@ public:
 
     void setPos(double const x, double const y);
 
-    void setPos(const pair<double,double> pos);
+    void setPos(const Vec2D pos);
 
-    void setMinPos(pair<double,double> const pos);
+    void setMinPos(Vec2D const pos);
 
-    void setMaxPos(pair<double,double> const pos);
+    void setMaxPos(Vec2D const pos);
 
     void setX(double const x);
 
     void setY(double const y);
 
-    void setFriendForce(function<pair<double,double>(BaseUnit const &, BaseUnit const &)> func);
+    void setFriendForce(function<Vec2D(BaseUnit &, BaseUnit &)> func);
 
-    void setEnemyForce(function<pair<double,double>(BaseUnit const &, BaseUnit const &)> func);
+    void setEnemyForce(function<Vec2D(BaseUnit &, BaseUnit &)> func);
 
     double computeRange(BaseUnit const& other) const;
 
-    pair<double,double> normVecSafe(pair<double,double>const& vec, double const norm) const;
 
-	template <typename T, typename U> double getPot(PlayerState<T>& own, PlayerState<U>& other, std::vector<std::vector<double>> &v)
-	{
-		double me = 0.0f;
-		for(auto buddy :  own.unitList)
-		{
-		//	me += mFriendFuncPot(*this,*buddy);
-			//o << buddy->getPos().first << "\t" << buddy->getPos().second << "\t" << mFriendFuncPot(*this,*buddy)<< std::endl;
-		//	std::cout << "\t" << buddy->getPos().first << " "  << buddy->getPos().second << " " << mFriendFuncPot(*this,*buddy) << std::endl; 
-			//v.at(buddy->getPos().first).at(buddy->getPos().second) += mFriendFuncPot(*this,*buddy, v);
-			me += mFriendFuncPot(*this,*buddy, v, 1);//own.unitList.size());
-		//	me += computeFriendPot(*buddy);
-		}
-		for(auto enemy :  other.unitList)
-		{
-			//me += mEnemyFuncPot(*this, *enemy);
-		//	std::cout << enemy->getPos().first << " " << enemy->getPos().second << " " << mEnemyFuncPot(*this,*enemy) << std::endl;
-		//	v.at(enemy->getPos().first).at(enemy->getPos().second) += mEnemyFuncPot(*this,*enemy,v);
-			me+=mEnemyFuncPot(*this,*enemy,v, 1);//other.unitList.size());
-		//	o << enemy->getPos().first << "\t" << enemy->getPos().second << "\t" << mEnemyFuncPot(*this,*enemy)<< std::endl;
-		//	me += computeEnemyPot(*enemy);
-		}
-		//me = std::min(1e+07, me);
-		return std::max(-1e8, std::min(1e8,me));
-	}
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -478,16 +365,16 @@ public:
         }
         if(mTracking)
         {
-            mPath.push_back(std::make_pair(static_cast<float>(mPos.first),static_cast<float>(mPos.second)));
+            mPath.emplace_back(static_cast<float>(mPos.x),static_cast<float>(mPos.y));
         }
         if(own.movementTimer <= 0)
         {
-            pair<double,double> force(0.0,0.0);
+            Vec2D force(0.0);
             for(const auto& pot : own.potentialList)
             {
-                const pair<double,double> generatedForce = pot.computeForce(*this);
-                force.first += generatedForce.first;
-                force.second += generatedForce.second;
+                const Vec2D generatedForce = pot.computeForce(*this);
+                force.x += generatedForce.x;
+                force.y += generatedForce.y;
             }
             for(auto buddy :  own.unitList)
             {
@@ -496,9 +383,9 @@ public:
                     continue;
                 }
 
-                const pair<double,double> generatedForce = this->computeFriendForce(*buddy);
-                force.first += generatedForce.first;
-                force.second += generatedForce.second;
+                const Vec2D generatedForce = this->computeFriendForce(*buddy);
+                force.x += generatedForce.x;
+                force.y += generatedForce.y;
             }
             for(auto enemy :  other.unitList)
             {
@@ -507,19 +394,20 @@ public:
                     continue;
                 }
 
-                const pair<double,double> generatedForce = this->computeEnemyForce(*enemy);
-                force.first += generatedForce.first;
-                force.second += generatedForce.second;
+                const Vec2D generatedForce = this->computeEnemyForce(*enemy);
+                force.x += generatedForce.x;
+                force.y += generatedForce.y;
             }
-            double const norm = sqrt(pow(force.first,2)+pow(force.second,2));
-            currentForce = this->normVecSafe(force,norm);
+            currentForce = force.getNormedVec ();
         }
+        double const moveDist = getSpeed()*own.movementUpdate/1000;
 
 
-        setX(currentForce.first*getSpeed()+getX());
-        setY(currentForce.second*getSpeed()+getY());
+        setX(currentForce.x*moveDist+getX());
+        setY(currentForce.y*moveDist+getY());
 
         // Collision detection, include it again if needed
+        //TODO needs to be fixed before included again!
         /*
         for(auto unit : other.unitList)
         {
@@ -530,9 +418,9 @@ public:
             if(dist < allowed_dist)
             {
                 double len = allowed_dist - dist;
-                pair<double,double> shift = normVecSafe(pair<double,double>(x, y), dist);
-                setX(getX()+len*shift.first);
-                setY(getY()+len*shift.second);
+                Vec2D shift = normVecSafe(Vec2D(x, y), dist);
+                setX(getX()+len*shift.x);
+                setY(getY()+len*shift.y);
             }
 
         }
@@ -545,15 +433,17 @@ public:
             if(dist < allowed_dist)
             {
                 double len = allowed_dist - dist;
-                pair<double,double> shift = normVecSafe(pair<double,double>(x, y), dist);
-                setX(getX()+len*shift.first);
-                setY(getY()+len*shift.second);
+                Vec2D shift = normVecSafe(Vec2D(x, y), dist);
+                setX(getX()+len*shift.x);
+                setY(getY()+len*shift.y);
             }
 
         }
         */
 
     }
+
+    bool attackPossible(BaseUnit const& enemy);
 
     template<typename T> bool attack(PlayerState<T>& other)
     {
@@ -567,35 +457,39 @@ public:
         bool kill = false;
         for(auto enemy : other.unitList)
         {
-            if(enemy->getHealth() < EPS)
+            Damage damage;
+            if(attackPossible (*enemy))
             {
-                continue;
+                damage = computeDamage(*enemy);
             }
-            double const damage = computeDamage(*enemy).total;
-            bool const newKill = 0.75 * damage > enemy->getHealth() + enemy->getShield();
-            bool const higher = damage > maxDamage;
+
+            bool const newKill = 0.75 * damage.total > enemy->getHealth() + enemy->getShield();
+            bool const higher = damage.total > maxDamage;
             if(newKill)
             {
                 if(kill)
                 {
                     if(higher)
                     {
-                        maxDamage = damage;
+                        maxDamage = damage.total;
                         aim = enemy;
+                        mPossibleDamage[enemy->getIdentifier()] = damage;
                     }
                 }
                 else
                 {
-                    maxDamage = damage;
+                    maxDamage = damage.total;
                     aim = enemy;
+                    mPossibleDamage[enemy->getIdentifier()] = damage;
                 }
             }
             else
             {
                 if(higher)
                 {
-                    maxDamage = damage;
+                    maxDamage = damage.total;
                     aim = enemy;
+                    mPossibleDamage[enemy->getIdentifier()] = damage;
                 }
             }
         }
@@ -617,7 +511,7 @@ public:
 
     void setTracking(bool const tracking);
     void reservePathStorage(size_t const sz);
-    vector<pair<float,float>> getPath() const;
+    vector<Vec2Df> getPath() const;
     void clearPath();
 
     int getAttackTimer() const;
@@ -635,6 +529,8 @@ public:
     void setDefenseMultiplier(double value);
     double getDefenseSubtractor() const;
     void setDefenseSubtractor(double value);
+    int getIdentifier() const;
+    void setIdentifier(int value);
 };
 
 
@@ -649,7 +545,7 @@ public:
 
     TerranUnit(const UnitStats& baseStats);
 
-    TerranUnit(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max);
+    TerranUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
     TerranUnit(TerranUnit const& terranUnit);
 
@@ -674,7 +570,7 @@ public:
 
     ZergUnit(const UnitStats& baseStats);
 
-    ZergUnit(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max);
+    ZergUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
     ZergUnit(ZergUnit const& zergUnit);
 
@@ -686,7 +582,7 @@ public:
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
-                BaseUnit::addHealth(0.27);
+                BaseUnit::addHealth(0.27 * state.regenerationUpdate / 1000);
             }
         }
     }
@@ -710,7 +606,7 @@ public:
 
     ProtossUnit(const UnitStats& baseStats);
 
-    ProtossUnit(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max);
+    ProtossUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
     ProtossUnit(ProtossUnit const& protossUnit);
 
@@ -724,7 +620,7 @@ public:
         {
             if(mShieldRegenCount == 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
             {
-                BaseUnit::addShield(2.0);
+                BaseUnit::addShield(2.0 * state.regenerationUpdate / 1000);
             }
             else
             {
@@ -768,7 +664,7 @@ public:
 
     Reaper(const UnitStats& baseStats);
 
-    Reaper(const UnitStats& baseStats, pair<double,double>min, pair<double,double>max);
+    Reaper(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
     Reaper(Reaper const& Reaper);
 
@@ -784,7 +680,7 @@ public:
         {
             if(mHealthRegenCount == 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
             {
-                BaseUnit::addHealth(2.0);
+                BaseUnit::addHealth(2.0 * state.regenerationUpdate / 1000);
             }
             else
             {

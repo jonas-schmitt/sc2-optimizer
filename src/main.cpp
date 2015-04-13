@@ -17,6 +17,7 @@
 #include "../include/UnitOptimizerBase.h"
 #include "../include/raceSelector.h"
 #include "../include/BaseSelector.h"
+#include "../include/GuiInterface.h"
 
 using std::vector;
 using std::string;
@@ -137,59 +138,87 @@ int main(int argc, char *argv[])
     float const selectionRate = 0.25; //dist(gen);
     float const reproductionRate = 0.5;//dist(gen);
     float const mutationRate = 0.5;//dist(gen);
+    double fieldSize = 150;
+    Vec2D minPos(0.0);
+    Vec2D maxPos(fieldSize);
 
     UnitOptimizerBase *UOB;
     if (race1 == "Terran" && race2 == "Protoss")
     {
         UOB = new UnitOptimizer<Terran,Protoss>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Terran, Protoss>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Terran" && race2 == "Zerg")
     {
         UOB = new UnitOptimizer<Terran, Zerg>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Terran, Zerg>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Protoss" && race2 == "Zerg")
     {
         UOB = new UnitOptimizer<Protoss, Zerg>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Protoss, Zerg>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Protoss" && race2 == "Terran")
     {
         UOB = new UnitOptimizer<Protoss, Terran>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Protoss, Terran>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Zerg" && race2 == "Terran")
     {
         UOB = new UnitOptimizer<Zerg, Terran>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Zerg, Terran>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Zerg" && race2 == "Protoss")
     {
         UOB = new UnitOptimizer<Zerg, Protoss>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Zerg, Protoss>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Zerg" && race2 == "Zerg")
     {
         UOB = new UnitOptimizer<Zerg, Zerg>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Zerg, Zerg>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Protoss" && race2 == "Protoss")
     {
         UOB = new UnitOptimizer<Protoss, Protoss>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Protoss, Protoss>(minPos, maxPos, filePath1, filePath2);
     }
     else if (race1 == "Terran" && race2 == "Terran")
     {
         UOB = new UnitOptimizer<Terran, Terran>(units1, units2, filePath1, filePath2, initialPopulationSize, initialGenes);
+        microSim = new GuiInterface<Terran, Terran>(minPos, maxPos, filePath1, filePath2);
     }
     else
     {
         return 4;
     }
 
-        std::ofstream outF(outPath.c_str(), std::ofstream::out);
-        UOB->optimize(iterations, stepsPerIteration, initialPopulationSize, selectionRate, reproductionRate, mutationRate);
-        auto a = UOB->getOptimum();
-        outF << "Player1:" << std::endl;
-        outF << a.first << std::endl;
-        outF << "Player2:" << std::endl;
-        outF << a.second << std::endl;
-        outF.close();
+    std::ofstream outF(outPath.c_str(), std::ofstream::out);
+    UOB->optimize(iterations, stepsPerIteration, initialPopulationSize, selectionRate, reproductionRate, mutationRate);
+    auto a = UOB->getOptimum();
+    outF << "Player1:" << std::endl;
+    outF << a.first << std::endl;
+    outF << "Player2:" << std::endl;
+    outF << a.second << std::endl;
+    outF.close();
+
+    microSim->initBothPlayers(units1, units2);
+    microSim->setPlayer1Genes(UOB->getOptimum().first);
+    microSim->setPlayer2Genes(UOB->getOptimum().second);
+    microSim->setTracking(false);
+
+    int retval = 0;
+    QApplication app(argc, argv);
+    app.setStyle("plastique");
+    GuiWindow window;
+    window.show();
+    window.setStartFunc(run);
+    microSim->setGuiWindow(&window);
+    retval = app.exec();
+    free(microSim);
     free(UOB);
-    return 0;
+    return retval;
+
 }
 
 void writeOutput(SimulationResult const &res1, SimulationResult const &res2, OutputParameters const &param)
@@ -220,7 +249,7 @@ void writeOutput(SimulationResult const &res1, SimulationResult const &res2, Out
     {
         for (size_t j = 0; j < res1.paths.size(); ++j)
         {
-            pathPl1 << res1.paths.at(j).at(i).first << "\t" << res1.paths.at(j).at(i).second << "\t";
+            pathPl1 << res1.paths.at(j).at(i).x << "\t" << res1.paths.at(j).at(i).y << "\t";
         }
         pathPl1 << std::endl;
     }
@@ -230,11 +259,11 @@ void writeOutput(SimulationResult const &res1, SimulationResult const &res2, Out
         {
             if (res1.paths.at(j).size() <= i)
             {
-                pathPl1 << res1.paths.at(j).back().first << "\t" << res1.paths.at(j).back().second << "\t";
+                pathPl1 << res1.paths.at(j).back().x << "\t" << res1.paths.at(j).back().y << "\t";
             }
             else
             {
-                pathPl1 << res1.paths.at(j).at(i).first << "\t" << res1.paths.at(j).at(i).second << "\t";
+                pathPl1 << res1.paths.at(j).at(i).x << "\t" << res1.paths.at(j).at(i).y << "\t";
             }
         }
         pathPl1 << std::endl;
@@ -243,7 +272,7 @@ void writeOutput(SimulationResult const &res1, SimulationResult const &res2, Out
     {
         for (size_t j = 0; j < res2.paths.size(); ++j)
         {
-            pathPl2 << res2.paths.at(j).at(i).first << "\t" << res2.paths.at(j).at(i).second << "\t";
+            pathPl2 << res2.paths.at(j).at(i).x << "\t" << res2.paths.at(j).at(i).y << "\t";
         }
         pathPl2 << std::endl;
     }
@@ -253,11 +282,11 @@ void writeOutput(SimulationResult const &res1, SimulationResult const &res2, Out
         {
             if (res2.paths.at(j).size() <= i)
             {
-                pathPl2 << res2.paths.at(j).back().first << "\t" << res2.paths.at(j).back().second << "\t";
+                pathPl2 << res2.paths.at(j).back().x << "\t" << res2.paths.at(j).back().y << "\t";
             }
             else
             {
-                pathPl2 << res2.paths.at(j).at(i).first << "\t" << res2.paths.at(j).at(i).second << "\t";
+                pathPl2 << res2.paths.at(j).at(i).x << "\t" << res2.paths.at(j).at(i).y << "\t";
             }
         }
         pathPl2 << std::endl;

@@ -38,8 +38,8 @@ template<class T, class U>
     class MicroSimulation
 {
 private:
-    pair<double,double> mMinPos;
-    pair<double,double> mMaxPos;
+    Vec2D mMinPos;
+    Vec2D mMaxPos;
     string mFilePath1;
     string mFilePath2;
     InitPlayerUnits<T> init1;
@@ -47,20 +47,20 @@ private:
     PlayerState<T> pl1;
     PlayerState<U> pl2;
     bool mTracking = false;
-    int mTimeSteps = 10000;
+    int mTimeSteps = 30000;
     int mTimeSlice = 10;
     template <class V> void collectPlayerGarbage(PlayerState<V>&);
 
 public:
     MicroSimulation(MicroSimulation const& microSim);
-    MicroSimulation(pair<double, double> const minPos, pair<double, double> const maxPos, string const& filePath1, string const& filePath2);
+    MicroSimulation(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2);
     void initPlayer1(vector<string> const&);
-    void initPlayer1(vector<string>const&, UnitGenes const& genes, std::function<pair<double,double>(BaseUnit const&, BaseUnit const&)> friendFunc, std::function<pair<double,double>(BaseUnit const&,BaseUnit const&)> enemyFunc);
+    void initPlayer1(vector<string>const&, UnitGenes const& genes, std::function<Vec2D(BaseUnit &, BaseUnit &)> friendFunc, std::function<Vec2D(BaseUnit &,BaseUnit &)> enemyFunc);
     void initPlayer2(vector<string> const&);
     void setPlayer1Genes(UnitGenes const& genes);
     void setPlayer2Genes(UnitGenes const& genes);
-    void setPlayer1Pos(pair<double,double> const pos);
-    void setPlayer2Pos(pair<double,double> const pos);
+    void setPlayer1Pos(Vec2D const pos);
+    void setPlayer2Pos(Vec2D const pos);
     void initBothPlayers(vector<string> const&, vector<string> const&);
     void clearPlayer1();
     void clearPlayer2();
@@ -70,8 +70,8 @@ public:
     void resetBothPlayers();
     PlayerState<T>const& getPlayer1() const;
     PlayerState<U>const& getPlayer2() const;
-    pair<double,double> getMinPos() const;
-    pair<double,double> getMaxPos() const;
+    Vec2D getMinPos() const;
+    Vec2D getMaxPos() const;
     string getFilePath1() const;
     string getFilePath2() const;
     bool run(int const steps);

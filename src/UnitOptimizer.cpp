@@ -219,7 +219,7 @@ void UnitOptimizer<Race1,Race2>::optimize(size_t iterations, size_t stepsPerIter
     };
 
 
-    std::cout << "Optimization started" << std::endl << "Number of forward simulations used: " << NSTRATEGIES << std::endl;
+    std::cout << "Optimization started" << std::endl << "Number of forward simulations used: " << NTHREADS << std::endl;
     size_t minSize = 0;
     for(size_t i = 0; i < iterations; ++i)
     {
@@ -241,7 +241,7 @@ void UnitOptimizer<Race1,Race2>::optimize(size_t iterations, size_t stepsPerIter
             pair<size_t,size_t> const popSize = std::make_pair<size_t, size_t>(mPopulation1.size(), mPopulation2.size());
             crossover(std::min(popSize.first, popSize.second));
             mutate(std::min(popSize.first, popSize.second));
-            size_t const limit = std::pow(static_cast<size_t>(std::round(NSTRATEGIES/mSelectionRate)),2);
+            size_t const limit = std::pow(static_cast<size_t>(std::round(NTHREADS/mSelectionRate)),2);
             if(mPopulation1.size() < limit || mPopulation2.size() < limit)
             {
                 break;
@@ -256,7 +256,7 @@ void UnitOptimizer<Race1,Race2>::optimize(size_t iterations, size_t stepsPerIter
         }
         mOptFlag = true;
         minSize = std::min(mPopulation1.size(), mPopulation2.size());
-        for(size_t i = 0; i < std::min(minSize, NSTRATEGIES); ++i)
+        for(size_t i = 0; i < std::min(minSize, NTHREADS); ++i)
         {
             mSim1[i].setPlayer2Genes(mPopulation2[i]);
             mSim2[i].setPlayer2Genes(mPopulation1[i]);

@@ -35,8 +35,8 @@ private:
     vector<string> mUnitList2;
     string mFilePath1;
     string mFilePath2;
-    pair<double,double> mMinPos = pair<double,double>(0,0);
-    pair<double,double> mMaxPos = pair<double,double>(150,150);
+    Vec2D mMinPos = Vec2D(0,0);
+    Vec2D mMaxPos = Vec2D(150,150);
     vector<UnitGenes> mPopulation1;
     vector<UnitGenes> mPopulation2;
     unordered_set<size_t> mPopControl1;
@@ -45,7 +45,7 @@ private:
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;
     size_t mInitialPopulationSize;
-    size_t const NSTRATEGIES = 1;
+    size_t const NTHREADS = 10;
     int const DELTA = 5;
     vector<MicroSimulation<Race1,Race2> > mSim1;
     vector<MicroSimulation<Race2,Race1> > mSim2;
@@ -57,9 +57,9 @@ private:
     template<typename T, typename U>
         void evaluate(vector<UnitGenes>& population, vector<MicroSimulation<T,U>>& simVec)
     {
-        vector<future<void> > futureVec(NSTRATEGIES);
-        vector<vector<Fitness>> threadRes(NSTRATEGIES);
-        for(size_t i = 0;i < NSTRATEGIES; ++i)
+        vector<future<void> > futureVec(NTHREADS);
+        vector<vector<Fitness>> threadRes(NTHREADS);
+        for(size_t i = 0;i < NTHREADS; ++i)
         {
             threadRes[i] = std::move(vector<Fitness>(population.size()));
             futureVec[i] = std::async(std::launch::async,
@@ -70,17 +70,17 @@ private:
                                               sim->setPlayer1Genes((*population)[i]);
                                               (*threadRes)[i] = sim->run(true);
                                               /* Remove this line for a maximum workload */
-                                              std::this_thread::sleep_for(std::chrono::microseconds(750));
+                                              //std::this_thread::sleep_for(std::chrono::microseconds(750));
                                           }
                                       }, &simVec[i],&population,&threadRes[i]);
         }
         std::for_each(population.begin(), population.end(), [](UnitGenes& genes) {genes.fitness = Fitness();});
-        for(size_t i = 0; i < NSTRATEGIES; ++i)
+        for(size_t i = 0; i < NTHREADS; ++i)
         {
             futureVec[i].get();
             for(size_t j = 0; j < population.size(); ++j)
             {
-                population[j].fitness = population[j].fitness + threadRes[i][j]/NSTRATEGIES;
+                population[j].fitness = population[j].fitness + threadRes[i][j]/NTHREADS;
 
             }
 
@@ -104,12 +104,12 @@ UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePat
 
             UnitGenes start = {x,x,x,x,x,y,y,y,y,y,y,y};
 
-            for(size_t i = 0; i < NSTRATEGIES; ++i)
+            for(size_t i = 0; i < NTHREADS; ++i)
             {
                 mSim1.emplace_back(mMinPos, mMaxPos, mFilePath1, mFilePath2);
                 mSim2.emplace_back(mMinPos, mMaxPos, mFilePath2, mFilePath1);
             }
-            for(size_t i = 0; i < NSTRATEGIES; ++i)
+            for(size_t i = 0; i < NTHREADS; ++i)
             {
                 mSim1[i].initBothPlayers(unitList1, unitList2);
                 mSim1[i].setPlayer2Genes(start);
@@ -140,12 +140,12 @@ UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePat
             mPopulation2.reserve(initialPopulationSize);
 
 
-            for(size_t i = 0; i < NSTRATEGIES; ++i)
+            for(size_t i = 0; i < NTHREADS; ++i)
             {
                 mSim1.emplace_back(mMinPos, mMaxPos, mFilePath1, mFilePath2);
                 mSim2.emplace_back(mMinPos, mMaxPos, mFilePath2, mFilePath1);
             }
-            for(size_t i = 0; i < NSTRATEGIES; ++i)
+            for(size_t i = 0; i < NTHREADS; ++i)
             {
                 mSim1[i].initBothPlayers(unitList1, unitList2);
                 mSim1[i].setPlayer2Genes(initialGenes);
@@ -200,8 +200,8 @@ UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePat
 
     void setFieldSize(double x, double y)
     {
-        mMaxPos.first = x;
-        mMaxPos.second = y;
+        mMaxPos.x = x;
+        mMaxPos.y = y;
     }
 
     void optimize(size_t iterations, size_t stepsPerIteration);
