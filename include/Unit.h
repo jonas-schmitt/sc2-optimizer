@@ -152,21 +152,14 @@ protected:
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mEnemyFunc = [] (BaseUnit & own, BaseUnit & enemy)
     {
 
+        Vec2D res1, res2;
         Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
         double const ownRange = own.computeRange(enemy);
-        Vec2D res1;
-
-        int const ownId = own.getIdentifier();
         int const enemyId = enemy.getIdentifier();
         if(!own.mPossibleDamage[enemyId].valid)
         {
             own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
         }
-        if(!enemy.mPossibleDamage[ownId].valid)
-        {
-            enemy.mPossibleDamage[ownId] = enemy.computeDamage(own);
-        }
-        Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
 
         double const len = distVec.computeLength ();
@@ -183,22 +176,20 @@ protected:
             res1.x *= -own.getYGene(4);
             res1.y *= -own.getYGene(4);
         }
-        else
-        {
-            res1 = Vec2D(0.0);
-        }
-        Vec2D res2;
+
         double const enemyRange = enemy.computeRange(own);
+        int const ownId = own.getIdentifier();
+        if(!enemy.mPossibleDamage[ownId].valid)
+        {
+            enemy.mPossibleDamage[ownId] = enemy.computeDamage(own);
+        }
+        Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
         if(len < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
         {
             res2 = distVec.getNormedVec();
             double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemyDamage.total;
             res2.x *= val;
             res2.y *= val;
-        }
-        else
-        {
-            res2 = Vec2D(0.0);
         }
 
         return Vec2D(res1.x+res2.x, res1.y+res2.y);
