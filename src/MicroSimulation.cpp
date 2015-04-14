@@ -58,6 +58,17 @@ template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
     init1.init(unitList, pl1);
+    double const fieldSizeX = pl1.maxPos.x-pl1.minPos.x;
+    double const fieldSizeY = pl1.maxPos.y-pl1.minPos.y;
+    Vec2D startPos = Vec2D(pl1.minPos.x + fieldSizeX/20., pl1.minPos.y);
+    for(auto unit : pl1.unitList)
+    {
+        unit->setMinPos(pl1.minPos);
+        unit->setMaxPos(pl1.maxPos);
+        startPos.y += fieldSizeY/pl1.unitList.size();
+        unit->setStartPos(startPos);
+        unit->resetPos();
+    }
 }
 template <class T, class U>
 void MicroSimulation<T,U>::initPlayer1(vector<string>const& unitList, UnitGenes const& genes, std::function<Vec2D(BaseUnit &, BaseUnit &)> friendForce, std::function<Vec2D(BaseUnit &,BaseUnit &)> enemyForce)
@@ -75,6 +86,17 @@ template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 {
     init2.init(unitList, pl2);
+    double const fieldSizeX = pl2.maxPos.x-pl2.minPos.x;
+    double const fieldSizeY = pl2.maxPos.y-pl2.minPos.y;
+    Vec2D startPos = Vec2D(pl2.maxPos.x - fieldSizeX/20., pl2.minPos.y);
+    for(auto unit : pl2.unitList)
+    {
+        unit->setMinPos(pl2.minPos);
+        unit->setMaxPos(pl2.maxPos);
+        startPos.y += fieldSizeY/pl2.unitList.size();
+        unit->setStartPos(startPos);
+        unit->resetPos();
+    }
 }
 
 

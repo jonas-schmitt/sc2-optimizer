@@ -21,6 +21,52 @@ class InitPlayerUnits : public Race
 {
 
 private:
+    std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMinX = [](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.x-unit.getX());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(LIMIT,0);
+        }
+        double const z = 1/pow(dist,3)*LIMIT;
+
+        return Vec2D(z,0);
+    };
+    std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMinY = [](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.y-unit.getY());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(0,LIMIT);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(0,z);
+    };
+    std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxX = [](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.x-unit.getX());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(-LIMIT,0);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(-z,0);
+    };
+    std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxY = [](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.y-unit.getY());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(0,-LIMIT);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(0,-z);
+    };
+
+
     UnitFactory<Race> mFactory;
 	std::string mFilePath;
     vector<string>& split(const string &s, char delim, vector<string> &tokens);

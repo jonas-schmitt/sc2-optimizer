@@ -39,6 +39,7 @@ void GuiInterface<T, U>::setGuiWindow(GuiWindow *gui)
 }
 
 
+
 template<class T, class U>
 void GuiInterface<T, U>::initBothPlayers(const vector<string>& a, const vector<string>& b)
 {
