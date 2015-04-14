@@ -102,6 +102,7 @@ protected:
     Vec2D mPos;
     Vec2D mMinPos;
     Vec2D mMaxPos;
+    Vec2D mStartPos;
     bool mTracking = false;
     vector<Vec2Df> mPath;
     vector<BaseUnit *> mInRange;
@@ -123,6 +124,8 @@ protected:
 
     int mId;
 
+    double mForceParameters[10];
+
 
 
 
@@ -131,19 +134,19 @@ protected:
 
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mFriendFunc = [] (BaseUnit & own, BaseUnit & buddy)
     {
-       Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
 
-       if(distVec.computeLength() < own.getMaxDist()*(static_cast<double>(own.getYGene(0))/YMAX))
+       Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
+       double const dist = distVec.computeLength();
+       if(dist < own.getMaxDist()*static_cast<double>(own.getGene(0))/MAX)
        {
-           Vec2D res = distVec.getNormedVec();
-           double const val = own.getXGene(0)*buddy.getResources()+own.getYGene(1);
-           res.x *= val;
-           res.y *= val;
+           Vec2D res = distVec.getNormedVec(dist);
+           res.x *= own.getGene(1);
+           res.y *= own.getGene(1);
            return res;
        }
        else
        {
-           return Vec2D(0.);
+           return Vec2D(0.0);
        }
     };
 
@@ -162,19 +165,22 @@ protected:
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
 
-        double const len = distVec.computeLength ();
-        if(len > ownRange)
+        double const dist = distVec.computeLength ();
+        if(dist > ownRange)
         {
-            res1 = distVec.getNormedVec();
-            double const val = own.getXGene(1)*enemy.getResources()+own.getXGene(2)*ownDamage.total+own.getYGene(2);
+            res1 = distVec.getNormedVec(dist);
+            double const tmp1 = enemy.getMaxHealth() + enemy.getMaxShield () - enemy.getHealth () - enemy.getShield ();
+            int const tmp2 = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
+                                                : std::max(own.getGACooldown () - own.getAttackTimer (),0);
+            double const val = own.getGene(2)* tmp1 + own.getGene(3)*tmp2 + own.getGene(4)*ownDamage.total + own.getGene(5);
             res1.x *= val;
             res1.y *= val;
         }
-        else if(len < ownRange-(ownRange*static_cast<double>(own.getYGene(3))/YMAX/4.))
+        else if(dist < ownRange-(ownRange*static_cast<double>(own.getGene(6))/MAX/4.))
         {
             res1 = distVec.getNormedVec();
-            res1.x *= -own.getYGene(4);
-            res1.y *= -own.getYGene(4);
+            res1.x *= -own.getGene(7);
+            res1.y *= -own.getGene(7);
         }
 
         double const enemyRange = enemy.computeRange(own);
@@ -184,15 +190,19 @@ protected:
             enemy.mPossibleDamage[ownId] = enemy.computeDamage(own);
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
-        if(len < enemyRange+enemyRange*static_cast<double>(own.getYGene(5))/YMAX/4.)
+
+        if(dist < enemyRange+enemyRange*static_cast<double>(own.getGene(8))/MAX/4.)
         {
-            res2 = distVec.getNormedVec();
-            double const val = -own.getYGene(6)-own.getXGene(3)*own.getResources()-own.getXGene(4)*enemyDamage.total;
+            res2 = distVec.getNormedVec(dist);
+            double const tmp1 = own.getMaxHealth() + own.getMaxShield () - own.getHealth () - own.getShield ();
+            int const tmp2 = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
+                                                : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
+            double const val = own.getGene(9) * tmp1 + own.getGene(10)*tmp2 + own.getGene(11)*enemyDamage.total + own.getGene(12);
             res2.x *= val;
             res2.y *= val;
         }
 
-        return Vec2D(res1.x+res2.x, res1.y+res2.y);
+        return Vec2D(res1.x-res2.x, res1.y-res2.y);
     };
 
     Damage computeDamage(BaseUnit const& unit) const;
@@ -363,7 +373,7 @@ public:
             Vec2D force(0.0);
             for(const auto& pot : own.potentialList)
             {
-                const Vec2D generatedForce = pot.computeForce(*this);
+                Vec2D const generatedForce = pot.computeForce(*this);
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
@@ -374,7 +384,7 @@ public:
                     continue;
                 }
 
-                const Vec2D generatedForce = this->computeFriendForce(*buddy);
+                Vec2D const generatedForce = this->computeFriendForce(*buddy);
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
@@ -385,7 +395,7 @@ public:
                     continue;
                 }
 
-                const Vec2D generatedForce = this->computeEnemyForce(*enemy);
+                Vec2D const generatedForce = this->computeEnemyForce(*enemy);
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
@@ -396,41 +406,6 @@ public:
 
         setX(currentForce.x*moveDist+getX());
         setY(currentForce.y*moveDist+getY());
-
-        // Collision detection, include it again if needed
-        //TODO needs to be fixed before included again!
-        /*
-        for(auto unit : other.unitList)
-        {
-            double x = this->getX()-unit->getX();
-            double y = this->getY()-unit->getY();
-            double const dist = std::sqrt(pow(x,2)+pow(y,2));
-            double const allowed_dist = unit->getSize() + this->getSize();
-            if(dist < allowed_dist)
-            {
-                double len = allowed_dist - dist;
-                Vec2D shift = normVecSafe(Vec2D(x, y), dist);
-                setX(getX()+len*shift.x);
-                setY(getY()+len*shift.y);
-            }
-
-        }
-        for(auto unit : own.unitList)
-        {
-            double x = this->getX()-unit->getX();
-            double y = this->getY()-unit->getY();
-            double const dist = std::sqrt(pow(x,2)+pow(y,2));
-            double const allowed_dist = unit->getSize() + this->getSize();
-            if(dist < allowed_dist)
-            {
-                double len = allowed_dist - dist;
-                Vec2D shift = normVecSafe(Vec2D(x, y), dist);
-                setX(getX()+len*shift.x);
-                setY(getY()+len*shift.y);
-            }
-
-        }
-        */
 
     }
 
@@ -452,6 +427,10 @@ public:
             if(attackPossible (*enemy))
             {
                 damage = computeDamage(*enemy);
+            }
+            else
+            {
+                continue;
             }
 
             bool const newKill = 0.75 * damage.total > enemy->getHealth() + enemy->getShield();
@@ -495,8 +474,7 @@ public:
         return true;
     }
 
-    int getXGene(size_t pos) const;
-    int getYGene(size_t pos) const;
+    int getGene(size_t pos) const;
     void setGenes(UnitGenes const& genes);
     size_t getHash() const;
 
@@ -522,6 +500,10 @@ public:
     void setDefenseSubtractor(double value);
     int getIdentifier() const;
     void setIdentifier(int value);
+
+    Vec2D getStartPos() const;
+    void setStartPos(const Vec2D &value);
+    void resetPos();
 };
 
 

@@ -45,7 +45,7 @@ private:
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;
     size_t mInitialPopulationSize;
-    size_t const NTHREADS = 10;
+    size_t const NTHREADS = 1;
     int const DELTA = 5;
     vector<MicroSimulation<Race1,Race2> > mSim1;
     vector<MicroSimulation<Race2,Race1> > mSim2;
@@ -99,10 +99,9 @@ UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePat
         {
             mPopulation1.reserve(initialPopulationSize);
             mPopulation2.reserve(initialPopulationSize);
-            int const x = (XMAX-XMIN)/2;
-            int const y = (YMAX-YMIN)/2;
+            int const x = (MAX-MIN)/2;
 
-            UnitGenes start = {x,x,x,x,x,y,y,y,y,y,y,y};
+            UnitGenes start(x);
 
             for(size_t i = 0; i < NTHREADS; ++i)
             {

@@ -58,157 +58,33 @@ template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
     init1.init(unitList, pl1);
-    pl1.unitCount = pl1.unitList.size();
 }
 template <class T, class U>
 void MicroSimulation<T,U>::initPlayer1(vector<string>const& unitList, UnitGenes const& genes, std::function<Vec2D(BaseUnit &, BaseUnit &)> friendForce, std::function<Vec2D(BaseUnit &,BaseUnit &)> enemyForce)
 {
-    init1.init(unitList,pl1);
+    initPlayer1(unitList);
     for(auto& unit : pl1.unitList)
     {
         unit->setGenes(genes);
         unit->setFriendForce(friendForce);
         unit->setEnemyForce(enemyForce);
     }
-    pl1.unitCount = pl1.unitList.size();
 }
 
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 {
     init2.init(unitList, pl2);
-    pl2.unitCount = pl2.unitList.size();
 }
 
-template <class T, class U>
-void MicroSimulation<T, U>::initPotentialFields()
-{
 
-    auto pl1FuncMinX = [&](Vec2D const& pos,typename T::BUT const& unit)
-        {
-            double const dist = fabs(pos.x-unit.getX());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(LIMIT,0);
-            }
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-
-            return Vec2D(z,0);
-        };
-    auto pl1FuncMinY = [&](Vec2D const& pos,typename T::BUT const& unit)
-        {
-            double const dist = fabs(pos.y-unit.getY());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(0,LIMIT);
-            }
-            //double const z = -pow(dist,4)+limit;
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            return Vec2D(0,z);
-        };
-    auto pl1FuncMaxX = [&](Vec2D const& pos,typename T::BUT const& unit)
-        {
-            double const dist = fabs(pos.x-unit.getX());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(-LIMIT,0);
-            }
-            //double const z = -pow(dist,4)+limit;
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            return Vec2D(-z,0);
-        };
-    auto pl1FuncMaxY = [&](Vec2D const& pos,typename T::BUT const& unit)
-        {
-            double const dist = fabs(pos.y-unit.getY());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(0,-LIMIT);
-            }
-            //double const z = -pow(dist,4)+limit;
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            return Vec2D(0,-z);
-        };
-
-    auto pl2FuncMinX = [&](Vec2D const& pos,typename U::BUT const& unit)
-        {
-            double dist = fabs(pos.x-unit.getX());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(LIMIT,0);
-            }
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            //double const z = -pow(dist,4)+limit;
-            return Vec2D(z,0);
-        };
-    auto pl2FuncMinY = [&](Vec2D const& pos,typename U::BUT const& unit)
-        {
-            double const dist = fabs(pos.y-unit.getY());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(0,LIMIT);
-            }
-            //double const z = -pow(dist,4)+limit;
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            return Vec2D(0,z);
-        };
-    auto pl2FuncMaxX = [&](Vec2D const& pos,typename U::BUT const& unit)
-        {
-            double const dist = fabs(pos.x-unit.getX());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(-LIMIT,0);
-            }
-            //double const z = -pow(dist,4)+limit;
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            return Vec2D(-z,0);
-        };
-    auto pl2FuncMaxY = [&](Vec2D const& pos,typename U::BUT const& unit)
-        {
-            double const dist = fabs(pos.y-unit.getY());
-            if(dist < unit.getSpeed())
-            {
-                return Vec2D(0,-LIMIT);
-            }
-            //double const z = -pow(dist,4)+limit;
-            double const z = 1/pow(dist,3)*LIMIT;//+limit;
-            return Vec2D(0,-z);
-        };
-
-    pl1.potentialList.emplace_back(pl1.minPos,pl1FuncMinX);
-    pl1.potentialList.emplace_back(pl1.maxPos,pl1FuncMaxX);
-    pl1.potentialList.emplace_back(pl1.minPos,pl1FuncMinY);
-    pl1.potentialList.emplace_back(pl1.maxPos,pl1FuncMaxY);
-    pl2.potentialList.emplace_back(pl2.minPos,pl2FuncMinX);
-    pl2.potentialList.emplace_back(pl2.maxPos,pl2FuncMaxX);
-    pl2.potentialList.emplace_back(pl2.minPos,pl2FuncMinY);
-    pl2.potentialList.emplace_back(pl2.maxPos,pl2FuncMaxY);
-    double const pl1FieldSizeX = pl1.maxPos.x-pl1.minPos.x;
-    double const pl1FieldSizeY = pl1.maxPos.y-pl1.minPos.y;
-    double const pl2FieldSizeX = pl2.maxPos.x-pl2.minPos.x;
-    double const pl2FieldSizeY = pl2.maxPos.y-pl2.minPos.y;
-    pl1.startPos = Vec2D(pl1.minPos.x+pl1FieldSizeX/20.,pl1.minPos.y);
-    pl2.startPos = Vec2D(pl2.maxPos.x-pl2FieldSizeX/20.,pl2.maxPos.y);
-
-    for(auto unit : pl1.unitList)
-    {
-        pl1.startPos.y += pl1FieldSizeY/pl1.unitList.size();
-        unit->setPos(pl1.startPos);
-    }
-    for(auto unit : pl2.unitList)
-    {
-        pl2.startPos.y -= pl2FieldSizeY/pl2.unitList.size();
-        unit->setPos(pl2.startPos);
-    }
-}
 
 template <class T, class U>
 void MicroSimulation<T, U>::initBothPlayers(const vector<string>& unitList1, const vector<string>& unitList2)
 {
     init1.init(unitList1, pl1);
     init2.init(unitList2, pl2);
-    resetTime();
-    pl1.unitCount = pl1.unitList.size();
-    pl2.unitCount = pl2.unitList.size();
+
 }
 template<class T, class U>
 void MicroSimulation<T,U>::setPlayer1Genes(UnitGenes const& genes)
@@ -327,16 +203,6 @@ void MicroSimulation<T, U>::setTimeSlice(int timeSlice)
     }
 }
 
-template <class T, class U>
-void MicroSimulation<T, U>::resetTime()
-{
-    pl1.time = 0;
-    pl1.movementTimer= pl1.movementUpdate;
-    pl1.regenerationTimer = pl1.regenerationUpdate;
-    pl2.time = 0;
-    pl2.movementTimer= pl2.movementUpdate;
-    pl2.regenerationTimer = pl2.regenerationUpdate;
-}
 
 template <class T, class U>
 void MicroSimulation<T, U>::timestep()
@@ -348,10 +214,6 @@ void MicroSimulation<T, U>::timestep()
 template <class T, class U>
 Fitness MicroSimulation<T, U>::run(bool const reset)
 {
-    initPotentialFields();
-    resetTime();
-    pl1.unitCount = pl1.unitList.size();
-    pl2.unitCount = pl2.unitList.size();
 
     for(int i = 0; i < mTimeSteps; ++i)
     {

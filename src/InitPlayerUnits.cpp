@@ -319,11 +319,66 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, Player
 		readStats();
 	}
     mFactory.create(unitVec, pl);
+    double const fieldSizeX = pl.maxPos.x-pl.minPos.x;
+    double const fieldSizeY = pl.maxPos.y-pl.minPos.y;
+    Vec2D startPos = Vec2D(pl.minPos.x + fieldSizeX/20., pl.minPos.y);
     for(auto unit : pl.unitList)
     {
         unit->setMinPos(pl.minPos);
         unit->setMaxPos(pl.maxPos);
+        startPos.y += fieldSizeY/pl.unitList.size();
+        unit->setStartPos(startPos);
+        unit->resetPos();
     }
+    pl.unitCount = pl.unitList.size ();
+    auto funcMinX = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.x-unit.getX());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(LIMIT,0);
+        }
+        double const z = 1/pow(dist,3)*LIMIT;
+
+        return Vec2D(z,0);
+    };
+    auto funcMinY = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.y-unit.getY());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(0,LIMIT);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(0,z);
+    };
+    auto funcMaxX = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.x-unit.getX());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(-LIMIT,0);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(-z,0);
+    };
+    auto funcMaxY = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.y-unit.getY());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(0,-LIMIT);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(0,-z);
+    };
+    pl.potentialList.emplace_back(pl.minPos,funcMinX);
+    pl.potentialList.emplace_back(pl.maxPos,funcMaxX);
+    pl.potentialList.emplace_back(pl.minPos,funcMinY);
+    pl.potentialList.emplace_back(pl.maxPos,funcMaxY);
 }
 
 template <class Race>
@@ -340,11 +395,66 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 	setFilePath(filePath);
 	readStats();
     mFactory.create(unitVec, pl);
+    double const fieldSizeX = pl.maxPos.x-pl.minPos.x;
+    double const fieldSizeY = pl.maxPos.y-pl.minPos.y;
+    Vec2D startPos = Vec2D(pl.minPos.x + fieldSizeX/20., pl.minPos.y);
     for(auto unit : pl.unitList)
     {
         unit->setMinPos(pl.minPos);
         unit->setMaxPos(pl.maxPos);
+        startPos.y += fieldSizeY/pl.unitList.size();
+        unit->setStartPos(startPos);
+        unit->resetPos();
     }
+    pl.unitCount = pl.unitList.size ();
+    auto funcMinX = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.x-unit.getX());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(LIMIT,0);
+        }
+        double const z = 1/pow(dist,3)*LIMIT;
+
+        return Vec2D(z,0);
+    };
+    auto funcMinY = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.y-unit.getY());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(0,LIMIT);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(0,z);
+    };
+    auto funcMaxX = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.x-unit.getX());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(-LIMIT,0);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(-z,0);
+    };
+    auto funcMaxY = [&](Vec2D const& pos,typename Race::BUT const& unit)
+    {
+        double const dist = fabs(pos.y-unit.getY());
+        if(dist < unit.getSpeed())
+        {
+            return Vec2D(0,-LIMIT);
+        }
+
+        double const z = 1/pow(dist,3)*LIMIT;
+        return Vec2D(0,-z);
+    };
+    pl.potentialList.emplace_back(pl.minPos,funcMinX);
+    pl.potentialList.emplace_back(pl.maxPos,funcMaxX);
+    pl.potentialList.emplace_back(pl.minPos,funcMinY);
+    pl.potentialList.emplace_back(pl.maxPos,funcMaxY);
 }
 
 

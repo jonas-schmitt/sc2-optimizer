@@ -24,7 +24,6 @@ public:
     void reset();
 
     void initBothPlayers(const vector<string>&, const vector<string>&);
-    void initPotentialFields();
 
     PlayerState<T>const& getPlayer1() const;
     PlayerState<U>const& getPlayer2() const;

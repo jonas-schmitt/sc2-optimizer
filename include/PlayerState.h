@@ -49,6 +49,7 @@ template <class Race> struct PlayerState : public Race
 
     Vec2D minPos;
     Vec2D maxPos;
+    Vec2D fieldSize;
 
     list<PotentialField<Race>> potentialList;
 
@@ -210,8 +211,12 @@ template <class Race> struct PlayerState : public Race
             unit->resetHealth();
             unit->resetShield();
             unit->resetEnergy();
+            unit->resetPos();
         }
-        potentialList.clear();
+        time = 0;
+        movementTimer= movementUpdate;
+        regenerationTimer = regenerationUpdate;
+
     }
 
     template<typename T>

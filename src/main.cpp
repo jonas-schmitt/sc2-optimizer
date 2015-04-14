@@ -130,9 +130,9 @@ int main(int argc, char *argv[])
     std::cout << outPath << std::endl;
     size_t const iterations = 10, stepsPerIteration = 50, initialPopulationSize = 1000;
 
-    int const x = (XMAX-XMIN)/2;
-    int const y = (YMAX-YMIN)/2;
-    UnitGenes initialGenes = {x,x,x,x,x,y,y,y,y,y,y,y};
+    int const x = (MAX-MIN)/2;
+
+    UnitGenes initialGenes(x);
     std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> dist(0.0,1.0);
     float const selectionRate = 0.25; //dist(gen);

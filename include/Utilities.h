@@ -7,12 +7,11 @@ static double const EPS = 1e-9;
 static double const GASTOMINERALS = 1.5;
 static double const STDLEN = 1./std::sqrt(2);
 static long const INTLIMIT = std::numeric_limits<int>::max();
-static long const BOUND1 = std::pow(2,8)-1;
-static long const BOUND2 = std::pow(2,16)-1;
-static int const XMIN = 0;
-static int const XMAX = static_cast<int>(std::min(INTLIMIT,BOUND1));
-static int const YMIN = 0;
-static int const YMAX = static_cast<int>(std::min(INTLIMIT,BOUND2));
+static long const BOUND = std::pow(2,16);
+
+static int const MIN = 0;
+static int const MAX = static_cast<int>(std::min(INTLIMIT,BOUND));
+
 
 struct Vec2D
 {

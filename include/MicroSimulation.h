@@ -38,6 +38,7 @@ template<class T, class U>
     class MicroSimulation
 {
 private:
+
     Vec2D mMinPos;
     Vec2D mMaxPos;
     string mFilePath1;
@@ -79,20 +80,13 @@ public:
     void setTimeSteps(size_t timeSteps);
     void setTimeSlice(int timeSlice);
 
-    void resetTime();
     void timestep();
 
     string determineWinner();
 
-    // returns a positive value if player1's units cost more resources than player2's
-    double compareCosts();
-
-    // returns 1 if player1 wins, returns -1 if player two wins, returns 0 in case of a draw
-    int compareStats();
 
     void collectGarbage();
 
-    void initPotentialFields();
 
     void setTracking(bool const tracking);
     void setTracking(bool const tracking, size_t const steps);

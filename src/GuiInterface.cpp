@@ -38,17 +38,11 @@ void GuiInterface<T, U>::setGuiWindow(GuiWindow *gui)
 	this->mGui = gui;
 }
 
-template<class T, class U>
-void GuiInterface<T, U>::initPotentialFields()
-{
-	MicroSimulation<T,U>::initPotentialFields();
-}
 
 template<class T, class U>
 void GuiInterface<T, U>::initBothPlayers(const vector<string>& a, const vector<string>& b)
 {
 	MicroSimulation<T,U>::initBothPlayers(a,b);
-	MicroSimulation<T,U>::initPotentialFields();
 }
 
 

@@ -17,7 +17,6 @@ public:
     virtual void reset()=0;
 
     virtual void initBothPlayers(const vector<string>&, const vector<string>&)=0;
-    virtual void initPotentialFields()=0;
 
     virtual SimulationResult getPlayer1Result()=0;
     virtual SimulationResult getPlayer2Result()=0;

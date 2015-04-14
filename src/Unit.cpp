@@ -439,6 +439,22 @@ void BaseUnit::setIdentifier(int value)
 {
     mId = value;
 }
+
+Vec2D BaseUnit::getStartPos() const
+{
+    return mStartPos;
+}
+
+void BaseUnit::setStartPos(const Vec2D &value)
+{
+    mStartPos = value;
+}
+
+void BaseUnit::resetPos()
+{
+    mPos = mStartPos;
+}
+
 Damage BaseUnit::computeDamage(BaseUnit const& other) const
 {
     double totalDamage = 0.0;
@@ -554,13 +570,9 @@ double BaseUnit::computeRange(BaseUnit const& other) const
     return other.isAirUnit() ? this->getAirRange() : this->getGroundRange();
 }
 
-int BaseUnit::getXGene(size_t pos) const
+int BaseUnit::getGene(size_t pos) const
 {
-    return mGenes.getX(pos);
-}
-int BaseUnit::getYGene(size_t pos) const
-{
-    return mGenes.getY(pos);
+    return mGenes.get(pos);
 }
 
 void BaseUnit::setGenes(UnitGenes const& genes)
