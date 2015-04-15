@@ -104,8 +104,8 @@ void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 template <class T, class U>
 void MicroSimulation<T, U>::initBothPlayers(const vector<string>& unitList1, const vector<string>& unitList2)
 {
-    init1.init(unitList1, pl1);
-    init2.init(unitList2, pl2);
+    initPlayer1 (unitList1);
+    initPlayer2 (unitList2);
 
 }
 template<class T, class U>
