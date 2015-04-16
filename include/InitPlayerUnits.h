@@ -13,6 +13,7 @@
 #include "Race.h"
 #include "Unit.h"
 #include "UnitFactory.h"
+#include "Utilities.h"
 using std::string;
 
 
@@ -26,9 +27,9 @@ private:
         double const dist = fabs(pos.x-unit.getX());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(LIMIT,0);
+            return Vec2D(MAX*100,0);
         }
-        double const z = 1/pow(dist,3)*LIMIT;
+        double const z = 1/pow(dist,3)*MAX*100;
 
         return Vec2D(z,0);
     };
@@ -37,10 +38,10 @@ private:
         double const dist = fabs(pos.y-unit.getY());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(0,LIMIT);
+            return Vec2D(0,MAX*100);
         }
 
-        double const z = 1/pow(dist,3)*LIMIT;
+        double const z = 1/pow(dist,3)*MAX*100;
         return Vec2D(0,z);
     };
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxX = [](Vec2D const& pos,typename Race::BUT const& unit)
@@ -48,10 +49,10 @@ private:
         double const dist = fabs(pos.x-unit.getX());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(-LIMIT,0);
+            return Vec2D(-MAX*100,0);
         }
 
-        double const z = 1/pow(dist,3)*LIMIT;
+        double const z = 1/pow(dist,3)*MAX*100;
         return Vec2D(-z,0);
     };
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxY = [](Vec2D const& pos,typename Race::BUT const& unit)
@@ -59,10 +60,10 @@ private:
         double const dist = fabs(pos.y-unit.getY());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(0,-LIMIT);
+            return Vec2D(0,-MAX*100);
         }
 
-        double const z = 1/pow(dist,3)*LIMIT;
+        double const z = 1/pow(dist,3)*MAX*100;
         return Vec2D(0,-z);
     };
 

@@ -45,7 +45,7 @@ private:
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;
     size_t mInitialPopulationSize;
-    size_t const NTHREADS = std::thread::hardware_concurrency();
+    size_t const NTHREADS = 10;//std::thread::hardware_concurrency();
     int const DELTA = 5;
     vector<MicroSimulation<Race1,Race2> > mSim1;
     vector<MicroSimulation<Race2,Race1> > mSim2;
@@ -93,7 +93,7 @@ private:
 
 
 public:
-UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePath1, string filePath2, size_t initialPopulationSize)
+UnitOptimizer(vector<string> const& unitList1, vector<string> const& unitList2, string const& filePath1, string const& filePath2, size_t initialPopulationSize)
     : mUnitList1(unitList1), mUnitList2(unitList2), mFilePath1(filePath1), mFilePath2(filePath2),
         mInitialPopulationSize(initialPopulationSize)
         {
@@ -116,7 +116,7 @@ UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePat
                 mSim2[i].setPlayer2Genes(start);
             }
         }
-UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePath1, string filePath2, size_t initialPopulationSize, float selectionRate, float reproductionRate, float mutationRate)
+UnitOptimizer(vector<string> const& unitList1, vector<string> const& unitList2, string const& filePath1, string const& filePath2, size_t initialPopulationSize, float selectionRate, float reproductionRate, float mutationRate)
     : UnitOptimizer(unitList1, unitList2, filePath1, filePath2, initialPopulationSize)
     {
         if(selectionRate < EPS || selectionRate > 1-EPS
@@ -131,7 +131,7 @@ UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePat
         mMutationRate = mutationRate;
     }
 
-UnitOptimizer(vector<string> unitList1, vector<string> unitList2, string filePath1, string filePath2, size_t initialPopulationSize, UnitGenes const & initialGenes)
+UnitOptimizer(vector<string> const& unitList1, vector<string> const& unitList2, string const& filePath1, string const& filePath2, size_t initialPopulationSize, UnitGenes const & initialGenes)
     : mUnitList1(unitList1), mUnitList2(unitList2), mFilePath1(filePath1), mFilePath2(filePath2),
         mInitialPopulationSize(initialPopulationSize)
         {

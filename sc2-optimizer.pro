@@ -8,7 +8,8 @@ INCLUDEPATH += . include src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 QT += widgets core gui
-QMAKE_CXXFLAGS += -D_GLIBCXX_USE_NANOSLEEP -g -std=c++11 -Wall -Wextra
+QMAKE_CXXFLAGS += -D_GLIBCXX_USE_NANOSLEEP -g -std=c++11 -Wall -Wextra -O3 #-pg
+QMAKE_CXXFLAGS_RELEASE -= -O2
 
 # Input
 HEADERS += include/DataReader.h \

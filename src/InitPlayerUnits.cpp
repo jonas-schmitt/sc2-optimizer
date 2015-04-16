@@ -296,6 +296,7 @@ void InitPlayerUnits<Race>::readStats()
         }
         stats.maxHealth = stats.health;
         stats.maxShield = stats.shield;
+        stats.sumMaxHealthAndShield = stats.maxHealth + stats.maxShield;
         statMap[name] = stats;
 
 	}

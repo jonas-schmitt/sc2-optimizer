@@ -127,6 +127,11 @@ double BaseUnit::getMaxShield() const
     return mStats.maxShield;
 }
 
+double BaseUnit::getSumMaxHealthShield() const
+{
+    return mStats.sumMaxHealthAndShield;
+}
+
 float BaseUnit::getArmor() const
 {
     return mStats.armor;
@@ -455,6 +460,42 @@ void BaseUnit::resetPos()
     mPos = mStartPos;
 }
 
+
+int BaseUnit::getMovementTimer() const
+{
+    return mMovementTimer;
+}
+
+void BaseUnit::setMovementTimer(int value)
+{
+    mMovementTimer = value;
+}
+
+int BaseUnit::getMovementUpdate() const
+{
+    return mMovementUpdate;
+}
+
+void BaseUnit::setMovementUpdate(int value)
+{
+    mMovementUpdate = value;
+}
+
+void BaseUnit::resetTimer ()
+{
+    mMovementTimer = 0;
+    mAttackTimer = 0;
+}
+
+void BaseUnit::decMovementTimer()
+{
+    if(mMovementTimer < 0)
+    {
+        return;
+    }
+    mMovementTimer -= mTimeSlice;
+}
+
 Damage BaseUnit::computeDamage(BaseUnit const& other) const
 {
     double totalDamage = 0.0;
@@ -561,7 +602,7 @@ double BaseUnit::getMaxDist() const
 {
     double const x = this->mMaxPos.x-this->mMinPos.x;
     double const y = this->mMaxPos.y-this->mMinPos.y;
-    return std::sqrt(pow(x,2)+pow(y,2));
+    return std::sqrt(x*x+y*y);
 }
 
 
@@ -570,7 +611,7 @@ double BaseUnit::computeRange(BaseUnit const& other) const
     return other.isAirUnit() ? this->getAirRange() : this->getGroundRange();
 }
 
-int BaseUnit::getGene(size_t pos) const
+int BaseUnit::getGene(int const pos) const
 {
     return mGenes.get(pos);
 }
@@ -578,6 +619,7 @@ int BaseUnit::getGene(size_t pos) const
 void BaseUnit::setGenes(UnitGenes const& genes)
 {
     mGenes = genes;
+    computeTemporaryValues ();
 }
 
 void BaseUnit::setTracking(bool const tracking)
@@ -629,6 +671,16 @@ int BaseUnit::getTimeSlice() const
 void BaseUnit::setTimeSlice(int value)
 {
     mTimeSlice = value;
+}
+
+void BaseUnit::computeTemporaryValues()
+{
+    param1 = getMaxDist()*static_cast<double>(getGene(0)) * MAX_INV;
+    param2[0] = mStats.airRange * (1.0 - static_cast<double>(getGene(6)) * MAX_INV * 0.25);
+    param2[1] = mStats.groundRange * (1.0 - static_cast<double>(getGene(6)) *MAX_INV * 0.25);
+    param3 = 1.0 - static_cast<double>(getGene(8)) * MAX_INV * 0.25;
+    mMoveDist = getSpeed()*mTimeSlice/1000;
+    mMovementUpdateBackup = mMovementUpdate;
 }
 
 

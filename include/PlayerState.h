@@ -80,10 +80,8 @@ template <class Race> struct PlayerState : public Race
     int timeSlice = 10;
     long time = 0;
     int regenerationTimer = 0;
-    int movementTimer = 0;
 
     int regenerationUpdate = 1000;
-    int movementUpdate = 100;
 
 
     template<typename T> void timestep(PlayerState<T>& other)
@@ -165,13 +163,8 @@ template <class Race> struct PlayerState : public Race
         {
             regenerationTimer = regenerationUpdate;
         }
-        if(movementTimer < 0)
-        {
-            movementTimer = movementUpdate;
-        }
         time += timeSlice;
         regenerationTimer -= timeSlice;
-        movementTimer -= timeSlice;
     }
 
 
@@ -212,9 +205,9 @@ template <class Race> struct PlayerState : public Race
             unit->resetShield();
             unit->resetEnergy();
             unit->resetPos();
+            unit->resetTimer();
         }
         time = 0;
-        movementTimer= movementUpdate;
         regenerationTimer = regenerationUpdate;
 
     }

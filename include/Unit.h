@@ -85,6 +85,8 @@ struct UnitStats
     int gaCooldown = 0;
     int aaCooldown = 0;
 
+    double sumMaxHealthAndShield = 0;
+
 
     vector<Attribute> attributes;
     vector<Bonus> bonuses;
@@ -110,6 +112,9 @@ protected:
     int mTimeSlice = 10;
 
     int mAttackTimer = 0;
+    int mMovementTimer = 0;
+
+    int mMovementUpdate = 100;
 
     int mAttackUpgrade = 0;
     int mArmorUpgrade = 0;
@@ -120,13 +125,16 @@ protected:
 
     double mDefenseSubtractor = 0.0;
 
+
     string mName;
 
     int mId;
 
     double mForceParameters[10];
-
-
+    double param1;
+    double param2[2];
+    double param3;
+    double mMoveDist;
 
 
 
@@ -137,7 +145,18 @@ protected:
 
        Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
        double const dist = distVec.computeLength();
-       if(dist < own.getMaxDist()*static_cast<double>(own.getGene(0))/MAX)
+       if(dist < own.getSize () + buddy.getSize())
+       {
+           own.setMovementUpdate (own.getTimeSlice ());
+           Vec2D const res = distVec.getNormedVec (dist);
+           return Vec2D(-res.x * 10000*MAX, -res.y * 10000*MAX);
+       }
+       else if(own.getMovementUpdate () == own.getTimeSlice ())
+       {
+           own.setMovementUpdate (own.mMovementUpdateBackup);
+       }
+
+       if(dist < own.param1)
        {
            Vec2D res = distVec.getNormedVec(dist);
            res.x *= own.getGene(1);
@@ -155,9 +174,36 @@ protected:
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mEnemyFunc = [] (BaseUnit & own, BaseUnit & enemy)
     {
 
-        Vec2D res1, res2;
+
         Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
-        double const ownRange = own.computeRange(enemy);
+        double const dist = distVec.computeLength ();
+        if(dist < own.getSize () + enemy.getSize())
+        {
+            own.setMovementUpdate (own.getTimeSlice ());
+            Vec2D const res = distVec.getNormedVec (dist);
+            return Vec2D(-res.x * 10000*MAX, -res.y * 10000*MAX);
+        }
+        else if(own.getMovementUpdate () == own.getTimeSlice ())
+        {
+            own.setMovementUpdate (own.mMovementUpdateBackup);
+        }
+        Vec2D res1, res2;
+        double ownRange;
+        double tmp;
+
+
+        if(enemy.isAirUnit ())
+        {
+            ownRange = own.getAirRange ();
+            tmp = own.param2[0];
+        }
+        else
+        {
+            ownRange = own.getGroundRange ();
+            tmp = own.param2[1];
+        }
+
+
         int const enemyId = enemy.getIdentifier();
         if(!own.mPossibleDamage[enemyId].valid)
         {
@@ -165,18 +211,17 @@ protected:
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
 
-        double const dist = distVec.computeLength ();
         if(dist > ownRange)
         {
             res1 = distVec.getNormedVec(dist);
-            double const tmp1 = enemy.getMaxHealth() + enemy.getMaxShield () - enemy.getHealth () - enemy.getShield ();
-            int const tmp2 = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
+            double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
+            int const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                                 : std::max(own.getGACooldown () - own.getAttackTimer (),0);
-            double const val = own.getGene(2)* tmp1 + own.getGene(3)*tmp2 + own.getGene(4)*ownDamage.total + own.getGene(5);
+            double const val = own.getGene(2)* a + own.getGene(3)*b + own.getGene(4)*ownDamage.total + own.getGene(5);
             res1.x *= val;
             res1.y *= val;
         }
-        else if(dist < ownRange-(ownRange*static_cast<double>(own.getGene(6))/MAX/4.))
+        else if(dist < tmp)
         {
             res1 = distVec.getNormedVec();
             res1.x *= -own.getGene(7);
@@ -191,13 +236,13 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < enemyRange+enemyRange*static_cast<double>(own.getGene(8))/MAX/4.)
+        if(dist < enemyRange * own.param3)
         {
             res2 = distVec.getNormedVec(dist);
-            double const tmp1 = own.getMaxHealth() + own.getMaxShield () - own.getHealth () - own.getShield ();
-            int const tmp2 = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
+            double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
+            int const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                                 : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            double const val = own.getGene(9) * tmp1 + own.getGene(10)*tmp2 + own.getGene(11)*enemyDamage.total + own.getGene(12);
+            double const val = own.getGene(9) * a + own.getGene(10)*b + own.getGene(11)*enemyDamage.total + own.getGene(12);
             res2.x *= val;
             res2.y *= val;
         }
@@ -212,6 +257,7 @@ protected:
 public:
 
     Damage mPossibleDamage[18];
+    int mMovementUpdateBackup;
 
     BaseUnit();
 
@@ -258,6 +304,8 @@ public:
     double getShield() const;
 
     double getMaxShield() const;
+
+    double getSumMaxHealthShield() const;
 
     float getArmor() const;
 
@@ -315,6 +363,8 @@ public:
 
     vector<Bonus> const& getBonuses() const;
 
+    void computeTemporaryValues();
+
 
 
     Vec2D getPos() const;
@@ -354,6 +404,7 @@ public:
             move(own, other);
         }
         decAttackTimer();
+        decMovementTimer ();
     }
 
 
@@ -368,7 +419,7 @@ public:
         {
             mPath.emplace_back(static_cast<float>(mPos.x),static_cast<float>(mPos.y));
         }
-        if(own.movementTimer <= 0)
+        if(mMovementTimer <= 0)
         {
             Vec2D force(0.0);
             for(const auto& pot : own.potentialList)
@@ -400,12 +451,13 @@ public:
                 force.y += generatedForce.y;
             }
             currentForce = force.getNormedVec ();
+
+            mMovementTimer = mMovementUpdate;
+
         }
-        double const moveDist = getSpeed()*own.movementUpdate/1000;
 
-
-        setX(currentForce.x*moveDist+getX());
-        setY(currentForce.y*moveDist+getY());
+        setX(currentForce.x*mMoveDist+getX());
+        setY(currentForce.y*mMoveDist+getY());
 
     }
 
@@ -474,7 +526,7 @@ public:
         return true;
     }
 
-    int getGene(size_t pos) const;
+    int getGene(int const pos) const;
     void setGenes(UnitGenes const& genes);
     size_t getHash() const;
 
@@ -486,6 +538,9 @@ public:
     int getAttackTimer() const;
     void setAttackTimer(int value);
     void decAttackTimer();
+
+
+    void resetTimer();
 
     int getTimeSlice() const;
     void setTimeSlice(int value);
@@ -504,6 +559,11 @@ public:
     Vec2D getStartPos() const;
     void setStartPos(const Vec2D &value);
     void resetPos();
+    int getMovementTimer() const;
+    void setMovementTimer(int value);
+    void decMovementTimer();
+    int getMovementUpdate() const;
+    void setMovementUpdate(int value);
 };
 
 

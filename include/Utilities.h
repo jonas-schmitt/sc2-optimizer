@@ -11,6 +11,7 @@ static long const BOUND = std::pow(2,16);
 
 static int const MIN = 0;
 static int const MAX = static_cast<int>(std::min(INTLIMIT,BOUND));
+static double const MAX_INV = 1.0/MAX;
 
 
 struct Vec2D

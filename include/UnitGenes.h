@@ -168,7 +168,7 @@ public:
         initHash();
     }
 
-    int get(size_t const pos) const
+    int get(int const pos) const
     {
         return X[pos];
     }
