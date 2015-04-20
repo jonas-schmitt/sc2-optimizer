@@ -136,57 +136,51 @@ protected:
     double param3;
     double mMoveDist;
 
+    bool mCollision = false;
 
 
 
 
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mFriendFunc = [] (BaseUnit & own, BaseUnit & buddy)
     {
+        Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
+        double const dist = distVec.computeLength();
+        if(dist < own.getSize () + buddy.getSize())
+        {
+            //own.setMovementUpdate (own.getTimeSlice ());
+            //own.setCollision(true);
+            Vec2D force = distVec.getNormedVec(dist);
+            return Vec2D(-force.x*10000*MAX, -force.y*10000*MAX);
+        }
 
-       Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
-       double const dist = distVec.computeLength();
-       if(dist < own.getSize () + buddy.getSize())
-       {
-           own.setMovementUpdate (own.getTimeSlice ());
-           Vec2D const res = distVec.getNormedVec (dist);
-           return Vec2D(-res.x * 10000*MAX, -res.y * 10000*MAX);
-       }
-       else if(own.getMovementUpdate () == own.getTimeSlice ())
-       {
-           own.setMovementUpdate (own.mMovementUpdateBackup);
-       }
 
-       if(dist < own.param1)
-       {
-           Vec2D res = distVec.getNormedVec(dist);
-           res.x *= own.getGene(1);
-           res.y *= own.getGene(1);
-           return res;
-       }
-       else
-       {
-           return Vec2D(0.0);
-       }
+        if(dist < own.param1)
+        {
+            Vec2D res = distVec.getNormedVec(dist);
+            res.x *= own.getGene(1);
+            res.y *= own.getGene(1);
+            return res;
+        }
+        else
+        {
+            return Vec2D(0.0);
+        }
     };
 
 
 
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mEnemyFunc = [] (BaseUnit & own, BaseUnit & enemy)
     {
-
-
         Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
         double const dist = distVec.computeLength ();
         if(dist < own.getSize () + enemy.getSize())
         {
-            own.setMovementUpdate (own.getTimeSlice ());
-            Vec2D const res = distVec.getNormedVec (dist);
-            return Vec2D(-res.x * 10000*MAX, -res.y * 10000*MAX);
+            //own.setMovementUpdate (own.getTimeSlice ());
+            //own.setCollision(true);
+            Vec2D force = distVec.getNormedVec(dist);
+            return Vec2D(-force.x*10000*MAX, -force.y*10000*MAX);
         }
-        else if(own.getMovementUpdate () == own.getTimeSlice ())
-        {
-            own.setMovementUpdate (own.mMovementUpdateBackup);
-        }
+
         Vec2D res1, res2;
         double ownRange;
         double tmp;
@@ -194,12 +188,12 @@ protected:
 
         if(enemy.isAirUnit ())
         {
-            ownRange = own.getAirRange ();
+            ownRange = own.computeAirRange (enemy);
             tmp = own.param2[0];
         }
         else
         {
-            ownRange = own.getGroundRange ();
+            ownRange = own.computeGroundRange (enemy);
             tmp = own.param2[1];
         }
 
@@ -216,7 +210,7 @@ protected:
             res1 = distVec.getNormedVec(dist);
             double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
             int const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
-                                                : std::max(own.getGACooldown () - own.getAttackTimer (),0);
+                                             : std::max(own.getGACooldown () - own.getAttackTimer (),0);
             double const val = own.getGene(2)* a + own.getGene(3)*b + own.getGene(4)*ownDamage.total + own.getGene(5);
             res1.x *= val;
             res1.y *= val;
@@ -241,7 +235,7 @@ protected:
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
             int const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
-                                                : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
+                                           : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
             double const val = own.getGene(9) * a + own.getGene(10)*b + own.getGene(11)*enemyDamage.total + own.getGene(12);
             res2.x *= val;
             res2.y *= val;
@@ -394,6 +388,9 @@ public:
     void setEnemyForce(function<Vec2D(BaseUnit &, BaseUnit &)> func);
 
     double computeRange(BaseUnit const& other) const;
+    double computeAirRange(BaseUnit const& other) const;
+    double computeGroundRange(BaseUnit const& other) const;
+
 
 
 
@@ -404,7 +401,8 @@ public:
             move(own, other);
         }
         decAttackTimer();
-        decMovementTimer ();
+        decMovementTimer();
+
     }
 
 
@@ -421,6 +419,7 @@ public:
         }
         if(mMovementTimer <= 0)
         {
+            mCollision = false;
             Vec2D force(0.0);
             for(const auto& pot : own.potentialList)
             {
@@ -434,7 +433,6 @@ public:
                 {
                     continue;
                 }
-
                 Vec2D const generatedForce = this->computeFriendForce(*buddy);
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
@@ -450,16 +448,20 @@ public:
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
+//            if(!mCollision)
+//            {
+//                mMovementUpdate = mMovementUpdateBackup;
+//            }
             currentForce = force.getNormedVec ();
-
             mMovementTimer = mMovementUpdate;
-
         }
+
 
         setX(currentForce.x*mMoveDist+getX());
         setY(currentForce.y*mMoveDist+getY());
 
     }
+
 
     bool attackPossible(BaseUnit const& enemy);
 
@@ -564,6 +566,10 @@ public:
     void decMovementTimer();
     int getMovementUpdate() const;
     void setMovementUpdate(int value);
+    bool hasCollision() const;
+    void setCollision(bool value);
+    double getMoveDist() const;
+    void setMoveDist(double value);
 };
 
 

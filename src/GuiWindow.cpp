@@ -220,7 +220,7 @@ void GuiWindow::playButtonPressed()
 {
 	std::cout << "Play Button Pressed" << std::endl;
 	if (playable==true)
-        updateIntervals = 100;
+        updateIntervals = 20;
 }
 
 void GuiWindow::pauseButtonPressed()
@@ -234,7 +234,7 @@ void GuiWindow::forwardButtonPressed()
 {
 	std::cout << "Forward Button Pressed" << std::endl;
 	if (playable==true)
-        updateIntervals = 2000;
+        updateIntervals = 100;
 }
 
 void GuiWindow::coordinatesPlayer1(int coord)

@@ -99,12 +99,12 @@ float BaseUnit::getAdps() const
 
 float BaseUnit::getGroundRange() const
 {
-    return mStats.groundRange+mStats.size;
+    return mStats.groundRange;
 }
 
 float BaseUnit::getAirRange() const
 {
-    return mStats.airRange+mStats.size;
+    return mStats.airRange;
 }
 
 double BaseUnit::getHealth() const
@@ -496,6 +496,26 @@ void BaseUnit::decMovementTimer()
     mMovementTimer -= mTimeSlice;
 }
 
+
+bool BaseUnit::hasCollision() const
+{
+    return mCollision;
+}
+
+void BaseUnit::setCollision(bool value)
+{
+    mCollision = value;
+}
+
+double BaseUnit::getMoveDist() const
+{
+    return mMoveDist;
+}
+
+void BaseUnit::setMoveDist(double value)
+{
+    mMoveDist = value;
+}
 Damage BaseUnit::computeDamage(BaseUnit const& other) const
 {
     double totalDamage = 0.0;
@@ -573,8 +593,7 @@ bool BaseUnit::attackPossible(BaseUnit const& enemy)
     {
         dist = 0.0;
     }
-    return (enemy.isAirUnit() && this->getAirRange() > dist)
-            || (!enemy.isAirUnit() && this->getGroundRange() > dist);
+    return computeRange (enemy) > dist;
 
 }
 
@@ -608,7 +627,17 @@ double BaseUnit::getMaxDist() const
 
 double BaseUnit::computeRange(BaseUnit const& other) const
 {
-    return other.isAirUnit() ? this->getAirRange() : this->getGroundRange();
+    return other.isAirUnit() ? computeAirRange (other) : computeGroundRange (other);
+}
+
+//TODO These functions must return 0 if the unit can generally not attack the respective type
+double BaseUnit::computeGroundRange(BaseUnit const& other) const
+{
+    return getGroundRange() + getSize() + other.getSize();
+}
+double BaseUnit::computeAirRange(BaseUnit const& other) const
+{
+    return getAirRange() + getSize() + other.getSize();
 }
 
 int BaseUnit::getGene(int const pos) const

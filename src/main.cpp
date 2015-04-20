@@ -128,16 +128,16 @@ int main(int argc, char *argv[])
     {}
     std::string outPath = baseDir+"./results/" + race1 + "_" + race2 + "/" + tmp1 + "_" + tmp2 + ".txt";
     std::cout << outPath << std::endl;
-    size_t const iterations = 10, stepsPerIteration = 50, initialPopulationSize = 1000;
+    size_t const iterations = 5, stepsPerIteration = 100, initialPopulationSize = 100;
 
     int const x = (MAX-MIN)/2;
 
     UnitGenes initialGenes(x);
     std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> dist(0.0,1.0);
-    float const selectionRate = 0.25; //dist(gen);
-    float const reproductionRate = 0.5;//dist(gen);
-    float const mutationRate = 0.5;//dist(gen);
+    float const selectionRate = 0.3; //dist(gen);
+    float const reproductionRate = 0.75;//dist(gen);
+    float const mutationRate = 0.75;//dist(gen);
     double fieldSize = 150;
     Vec2D minPos(0.0);
     Vec2D maxPos(fieldSize);

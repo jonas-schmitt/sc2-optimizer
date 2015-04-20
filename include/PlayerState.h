@@ -83,10 +83,8 @@ template <class Race> struct PlayerState : public Race
 
     int regenerationUpdate = 1000;
 
-
     template<typename T> void timestep(PlayerState<T>& other)
     {
-
         for(auto& elem : this->unitList0)
         {
             elem.first.timestep(*this, other);
