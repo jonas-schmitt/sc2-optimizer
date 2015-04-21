@@ -37,7 +37,6 @@ public:
 
     void setPositions(std::pair<int, int> &, std::pair<int, int> &);
 
-    void collectGarbage();
     void setTracking(bool const tracking);
     void setTracking(bool const tracking, size_t const steps);
     void setTimeSteps(size_t steps);

@@ -51,30 +51,29 @@ template <class Race> struct PlayerState : public Race
     Vec2D maxPos;
     Vec2D fieldSize;
 
-    list<PotentialField<Race>> potentialList;
+    vector<PotentialField<Race>> potentialList;
 
-    typedef typename std::list<typename Race::RUT *>::iterator unitIterator;
 
-    list<pair<typename Race::UT0, unitIterator>> unitList0;
-    list<pair<typename Race::UT1, unitIterator>> unitList1;
-    list<pair<typename Race::UT2, unitIterator>> unitList2;
-    list<pair<typename Race::UT3, unitIterator>> unitList3;
-    list<pair<typename Race::UT4, unitIterator>> unitList4;
-    list<pair<typename Race::UT5, unitIterator>> unitList5;
-    list<pair<typename Race::UT6, unitIterator>> unitList6;
-    list<pair<typename Race::UT7, unitIterator>> unitList7;
-    list<pair<typename Race::UT8, unitIterator>> unitList8;
-    list<pair<typename Race::UT9, unitIterator>> unitList9;
-    list<pair<typename Race::UT10, unitIterator>> unitList10;
-    list<pair<typename Race::UT11, unitIterator>> unitList11;
-    list<pair<typename Race::UT12, unitIterator>> unitList12;
-    list<pair<typename Race::UT13, unitIterator>> unitList13;
-    list<pair<typename Race::UT14, unitIterator>> unitList14;
-    list<pair<typename Race::UT15, unitIterator>> unitList15;
-    list<pair<typename Race::UT16, unitIterator>> unitList16;
-    list<pair<typename Race::UT17, unitIterator>> unitList17;
+    vector<typename Race::UT0> unitList0;
+    vector<typename Race::UT1> unitList1;
+    vector<typename Race::UT2> unitList2;
+    vector<typename Race::UT3> unitList3;
+    vector<typename Race::UT4> unitList4;
+    vector<typename Race::UT5> unitList5;
+    vector<typename Race::UT6> unitList6;
+    vector<typename Race::UT7> unitList7;
+    vector<typename Race::UT8> unitList8;
+    vector<typename Race::UT9> unitList9;
+    vector<typename Race::UT10> unitList10;
+    vector<typename Race::UT11> unitList11;
+    vector<typename Race::UT12> unitList12;
+    vector<typename Race::UT13> unitList13;
+    vector<typename Race::UT14> unitList14;
+    vector<typename Race::UT15> unitList15;
+    vector<typename Race::UT16> unitList16;
+    vector<typename Race::UT17> unitList17;
 
-    list<typename Race::RUT*>unitList;
+    vector<typename Race::RUT*>unitList;
     size_t unitCount;
 
     int timeSlice = 10;
@@ -83,79 +82,82 @@ template <class Race> struct PlayerState : public Race
 
     int regenerationUpdate = 1000;
 
+
+
     template<typename T> void timestep(PlayerState<T>& other)
     {
+
         for(auto& elem : this->unitList0)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList1)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList2)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList3)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList4)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList5)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList6)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList7)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList8)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList9)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList10)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList11)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList12)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList13)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList14)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList15)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList16)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         for(auto& elem : this->unitList17)
         {
-            elem.first.timestep(*this, other);
+            elem.timestep(*this, other);
         }
         if(regenerationTimer < 0)
         {
@@ -166,11 +168,7 @@ template <class Race> struct PlayerState : public Race
     }
 
 
-    template<typename T> void eraseUnit(typename list<pair<T,unitIterator>>::iterator it, list<pair<T,unitIterator>>& unitListT)
-    {
-        unitList.erase((*it).second);
-        unitListT.erase(it);
-    }
+
     void clear()
     {
         unitList.clear();
@@ -210,24 +208,7 @@ template <class Race> struct PlayerState : public Race
 
     }
 
-    template<typename T>
-    void removeZombies(list<pair<T,unitIterator>>& unitListT)
-    {
-        if(unitListT.empty())
-        {
-            return;
-        }
 
-        for(auto it = unitListT.begin(); it != unitListT.end(); ++it)
-        {
-            if(it->first.getHealth() < EPS)
-            {
-                auto delIt = it;
-                ++it;
-                eraseUnit(delIt,unitListT);
-            }
-        }
-    }
 
     SimulationResult calculateResult() const
     {

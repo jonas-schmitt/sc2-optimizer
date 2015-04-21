@@ -31,7 +31,6 @@ public:
 
     virtual void clearBothPlayers()=0;
     virtual void setPositions(std::pair<int, int> &, std::pair<int, int> &)=0;
-    virtual void collectGarbage()=0;
 };
 
 #endif

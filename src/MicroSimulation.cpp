@@ -283,71 +283,8 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
     return res;
 }
 
-template <class T, class U>
-void MicroSimulation<T,U>::collectGarbage()
-{
 
-//    auto tmp = std::async(std::launch::async, [&] ()
-//    {
-    collectPlayerGarbage(pl1);
-//    });
-    collectPlayerGarbage(pl2);
-//    tmp.get();
-}
 
-template <class T, class U>
-template <class V>
-void MicroSimulation<T,U>::collectPlayerGarbage(PlayerState<V>& pl)
-{
-    //    auto tmp1 = std::async(std::launch::async,
-    //        [&] ()
-    //    {
-    pl.removeZombies(pl.unitList0);
-    pl.removeZombies(pl.unitList1);
-    pl.removeZombies(pl.unitList2);
-    pl.removeZombies(pl.unitList3);
-    pl.removeZombies(pl.unitList4);
-    pl.removeZombies(pl.unitList5);
-    //    });
-
-    //    auto tmp2 = std::async(std::launch::async,
-    //        [&] ()
-    //    {
-    pl.removeZombies(pl.unitList6);
-    pl.removeZombies(pl.unitList7);
-    pl.removeZombies(pl.unitList8);
-    pl.removeZombies(pl.unitList9);
-    pl.removeZombies(pl.unitList10);
-    //    });
-
-    pl.removeZombies(pl.unitList11);
-    pl.removeZombies(pl.unitList12);
-    pl.removeZombies(pl.unitList13);
-    pl.removeZombies(pl.unitList14);
-    pl.removeZombies(pl.unitList15);
-    pl.removeZombies(pl.unitList16);
-    pl.removeZombies(pl.unitList17);
-    //    tmp1.get();
-    //    tmp2.get();
-}
-
-template<class T, class U>
-string MicroSimulation<T,U>::determineWinner()
-{
-    collectGarbage();
-    if(pl1.unitList.empty())
-    {
-        return "Player2";
-    }
-    else if(pl2.unitList.empty())
-    {
-        return "Player1";
-    }
-    else
-    {
-        return "Nobody";
-    }
-}
 
 
 template<class T, class U>

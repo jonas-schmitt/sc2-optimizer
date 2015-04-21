@@ -50,7 +50,6 @@ private:
     bool mTracking = false;
     int mTimeSteps = 30000;
     int mTimeSlice = 10;
-    template <class V> void collectPlayerGarbage(PlayerState<V>&);
 
 public:
     MicroSimulation(MicroSimulation const& microSim);
@@ -84,8 +83,6 @@ public:
 
     string determineWinner();
 
-
-    void collectGarbage();
 
 
     void setTracking(bool const tracking);

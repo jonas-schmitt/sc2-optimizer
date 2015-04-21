@@ -86,12 +86,6 @@ void GuiInterface<T,U>::setPositions(std::pair<int,int> &pl1, std::pair<int,int>
 
 
 template<class T, class U>
-void GuiInterface<T, U>::collectGarbage()
-{
-	MicroSimulation<T,U>::collectGarbage();
-}
-
-template<class T, class U>
 void GuiInterface<T, U>::setTracking(bool const tracking)
 {
     MicroSimulation<T,U>::setTracking(tracking);

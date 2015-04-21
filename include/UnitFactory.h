@@ -53,249 +53,104 @@ public:
 		return mUmap.empty();
 	}
 
-    //TODO save type in actual object
+    template<typename T>
+    void createUnit(const string& name, vector<T>& unitListX, int x)
+    {
+        T unit;
+        unit.setName(name);
+        unit.setStats(mUmap[name]);
+        unit.setIdentifier(x);
+        unitListX.push_back (std::move(unit));
+    }
+
+    template<typename T>
+    void setPointer(PlayerState<Race>& pl, vector<T>& unitListX)
+    {
+        pl.unitList.reserve (pl.unitList.size() + unitListX.size());
+        for(auto& unit : unitListX)
+        {
+            pl.unitList.emplace_back();
+            pl.unitList.back() = &unit;
+        }
+    }
 
     void create(const string& name, PlayerState<Race>& pl)
 	{
         if (name == "ZergUnit" || name == "TerranUnit" || name == "ProtossUnit")
 		{
-			return;
-		}
-		if (name == Race::nameList[0])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT0 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(0);
-
-            pl.unitList0.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList0.back().first);
-		}
-		else if (name == Race::nameList[1])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT1 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(1);
-
-            pl.unitList1.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList1.back().first);
-		}
-		else if (name == Race::nameList[2])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT2 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(2);
-
-            pl.unitList2.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList2.back().first);
-
-
-		}
-		else if (name == Race::nameList[3])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT3 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(3);
-
-            pl.unitList3.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList3.back().first);
-		}
-		else if (name == Race::nameList[4])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT4 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(4);
-
-            pl.unitList4.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList4.back().first);
+            return;
         }
-		else if (name == Race::nameList[5])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT5 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(5);
-
-            pl.unitList5.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList5.back().first);
-		}
-		else if (name == Race::nameList[6])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT6 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(6);
-
-            pl.unitList6.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList6.back().first);
-		}
-		else if (name == Race::nameList[7])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT7 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(7);
-
-            pl.unitList7.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList7.back().first);
-		}
-		else if (name == Race::nameList[8])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT8 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(8);
-
-            pl.unitList8.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList8.back().first);
-		}
-		else if (name == Race::nameList[9])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT9 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(9);
-
-            pl.unitList9.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList9.back().first);
-		}
-		else if (name == Race::nameList[10])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT10 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(10);
-
-            pl.unitList10.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList10.back().first);
-		}
-		else if (name == Race::nameList[11])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT11 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(11);
-
-            pl.unitList11.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList11.back().first);
-		}
-		else if (name == Race::nameList[12])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT12 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(12);
-
-            pl.unitList12.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList12.back().first);
-		}
-		else if (name == Race::nameList[13])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT13 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(13);
-
-            pl.unitList13.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList13.back().first);
-		}
-		else if (name == Race::nameList[14])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT14 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(14);
-
-            pl.unitList14.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList14.back().first);
-		}
-		else if (name == Race::nameList[15])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT15 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(15);
-
-            pl.unitList15.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList15.back().first);
-		}
-		else if (name == Race::nameList[16])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT16 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(16);
-
-            pl.unitList16.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList16.back().first);
-		}
-		else if (name == Race::nameList[17])
-		{
-            pl.unitList.emplace_back();
-            auto it = pl.unitList.end();
-            --it;
-            typename Race::UT17 unit;
-            unit.setName(name);
-            unit.setStats(mUmap[name]);
-            unit.setIdentifier(17);
-
-            pl.unitList17.emplace_back(unit,it);
-            pl.unitList.back() = &(pl.unitList17.back().first);
+        if (name == Race::nameList[0])
+        {
+            createUnit(name, pl.unitList0, 0);
+        }
+        else if (name == Race::nameList[1])
+        {
+            createUnit(name, pl.unitList1, 1);
+        }
+        else if (name == Race::nameList[2])
+        {
+            createUnit(name, pl.unitList2, 2);
+        }
+        else if (name == Race::nameList[3])
+        {
+            createUnit(name, pl.unitList3, 3);
+        }
+        else if (name == Race::nameList[4])
+        {
+            createUnit(name, pl.unitList4, 4);
+        }
+        else if (name == Race::nameList[5])
+        {
+            createUnit(name, pl.unitList5, 5);
+        }
+        else if (name == Race::nameList[6])
+        {
+            createUnit(name, pl.unitList6, 6);
+        }
+        else if (name == Race::nameList[7])
+        {
+            createUnit(name, pl.unitList7, 7);
+        }
+        else if (name == Race::nameList[8])
+        {
+            createUnit(name, pl.unitList8, 8);
+        }
+        else if (name == Race::nameList[9])
+        {
+            createUnit(name, pl.unitList9, 9);
+        }
+        else if (name == Race::nameList[10])
+        {
+            createUnit(name, pl.unitList11, 10);
+        }
+        else if (name == Race::nameList[11])
+        {
+            createUnit(name, pl.unitList11, 11);
+        }
+        else if (name == Race::nameList[12])
+        {
+            createUnit(name, pl.unitList12, 12);
+        }
+        else if (name == Race::nameList[13])
+        {
+            createUnit(name, pl.unitList13, 13);
+        }
+        else if (name == Race::nameList[14])
+        {
+            createUnit(name, pl.unitList14, 14);
+        }
+        else if (name == Race::nameList[15])
+        {
+            createUnit(name, pl.unitList15, 15);
+        }
+        else if (name == Race::nameList[16])
+        {
+            createUnit(name, pl.unitList16, 16);
+        }
+        else if (name == Race::nameList[17])
+        {
+            createUnit(name, pl.unitList17, 17);
 		}
 	}
     void create(const vector<string>& names, PlayerState<Race>& pl)
@@ -304,6 +159,25 @@ public:
 		{
             create(name, pl);
 		}
+        setPointer(pl, pl.unitList0);
+        setPointer(pl, pl.unitList1);
+        setPointer(pl, pl.unitList2);
+        setPointer(pl, pl.unitList3);
+        setPointer(pl, pl.unitList4);
+        setPointer(pl, pl.unitList5);
+        setPointer(pl, pl.unitList6);
+        setPointer(pl, pl.unitList7);
+        setPointer(pl, pl.unitList8);
+        setPointer(pl, pl.unitList9);
+        setPointer(pl, pl.unitList10);
+        setPointer(pl, pl.unitList11);
+        setPointer(pl, pl.unitList12);
+        setPointer(pl, pl.unitList13);
+        setPointer(pl, pl.unitList14);
+        setPointer(pl, pl.unitList15);
+        setPointer(pl, pl.unitList16);
+        setPointer(pl, pl.unitList17);
+
 	}
 };
 
