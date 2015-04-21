@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     {}
     std::string outPath = baseDir+"./results/" + race1 + "_" + race2 + "/" + tmp1 + "_" + tmp2 + ".txt";
     std::cout << outPath << std::endl;
-    size_t const iterations = 5, stepsPerIteration = 100, initialPopulationSize = 100;
+    size_t const iterations = 10, stepsPerIteration = 1000, initialPopulationSize = 200;
 
     int const x = (MAX-MIN)/2;
 
@@ -194,7 +194,12 @@ int main(int argc, char *argv[])
     }
 
     std::ofstream outF(outPath.c_str(), std::ofstream::out);
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     UOB->optimize(iterations, stepsPerIteration, initialPopulationSize, selectionRate, reproductionRate, mutationRate);
+    end = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
     auto a = UOB->getOptimum();
     outF << "Player1:" << std::endl;
     outF << a.first << std::endl;

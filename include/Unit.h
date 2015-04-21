@@ -147,8 +147,6 @@ protected:
         double const dist = distVec.computeLength();
         if(dist < own.getSize () + buddy.getSize())
         {
-            //own.setMovementUpdate (own.getTimeSlice ());
-            //own.setCollision(true);
             Vec2D force = distVec.getNormedVec(dist);
             return Vec2D(-force.x*10000*MAX, -force.y*10000*MAX);
         }
@@ -175,8 +173,6 @@ protected:
         double const dist = distVec.computeLength ();
         if(dist < own.getSize () + enemy.getSize())
         {
-            //own.setMovementUpdate (own.getTimeSlice ());
-            //own.setCollision(true);
             Vec2D force = distVec.getNormedVec(dist);
             return Vec2D(-force.x*10000*MAX, -force.y*10000*MAX);
         }
@@ -419,7 +415,6 @@ public:
         }
         if(mMovementTimer <= 0)
         {
-            mCollision = false;
             Vec2D force(0.0);
             for(const auto& pot : own.potentialList)
             {
@@ -448,10 +443,7 @@ public:
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
-//            if(!mCollision)
-//            {
-//                mMovementUpdate = mMovementUpdateBackup;
-//            }
+
             currentForce = force.getNormedVec ();
             mMovementTimer = mMovementUpdate;
         }
