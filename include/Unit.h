@@ -35,10 +35,10 @@ enum Attribute
 
 struct Bonus
 {
-    float base;
-    float upgrade;
+    double base;
+    double upgrade;
     vector<Attribute> attributes;
-    Bonus() : base(0.f), upgrade(0.f)
+    Bonus() : base(0.0), upgrade(0.0)
     {}
     Bonus(Bonus const& other) : base(other.base), upgrade(other.upgrade), attributes(other.attributes)
     {}
@@ -59,29 +59,29 @@ struct Damage
 
 struct UnitStats
 {
-    float minerals = 0;
-    float gas = 0;
-    float gdps = 0;
-    float adps = 0;
-    float groundRange = 0;
-    float airRange = 0;
+    double minerals = 0;
+    double gas = 0;
+    double gdps = 0;
+    double adps = 0;
+    double groundRange = 0;
+    double airRange = 0;
     double health = 0;
     double maxHealth = 0;
     double shield = 0;
     double maxShield = 0;
-    float armor = 0;
-    float armorUpgradeBonus = 0;
-    float speed = 0;
+    double armor = 0;
+    double armorUpgradeBonus = 0;
+    double speed = 0;
     double energy = 0;
     double maxEnergy = 0;
-    float size = 0;
+    double size = 0;
     bool airUnit = false;
 
-    float groundAttack = 0;
-    float gaUpgradeBonus = 0;
+    double groundAttack = 0;
+    double gaUpgradeBonus = 0;
 
-    float airAttack = 0;
-    float aaUpgradeBonus = 0;
+    double airAttack = 0;
+    double aaUpgradeBonus = 0;
     int gaCooldown = 0;
     int aaCooldown = 0;
 
@@ -273,19 +273,19 @@ public:
 
     double getMaxDist() const;
 
-    float getMinerals() const;
+    double getMinerals() const;
 
-    float getGas() const;
+    double getGas() const;
 
-    float getResources() const;
+    double getResources() const;
 
-    float getGdps() const ;
+    double getGdps() const ;
 
-    float getAdps() const;
+    double getAdps() const;
 
-    float getGroundRange() const;
+    double getGroundRange() const;
 
-    float getAirRange() const;
+    double getAirRange() const;
 
     double getHealth() const ;
 
@@ -297,13 +297,13 @@ public:
 
     double getSumMaxHealthShield() const;
 
-    float getArmor() const;
+    double getArmor() const;
 
-    float getSight() const;
+    double getSight() const;
 
-    float getSpeed() const;
+    double getSpeed() const;
 
-    float getAcceleration() const;
+    double getAcceleration() const;
 
     double getEnergy() const;
 
@@ -311,7 +311,7 @@ public:
 
     bool isAirUnit() const;
 
-    float getSize() const;
+    double getSize() const;
 
     void addHealth(double const value);
 
@@ -331,19 +331,19 @@ public:
 
     void resetEnergy();
 
-    float getGroundAttack() const;
+    double getGroundAttack() const;
 
-    float getAirAttack() const;
+    double getAirAttack() const;
 
     int getGACooldown() const;
 
     int getAACooldown() const;
 
-    float getGAUpgradeBonus() const;
+    double getGAUpgradeBonus() const;
 
-    float getAAUpgradeBonus() const;
+    double getAAUpgradeBonus() const;
 
-    float getArmorUpgradeBonus() const;
+    double getArmorUpgradeBonus() const;
 
     int getArmorUpgrade() const;
 

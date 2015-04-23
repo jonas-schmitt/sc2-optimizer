@@ -77,32 +77,32 @@ void BaseUnit::setStats(const UnitStats& newStats)
     this->mStats = newStats;
 }
 
-float BaseUnit::getMinerals() const
+double BaseUnit::getMinerals() const
 {
     return mStats.minerals;
 }
 
-float BaseUnit::getGas() const
+double BaseUnit::getGas() const
 {
     return mStats.gas;
 }
 
-float BaseUnit::getGdps() const
+double BaseUnit::getGdps() const
 {
     return mStats.gdps;
 }
 
-float BaseUnit::getAdps() const
+double BaseUnit::getAdps() const
 {
     return mStats.adps;
 }
 
-float BaseUnit::getGroundRange() const
+double BaseUnit::getGroundRange() const
 {
     return mStats.groundRange;
 }
 
-float BaseUnit::getAirRange() const
+double BaseUnit::getAirRange() const
 {
     return mStats.airRange;
 }
@@ -132,13 +132,13 @@ double BaseUnit::getSumMaxHealthShield() const
     return mStats.sumMaxHealthAndShield;
 }
 
-float BaseUnit::getArmor() const
+double BaseUnit::getArmor() const
 {
     return mStats.armor;
 }
 
 
-float BaseUnit::getSpeed() const
+double BaseUnit::getSpeed() const
 {
     return mStats.speed;
 }
@@ -164,7 +164,7 @@ bool BaseUnit::isAirUnit() const
     return mStats.airUnit;
 } //returns true, if its an air unit
 
-float BaseUnit::getSize() const
+double BaseUnit::getSize() const
 {
 	return mStats.size;
 }
@@ -330,13 +330,13 @@ void BaseUnit::setEnemyForce(function<Vec2D(BaseUnit &, BaseUnit &)> func)
 }
 
 
-float BaseUnit::getResources() const
+double BaseUnit::getResources() const
 {
     return mStats.minerals+GASTOMINERALS*mStats.gas;
 }
 
 
-float BaseUnit::getAirAttack() const
+double BaseUnit::getAirAttack() const
 {
     return mStats.airAttack;
 }
@@ -353,21 +353,21 @@ int BaseUnit::getAACooldown() const
     return mStats.aaCooldown;
 }
 
-float BaseUnit::getGroundAttack() const
+double BaseUnit::getGroundAttack() const
 {
     return mStats.groundAttack;
 }
 
-float BaseUnit::getGAUpgradeBonus() const
+double BaseUnit::getGAUpgradeBonus() const
 {
     return mStats.gaUpgradeBonus;
 }
-float BaseUnit::getAAUpgradeBonus() const
+double BaseUnit::getAAUpgradeBonus() const
 {
     return mStats.aaUpgradeBonus;
 }
 
-float BaseUnit::getArmorUpgradeBonus() const
+double BaseUnit::getArmorUpgradeBonus() const
 {
     return mStats.armorUpgradeBonus;
 }
