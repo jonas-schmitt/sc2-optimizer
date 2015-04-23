@@ -18,14 +18,15 @@ struct UnitGenes
 private:
     array<double, 13> X;
 
-    double mHash;
+    size_t mHash;
 
     void initHash()
     {
-        mHash = 0.0;
-        for(double const val : X)
+        mHash = 0;
+        std::hash<double> hash_func;
+        for(double const value : X)
         {
-            mHash += val;
+            mHash ^= hash_func(value) + 0x9e3779b9 + (mHash<<6) + (mHash>>2);
         }
 
     }
@@ -179,7 +180,7 @@ public:
         X[pos] = x;
     }
 
-    double getHash() const
+    size_t getHash() const
     {
         return mHash;
     }

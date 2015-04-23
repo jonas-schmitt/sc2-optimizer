@@ -155,8 +155,9 @@ protected:
         if(dist < own.param1)
         {
             Vec2D res = distVec.getNormedVec(dist);
-            res.x *= 1000.0*own.getGene(1);
-            res.y *= 1000.0*own.getGene(1);
+            double const value = 1000.0*own.getGene(1) + own.getGene(2)*10.0*own.getResources();
+            res.x *= value;
+            res.y *= value;
             return res;
         }
         else
@@ -190,21 +191,15 @@ protected:
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
 
-        if(dist > ownRange)
+        if(dist > ownRange*own.getGene(3))
         {
             res1 = distVec.getNormedVec(dist);
             double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
             int const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                              : std::max(own.getGACooldown () - own.getAttackTimer (),0);
-            double const val = own.getGene(2)* a + own.getGene(3)*b + own.getGene(4)*ownDamage.total + own.getGene(5);
+            double const val = own.getGene(4)* 10.0 * a + own.getGene(5)*b + own.getGene(6)*100.0*ownDamage.total + 1000.0*own.getGene(7);
             res1.x *= val;
             res1.y *= val;
-        }
-        else if(dist < ownRange*own.getGene(6))
-        {
-            res1 = distVec.getNormedVec();
-            res1.x *= -1000.0*own.getGene(7);
-            res1.y *= -1000.0*own.getGene(7);
         }
 
         double const enemyRange = enemy.computeRange(own);
@@ -215,13 +210,13 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < enemyRange * own.getGene(8))
+        if(dist < 2.0*enemyRange * own.getGene (8))
         {
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
             int const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            double const val = own.getGene(9) * a + own.getGene(10)*b + own.getGene(11)*enemyDamage.total + own.getGene(12);
+            double const val = own.getGene(9) * 10.0 * a + own.getGene(10)*b + own.getGene(11)*100.0*enemyDamage.total + 1000.0*own.getGene(12);
             res2.x *= val;
             res2.y *= val;
         }

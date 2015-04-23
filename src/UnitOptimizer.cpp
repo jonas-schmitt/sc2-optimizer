@@ -46,7 +46,7 @@ template<class Race1, class Race2>
 void UnitOptimizer<Race1,Race2>::mutate(size_t const N)
 {
 
-    auto mt = [=] (vector<UnitGenes>* population, unordered_set<double>* popControl, vector<UnitGenes>* newGenes)
+    auto mt = [=] (vector<UnitGenes>* population, unordered_set<size_t>* popControl, vector<UnitGenes>* newGenes)
     {
         size_t const nindividuals = std::min(N, population->size());
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
@@ -54,7 +54,7 @@ void UnitOptimizer<Race1,Race2>::mutate(size_t const N)
 
         auto chooseIndividual = std::bind(dist,gen);
         size_t number = static_cast<size_t>(std::round(mMutationRate*nindividuals));
-        unordered_set<double> positions;
+        unordered_set<size_t> positions;
 
         do
         {
@@ -109,7 +109,7 @@ void UnitOptimizer<Race1,Race2>::mutate(size_t const N)
 template<class Race1, class Race2>
 void UnitOptimizer<Race1,Race2>::crossover(size_t const N)
 {
-    auto co = [=] (vector<UnitGenes>* population, unordered_set<double>* popControl, vector<UnitGenes>* newGenes)
+    auto co = [=] (vector<UnitGenes>* population, unordered_set<size_t>* popControl, vector<UnitGenes>* newGenes)
     {
         size_t const nindividuals = std::min(N, population->size());
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
@@ -117,7 +117,7 @@ void UnitOptimizer<Race1,Race2>::crossover(size_t const N)
 
         auto chooseIndividual = std::bind(dist,gen);
         size_t number = static_cast<size_t>(std::round(mReproductionRate*nindividuals));
-        unordered_set<double> positions;
+        unordered_set<size_t> positions;
         if(newGenes->capacity() < number)
         {
             newGenes->reserve(number);
@@ -207,7 +207,7 @@ void UnitOptimizer<Race1,Race2>::optimize(size_t iterations, size_t stepsPerIter
     mSurvival2.clear();
     mSurvival2.resize(iterations);
     mSurvival2.front() = 0.0;
-    auto select = [=] (vector<UnitGenes>* population, unordered_set<double>* popControl, float selectionRate)
+    auto select = [=] (vector<UnitGenes>* population, unordered_set<size_t>* popControl, float selectionRate)
     {
         std::sort(population->begin(),population->end());
         size_t const newSize = static_cast<size_t>(std::round(selectionRate*population->size()));
@@ -265,27 +265,27 @@ void UnitOptimizer<Race1,Race2>::optimize(size_t iterations, size_t stepsPerIter
         std::cout << std::endl;
 
         printNBest(std::min(size_t(3),minSize));
-	for(size_t k = 0; k < mPopulation1.size(); ++k)
-	{
-	    mSurvival1[i] += mPopulation1[k].count;
-	}
-	mSurvival1[i] /= mPopulation1.size();
-	for(size_t k = 0; k < mPopulation2.size(); ++k)
-	{
-	    mSurvival2[i] += mPopulation2[k].count;
-	}
-	mSurvival2[i] /= mPopulation2.size();
+    for(size_t k = 0; k < mPopulation1.size(); ++k)
+    {
+        mSurvival1[i] += mPopulation1[k].count;
+    }
+    mSurvival1[i] /= mPopulation1.size();
+    for(size_t k = 0; k < mPopulation2.size(); ++k)
+    {
+        mSurvival2[i] += mPopulation2[k].count;
+    }
+    mSurvival2[i] /= mPopulation2.size();
         for(size_t i = 0; i < minSize; ++i)
         {
             ++mPopulation1[i].count;
             ++mPopulation2[i].count;
         }
-//        long dist1 = mPopulation1.front().computeDistance(mOldOptimum.first), dist2 = mPopulation2.front().computeDistance(mOldOptimum.second);
-//        if(dist1 < DELTA && dist2 < DELTA)
-//        {
-//            std::cout << "The distances between the optima of iteration " << i+1 << " and " << i << " are for both populations smaller than " << DELTA << " (" << dist1 << ", " << dist2 << ")" << std::endl;
-//            break;
-//        }
+        long dist1 = mPopulation1.front().computeDistance(mOldOptimum.first), dist2 = mPopulation2.front().computeDistance(mOldOptimum.second);
+        if(dist1 < EPS && dist2 < EPS)
+        {
+            std::cout << "The distances between the optima of iteration " << i+1 << " and " << i << " are for both populations smaller than " << EPS << " (" << dist1 << ", " << dist2 << ")" << std::endl;
+            break;
+        }
 
     }
     std::cout << "The individuals that survived the most iterations are:" << std::endl;
@@ -401,4 +401,3 @@ pair<vector<double>,vector<double>> UnitOptimizer<Race1, Race2>::getSurvivalAver
 {
     return pair<vector<double>,vector<double>>(mSurvival1, mSurvival2);
 }
-

@@ -39,14 +39,13 @@ private:
     Vec2D mMaxPos = Vec2D(150,150);
     vector<UnitGenes> mPopulation1;
     vector<UnitGenes> mPopulation2;
-    unordered_set<double> mPopControl1;
-    unordered_set<double> mPopControl2;
+    unordered_set<size_t> mPopControl1;
+    unordered_set<size_t> mPopControl2;
     float mSelectionRate = 0.25;
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;
     size_t mInitialPopulationSize;
     size_t const NTHREADS = 10;//std::thread::hardware_concurrency();
-    int const DELTA = 5;
     vector<MicroSimulation<Race1,Race2> > mSim1;
     vector<MicroSimulation<Race2,Race1> > mSim2;
     pair<UnitGenes,UnitGenes> mOldOptimum;

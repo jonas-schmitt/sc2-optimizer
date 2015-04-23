@@ -552,6 +552,7 @@ Damage BaseUnit::computeDamage(BaseUnit const& other) const
         {
             healthDamage = 0.0;
         }
+        totalDamage = shieldDamage + healthDamage;
     }
     else
     {
@@ -707,7 +708,7 @@ void BaseUnit::computeTemporaryValues()
     param1 = getMaxDist()*getGene(0);
 
     param3 = getGene(8);
-    mMoveDist = getSpeed()*mTimeSlice/1000;
+    mMoveDist = getSpeed()*mTimeSlice/1000.0;
     mMovementUpdateBackup = mMovementUpdate;
 }
 

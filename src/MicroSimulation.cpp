@@ -270,7 +270,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
     {
         resetBothPlayers();
     }
-    if(res.damage < EPS)
+    if(res.damage < res.health)
     {
         res.score = 0;
     }
