@@ -640,7 +640,7 @@ double BaseUnit::computeAirRange(BaseUnit const& other) const
     return getAirRange() + getSize() + other.getSize();
 }
 
-int BaseUnit::getGene(int const pos) const
+double BaseUnit::getGene(int const pos) const
 {
     return mGenes.get(pos);
 }
@@ -704,10 +704,9 @@ void BaseUnit::setTimeSlice(int value)
 
 void BaseUnit::computeTemporaryValues()
 {
-    param1 = getMaxDist()*static_cast<double>(getGene(0)) * MAX_INV;
-    param2[0] = mStats.airRange * (1.0 - static_cast<double>(getGene(6)) * MAX_INV * 0.25);
-    param2[1] = mStats.groundRange * (1.0 - static_cast<double>(getGene(6)) *MAX_INV * 0.25);
-    param3 = 1.0 - static_cast<double>(getGene(8)) * MAX_INV * 0.25;
+    param1 = getMaxDist()*getGene(0);
+
+    param3 = getGene(8);
     mMoveDist = getSpeed()*mTimeSlice/1000;
     mMovementUpdateBackup = mMovementUpdate;
 }

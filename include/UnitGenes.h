@@ -16,28 +16,29 @@ using std::initializer_list;
 struct UnitGenes
 {
 private:
-    array<int, 13> X;
+    array<double, 13> X;
 
-    size_t mHash;
+    double mHash;
 
     void initHash()
     {
-        mHash = 0;
-        for(int const value : X)
+        mHash = 0.0;
+        for(double const val : X)
         {
-            mHash ^= value + 0x9e3779b9 + (mHash<<6) + (mHash>>2);
+            mHash += val;
         }
+
     }
 
 public:
     Fitness fitness;
-    size_t count;
+    int count;
 
     // Default constructor, creates random genes
     UnitGenes()
     {
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
-        std::uniform_int_distribution<int> dist(MIN,MAX);
+        std::uniform_real_distribution<double> dist(MIN,MAX);
         for(int i = 0; i < 13; ++i)
         {
             X[i] = dist(gen);
@@ -47,7 +48,7 @@ public:
         initHash();
 
     }
-    UnitGenes(int x)
+    UnitGenes(double x)
     {
         X.fill(x);
         count = 0;
@@ -55,18 +56,18 @@ public:
 
     }
 
-    UnitGenes(initializer_list<int> L)
+    UnitGenes(initializer_list<double> L)
     {
         if(L.size() != 13)
         {
-            throw std::invalid_argument("UnitGenes::UnitGenes(initializer_list<int>): The initializer list must contain 12 arguments");
+            throw std::invalid_argument("UnitGenes::UnitGenes(initializer_list<double>): The initializer list must contain 12 arguments");
         }
         auto it = L.begin();
         for(int i = 0; i < 13; ++i)
         {
             if(*it > MAX)
             {
-                throw std::invalid_argument("UnitGenes::UnitGenes(initializer_list<int>): The first 5 values must be smaller than 2^8-1");
+                throw std::invalid_argument("UnitGenes::UnitGenes(initializer_list<double>): The first 5 values must be smaller than 2^8-1");
             }
             X[i] = *it;
             ++it;
@@ -76,18 +77,18 @@ public:
         initHash();
     }
 
-    UnitGenes(vector<int> const& L)
+    UnitGenes(vector<double> const& L)
     {
         if(L.size() != 13)
         {
-            throw std::invalid_argument("UnitGenes::UnitGenes(vector<int>): The vector must contain 12 arguments");
+            throw std::invalid_argument("UnitGenes::UnitGenes(vector<double>): The vector must contain 12 arguments");
         }
         auto it = L.begin();
         for(int i = 0; i < 13; ++i)
         {
             if(*it > MAX)
             {
-                throw std::invalid_argument("UnitGenes::UnitGenes(vector<int>): The first 5 values must be smaller than 2^8-1");
+                throw std::invalid_argument("UnitGenes::UnitGenes(vector<double>): The first 5 values must be smaller than 2^8-1");
             }
             X[i] = *it;
             ++it;
@@ -100,7 +101,7 @@ public:
     // copy constructor
     UnitGenes(UnitGenes const& clone)
     {
-        for(size_t i = 0; i < 13; ++i)
+        for(int i = 0; i < 13; ++i)
         {
             X[i] = clone.get(i);
         }
@@ -146,12 +147,12 @@ public:
         size_t number = static_cast<size_t>(std::min(mutationRate*13.,13.));
         unordered_set<size_t> positions;
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
-        std::uniform_int_distribution<size_t> dist1(0,12);
+        std::uniform_int_distribution<int> dist1(0,12);
         while(positions.size() < number)
         {
             positions.insert(dist1(gen));
         }
-        std::uniform_int_distribution<int> dist2(MIN,MAX);
+        std::uniform_real_distribution<double> dist2(MIN,MAX);
         for(int i = 0; i < 13; ++i)
         {
             if(positions.count(i) == 1)
@@ -168,17 +169,17 @@ public:
         initHash();
     }
 
-    int get(int const pos) const
+    double get(double const pos) const
     {
         return X[pos];
     }
 
-    void set(size_t const pos, int const x)
+    void set(int const pos, double const x)
     {
         X[pos] = x;
     }
 
-    size_t getHash() const
+    double getHash() const
     {
         return mHash;
     }
@@ -194,11 +195,11 @@ public:
             return this->count > genes.count;
         }
     }
-    long computeDistance(UnitGenes const& other) const
+    double computeDistance(UnitGenes const& other) const
     {
 
-        long dist = 0;
-        for(size_t i = 0; i < 13; ++i)
+        double dist = 0;
+        for(int i = 0; i < 13; ++i)
         {
             dist += std::abs(this->get(i)-other.get(i));
         }
@@ -209,7 +210,7 @@ public:
 inline std::ostream& operator<<(std::ostream& out, UnitGenes const& genes)
 {
     out << "X:";
-    for(size_t i = 0; i < 13; ++i)
+    for(int i = 0; i < 13; ++i)
     {
         out << '\t' << std::to_string(genes.get(i));
     }

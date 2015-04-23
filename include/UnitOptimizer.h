@@ -39,8 +39,8 @@ private:
     Vec2D mMaxPos = Vec2D(150,150);
     vector<UnitGenes> mPopulation1;
     vector<UnitGenes> mPopulation2;
-    unordered_set<size_t> mPopControl1;
-    unordered_set<size_t> mPopControl2;
+    unordered_set<double> mPopControl1;
+    unordered_set<double> mPopControl2;
     float mSelectionRate = 0.25;
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;

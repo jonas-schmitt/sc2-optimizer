@@ -148,15 +148,15 @@ protected:
         if(dist < own.getSize () + buddy.getSize())
         {
             Vec2D force = distVec.getNormedVec(dist);
-            return Vec2D(-force.x*10000*MAX, -force.y*10000*MAX);
+            return Vec2D(-force.x*100000.0, -force.y*100000.0);
         }
 
 
         if(dist < own.param1)
         {
             Vec2D res = distVec.getNormedVec(dist);
-            res.x *= own.getGene(1);
-            res.y *= own.getGene(1);
+            res.x *= 1000.0*own.getGene(1);
+            res.y *= 1000.0*own.getGene(1);
             return res;
         }
         else
@@ -174,25 +174,14 @@ protected:
         if(dist < own.getSize () + enemy.getSize())
         {
             Vec2D force = distVec.getNormedVec(dist);
-            return Vec2D(-force.x*10000*MAX, -force.y*10000*MAX);
+            return Vec2D(-force.x*100000.0, -force.y*100000.0);
         }
 
         Vec2D res1, res2;
         double ownRange;
-        double tmp;
+        //double tmp;
 
-
-        if(enemy.isAirUnit ())
-        {
-            ownRange = own.computeAirRange (enemy);
-            tmp = own.param2[0];
-        }
-        else
-        {
-            ownRange = own.computeGroundRange (enemy);
-            tmp = own.param2[1];
-        }
-
+        ownRange = own.computeRange (enemy);
 
         int const enemyId = enemy.getIdentifier();
         if(!own.mPossibleDamage[enemyId].valid)
@@ -211,11 +200,11 @@ protected:
             res1.x *= val;
             res1.y *= val;
         }
-        else if(dist < tmp)
+        else if(dist < ownRange*own.getGene(6))
         {
             res1 = distVec.getNormedVec();
-            res1.x *= -own.getGene(7);
-            res1.y *= -own.getGene(7);
+            res1.x *= -1000.0*own.getGene(7);
+            res1.y *= -1000.0*own.getGene(7);
         }
 
         double const enemyRange = enemy.computeRange(own);
@@ -226,7 +215,7 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < enemyRange * own.param3)
+        if(dist < enemyRange * own.getGene(8))
         {
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
@@ -520,7 +509,7 @@ public:
         return true;
     }
 
-    int getGene(int const pos) const;
+    double getGene(int const pos) const;
     void setGenes(UnitGenes const& genes);
     size_t getHash() const;
 
