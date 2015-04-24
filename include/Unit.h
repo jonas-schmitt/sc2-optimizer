@@ -599,7 +599,7 @@ public:
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        if(state.regenerationTimer == 0)
+        if(state.regenerationTimer <= 0)
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
@@ -637,18 +637,20 @@ public:
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        if(state.regenerationTimer == 0)
+        if(state.regenerationTimer <= 0)
         {
-            if(mShieldRegenCount == 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
+            if(mShieldRegenCount <= 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
             {
                 BaseUnit::addShield(2.0 * state.regenerationUpdate / 1000);
             }
             else
             {
-                --mShieldRegenCount;
+                if(mShieldRegenCount > 0)
+                {
+                    --mShieldRegenCount;
+                }
             }
         }
-
     }
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
@@ -697,15 +699,18 @@ public:
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        if(state.regenerationTimer == 0)
+        if(state.regenerationTimer <= 0)
         {
-            if(mHealthRegenCount == 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
+            if(mHealthRegenCount <= 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
             {
-                BaseUnit::addHealth(2.0 * state.regenerationUpdate / 1000);
+                TerranUnit::addHealth(2.0 * state.regenerationUpdate / 1000);
             }
             else
             {
-                --mHealthRegenCount;
+                if(mHealthRegenCount > 0)
+                {
+                    --mHealthRegenCount;
+                }
             }
         }
     }

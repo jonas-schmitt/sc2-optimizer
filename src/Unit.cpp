@@ -773,7 +773,6 @@ ZergUnit::ZergUnit(BaseUnit const& baseUnit)
 
 
 
-
 ProtossUnit::ProtossUnit()
     : BaseUnit(), mShieldRegenCount(0)
 {}
@@ -837,7 +836,7 @@ Reaper::Reaper(TerranUnit const& terranUnit)
 void Reaper::subHealth(double const value)
 {
     mHealthRegenCount = 10;
-    BaseUnit::subHealth(value);
+    TerranUnit::subHealth(value);
 }
 
 

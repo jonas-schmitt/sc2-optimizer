@@ -45,7 +45,7 @@ private:
     float mReproductionRate = 0.5;
     float mMutationRate = 0.5;
     size_t mInitialPopulationSize;
-    size_t const NTHREADS = 10;//std::thread::hardware_concurrency();
+    size_t const NTHREADS = 1;//std::thread::hardware_concurrency();
     vector<MicroSimulation<Race1,Race2> > mSim1;
     vector<MicroSimulation<Race2,Race1> > mSim2;
     pair<UnitGenes,UnitGenes> mOldOptimum;
