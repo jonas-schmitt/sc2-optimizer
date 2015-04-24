@@ -16,7 +16,7 @@ using std::initializer_list;
 struct UnitGenes
 {
 private:
-    array<double, 13> X;
+    array<double, 15> X;
 
     size_t mHash;
 
@@ -40,7 +40,7 @@ public:
     {
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_real_distribution<double> dist(MIN,MAX);
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             X[i] = dist(gen);
         }
@@ -59,12 +59,12 @@ public:
 
     UnitGenes(initializer_list<double> L)
     {
-        if(L.size() != 13)
+        if(L.size() != 15)
         {
             throw std::invalid_argument("UnitGenes::UnitGenes(initializer_list<double>): The initializer list must contain 12 arguments");
         }
         auto it = L.begin();
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             if(*it > MAX)
             {
@@ -80,12 +80,12 @@ public:
 
     UnitGenes(vector<double> const& L)
     {
-        if(L.size() != 13)
+        if(L.size() != 15)
         {
             throw std::invalid_argument("UnitGenes::UnitGenes(vector<double>): The vector must contain 12 arguments");
         }
         auto it = L.begin();
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             if(*it > MAX)
             {
@@ -102,7 +102,7 @@ public:
     // copy constructor
     UnitGenes(UnitGenes const& clone)
     {
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             X[i] = clone.get(i);
         }
@@ -116,7 +116,7 @@ public:
     {
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> dist(0,2);
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             int k = dist(gen);
             if(k == 0)
@@ -145,7 +145,7 @@ public:
         {
             throw std::invalid_argument("UnitGenes::UnitGenes(UnitGenes const & mutant, float rate): The rate must be a value in (0,1)");
         }
-        size_t number = static_cast<size_t>(std::min(mutationRate*13.,13.));
+        size_t number = static_cast<size_t>(std::min(mutationRate*15.,15.));
         unordered_set<size_t> positions;
         std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> dist1(0,12);
@@ -154,7 +154,7 @@ public:
             positions.insert(dist1(gen));
         }
         std::uniform_real_distribution<double> dist2(MIN,MAX);
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             if(positions.count(i) == 1)
             {
@@ -200,7 +200,7 @@ public:
     {
 
         double dist = 0;
-        for(int i = 0; i < 13; ++i)
+        for(int i = 0; i < 15; ++i)
         {
             dist += std::abs(this->get(i)-other.get(i));
         }
@@ -211,7 +211,7 @@ public:
 inline std::ostream& operator<<(std::ostream& out, UnitGenes const& genes)
 {
     out << "X:";
-    for(int i = 0; i < 13; ++i)
+    for(int i = 0; i < 15; ++i)
     {
         out << '\t' << std::to_string(genes.get(i));
     }

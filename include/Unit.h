@@ -155,7 +155,7 @@ protected:
         if(dist < own.param1)
         {
             Vec2D res = distVec.getNormedVec(dist);
-            double const value = 1000.0*own.getGene(1) + own.getGene(2)*10.0*own.getResources();
+            double const value = 4000.0*own.getGene(1) + own.getGene(2)*10.0*own.getResources();
             res.x *= value;
             res.y *= value;
             return res;
@@ -190,7 +190,7 @@ protected:
             own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
-
+        double const threshold = (ownRange-(enemy.getSpeed() * enemy.getMovementUpdate()/1000));
         if(dist > ownRange*own.getGene(3))
         {
             res1 = distVec.getNormedVec(dist);
@@ -201,6 +201,12 @@ protected:
             res1.x *= val;
             res1.y *= val;
         }
+        else if(dist < threshold*own.getGene(8))
+        {
+            double const val = 5000.0*own.getGene(9);
+            res2.x *= val;
+            res2.y *= val;
+        }
 
         double const enemyRange = enemy.computeRange(own);
         int const ownId = own.getIdentifier();
@@ -210,13 +216,13 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < 2.0*enemyRange * own.getGene (8))
+        if(dist < 2.0*own.getGene (10) * (enemyRange + enemy.getSpeed() * enemy.getMovementUpdate()/1000))
         {
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
             int const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            double const val = own.getGene(9) * 10.0 * a + own.getGene(10)*b + own.getGene(11)*100.0*enemyDamage.total + 1000.0*own.getGene(12);
+            double const val = own.getGene(11) * 10.0 * a + own.getGene(12)*b + own.getGene(13)*100.0*enemyDamage.total + 1000.0*own.getGene(14);
             res2.x *= val;
             res2.y *= val;
         }
