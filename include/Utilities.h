@@ -31,37 +31,53 @@ struct Vec2D
     }
     Vec2D getNormedVec(double const len) const
     {
-        Vec2D result(x / len, y / len);
-        if(std::isinf (result.x) || std::isnan(result.x) || std::isinf (result.y) || std::isnan(result.y) || len < EPS)
+        if(len == 0.0)
         {
-            // choose direction that brings the unit as much away from the border as possible
-
-            if(x > EPS)
+            Vec2D result;
+            if(x > 0.0)
             {
                 result.x = STDLEN;
             }
-            else if(x < -EPS)
+            else if(x < 0.0)
             {
                 result.x = -STDLEN;
             }
-            else
-            {
-                result.x = 0;
-            }
-            if(y > EPS)
+            if(y > 0.0)
             {
                 result.y = STDLEN;
             }
-            else if(y < -EPS)
+            else if(y < 0.0)
             {
                 result.y = -STDLEN;
             }
-            else
-            {
-                result.y = 0;
-            }
+            return result;
         }
-        return result;
+        double const tmp = 1.0/len;
+        double const x_res = tmp * x;
+        double const y_res = tmp * y;
+        if(std::isinf (x_res) || std::isnan(x_res) || std::isinf (y_res) || std::isnan(y_res))
+        {
+            // choose direction that brings the unit as much away from the border as possible
+            Vec2D result;
+            if(x > 0.0)
+            {
+                result.x = STDLEN;
+            }
+            else if(x < 0.0)
+            {
+                result.x = -STDLEN;
+            }
+            if(y > 0.0)
+            {
+                result.y = STDLEN;
+            }
+            else if(y < 0.0)
+            {
+                result.y = -STDLEN;
+            }
+            return result;
+        }
+        return Vec2D(x_res, y_res);
     }
     Vec2D getNormedVec() const
     {
