@@ -6,7 +6,9 @@
 #include <list>
 #include <unordered_map>
 #include <utility>
-#include <typeinfo>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "Race.h"
 #include "Unit.h"
@@ -14,11 +16,12 @@
 
 
 using std::string;
+using std::ifstream;
+using std::stringstream;
 using std::vector;
 using std::list;
 using std::unordered_map;
 using std::pair;
-using std::type_info;
 
 template <class Race> 
 class UnitFactory : public Race 
@@ -59,6 +62,21 @@ public:
         T unit;
         unit.setName(name);
         unit.setStats(mUmap[name]);
+        ifstream file;
+        file.open("./data/upgrades/"+name);
+        string buf;
+        std::getline(file, buf);
+        int flag;
+        stringstream ss(buf);
+        vector<int> flags;
+        while(!(ss >> flag))
+        {
+            flags.push_back (flag);
+        }
+        file.close ();
+        //TODO implement unit specific method for applying upgrades
+        // this method sets the upgrades according to the flags that are passed
+
         unit.setIdentifier(x);
         unitListX.push_back (std::move(unit));
     }

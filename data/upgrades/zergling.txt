@@ -1,0 +1,2 @@
+Attack-Upgrade  Armor-Upgrade   Adrenal-Glands  Metabolic-Boost
+0               0               0               0

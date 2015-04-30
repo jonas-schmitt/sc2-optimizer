@@ -1,0 +1,2 @@
+Attack-Upgrade  Armor-Upgrade   Shield-Upgrade 
+0               0               0

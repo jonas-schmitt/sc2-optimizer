@@ -1,0 +1,2 @@
+Attack-Upgrade  Armor-Upgrade   Glial-Reconstitution 
+0               0               0

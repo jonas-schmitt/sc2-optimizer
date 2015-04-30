@@ -1,0 +1,2 @@
+Attack-Upgrade  Armor-Upgrade 
+0               0           
