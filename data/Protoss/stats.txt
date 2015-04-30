@@ -1,0 +1,5 @@
+Name	Minerals	Gas	Size	Armor	Ar.-Upgrade	Health	Shield	Attr.	GA	GA-Upgrade	AA	AA-Upgrade	Bonus	Bonus-Upgrade	GA-Cooldown	AA-Cooldown	Speed	GA-Range	AA-Range	Energy	Max-Energy
+Probe	50		0	0.75	0	1		20	20	L,M	5	0		0	0		-	-		1.5		0		2.8125	0.1	0	0	0
+Zealot	100		0	0.75	1	1		100	50	L,B	16	2		0	0		-	-		1.2		0		2.25	0.1	0	0	0
+Sentry	50		100	1.25	1	1		40	40	L,M,P	6	2		6	2		-	-		1.0		1.0		2.25	5	5	50	200
+Stalker	125		50	1.25	1	1		80	80	A,M	10	1		10	1		A:4	-		1.44		1.44		2.9531	6	6	0	0
