@@ -66,6 +66,11 @@ void BaseUnit::setName(string name)
     mName = name;
 }
 
+UnitStats& BaseUnit::accessStats()
+{
+    return this->mStats;
+}
+
 string BaseUnit::getName() const
 {
     return mName;
@@ -75,6 +80,22 @@ string BaseUnit::getName() const
 void BaseUnit::setStats(const UnitStats& newStats)
 {
     this->mStats = newStats;
+}
+
+void BaseUnit::setMaxHealth (double const value)
+{
+    mStats.maxHealth = value;
+}
+
+void BaseUnit::incMaxHealth (double const value)
+{
+    mStats.maxHealth += value;
+}
+
+void BaseUnit::incHealth (double const value)
+{
+    double const health_new = mStats.health + value;
+    mStats.health = health_new < mStats.maxHealth ? health_new : mStats.maxHealth;
 }
 
 double BaseUnit::getMinerals() const
@@ -712,6 +733,16 @@ void BaseUnit::computeTemporaryValues()
     mMovementUpdateBackup = mMovementUpdate;
 }
 
+void BaseUnit::initUpgrades (vector<int> const& flags)
+{
+    if(flags.size() < 2)
+    {
+        return;
+    }
+    mAttackUpgrade = flags[0];
+    mArmorUpgrade = flags[1];
+}
+
 
 
 
@@ -803,6 +834,60 @@ void ProtossUnit::subShield(double const value)
     mShieldRegenCount = 10;
     BaseUnit::subShield(value);
 }
+
+void ProtossUnit::initUpgrades (vector<int> const &flags)
+{
+    BaseUnit::initUpgrades(flags);
+    if(flags.size() < 3)
+    {
+        mShieldUpgrade = flags[2];
+    }
+}
+
+
+void Marine::initUpgrades (vector<int> const& flags)
+{
+    if(flags.size() < 4)
+    {
+        return;
+    }
+    if(flags[2] == 1)
+    {
+        mStimpackAvail = true;
+    }
+    if(flags[3] == 1)
+    {
+        incMaxHealth(10);
+        incHealth(10);
+
+    }
+}
+
+void Marine::stimpack ()
+{
+    if(mStimpackTimer <= 0)
+    {
+        if(mStimpack)
+        {
+            mStats.gaCooldown *= 2.0;
+            mStats.aaCooldown *= 2.0;
+            //mStats.speed *= 0.5;
+            mMoveDist *= 0.5;
+        }
+        // TODO Decide if to use stimpack or not
+        if(mStats.health > 10)
+        {
+            mStats.gaCooldown *= 0.5;
+            mStats.aaCooldown *= 0.5;
+            //mStats.speed *= 2.0;
+            mMoveDist *= 2.0;
+            mStats.health -= 10.0;
+            mStimpackTimer = 15000;
+        }
+    }
+    mStimpackTimer -= mTimeSlice;
+}
+
 
 
 Reaper::Reaper()

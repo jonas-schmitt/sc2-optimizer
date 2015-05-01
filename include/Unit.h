@@ -261,6 +261,14 @@ public:
     // getter and setter
     void setStats(const UnitStats& newStats);
 
+    void setMaxHealth(double const value);
+
+    void incMaxHealth(double const value);
+
+    void incHealth(double const value);
+
+    UnitStats& accessStats();
+
     double getMaxDist() const;
 
     double getMinerals() const;
@@ -280,6 +288,7 @@ public:
     double getHealth() const ;
 
     double getMaxHealth() const;
+
 
     double getShield() const;
 
@@ -376,6 +385,8 @@ public:
     double computeRange(BaseUnit const& other) const;
     double computeAirRange(BaseUnit const& other) const;
     double computeGroundRange(BaseUnit const& other) const;
+
+    void initUpgrades(vector<int> const& flags);
 
 
 
@@ -607,7 +618,6 @@ public:
             }
         }
     }
-
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
@@ -658,6 +668,8 @@ public:
         BaseUnit::timestep(own, other);
         regenerate(own);
     }
+
+    void initUpgrades(vector<int> const& flags);
 };
 
 
@@ -670,7 +682,24 @@ class SCV final : public TerranUnit
 {};
 
 class Marine final : public TerranUnit
-{};
+{
+    bool mStimpackAvail = false;
+    bool mStimpack = false;
+    int mStimpackTimer = 0;
+    void initUpgrades(vector<int> const& flags);
+    void stimpack();
+
+public:
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        TerranUnit::timestep(own, other);
+        if(mStimpackAvail)
+        {
+            stimpack();
+        }
+    }
+
+};
 
 class Marauder final : public TerranUnit
 {};
