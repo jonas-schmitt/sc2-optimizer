@@ -57,7 +57,7 @@ string MicroSimulation<T, U>::getFilePath2() const
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
-    init1.init(unitList, pl1);
+    init1.init(unitList, mFilePath1, pl1);
     double const fieldSizeX = pl1.maxPos.x-pl1.minPos.x;
     double const fieldSizeY = pl1.maxPos.y-pl1.minPos.y;
     Vec2D startPos = Vec2D(pl1.minPos.x + fieldSizeX/20., pl1.minPos.y);
@@ -85,7 +85,7 @@ void MicroSimulation<T,U>::initPlayer1(vector<string>const& unitList, UnitGenes 
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 {
-    init2.init(unitList, pl2);
+    init2.init(unitList, mFilePath2, pl2);
     double const fieldSizeX = pl2.maxPos.x-pl2.minPos.x;
     double const fieldSizeY = pl2.maxPos.y-pl2.minPos.y;
     Vec2D startPos = Vec2D(pl2.maxPos.x - fieldSizeX/20., pl2.minPos.y);

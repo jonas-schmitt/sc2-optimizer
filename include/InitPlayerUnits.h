@@ -27,9 +27,9 @@ private:
         double const dist = fabs(pos.x-unit.getX());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(MAX*1000,0);
+            return Vec2D(100000,0);
         }
-        double const z = 1/pow(dist,3)*MAX*1000;
+        double const z = 1/pow(dist,3)*100000;
 
         return Vec2D(z,0);
     };
@@ -38,10 +38,10 @@ private:
         double const dist = fabs(pos.y-unit.getY());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(0,MAX*1000);
+            return Vec2D(0,100000);
         }
 
-        double const z = 1/pow(dist,3)*MAX*1000;
+        double const z = 1/pow(dist,3)*100000;
         return Vec2D(0,z);
     };
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxX = [](Vec2D const& pos,typename Race::BUT const& unit)
@@ -49,10 +49,10 @@ private:
         double const dist = fabs(pos.x-unit.getX());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(-MAX*1000,0);
+            return Vec2D(-100000,0);
         }
 
-        double const z = 1/pow(dist,3)*MAX*1000;
+        double const z = 1/pow(dist,3)*100000;
         return Vec2D(-z,0);
     };
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxY = [](Vec2D const& pos,typename Race::BUT const& unit)
@@ -60,26 +60,26 @@ private:
         double const dist = fabs(pos.y-unit.getY());
         if(dist < unit.getSpeed())
         {
-            return Vec2D(0,-MAX*1000);
+            return Vec2D(0,-100000);
         }
 
-        double const z = 1/pow(dist,3)*MAX*1000;
+        double const z = 1/pow(dist,3)*100000;
         return Vec2D(0,-z);
     };
 
 
     UnitFactory<Race> mFactory;
-	std::string mFilePath;
+    std::string mPath;
     vector<string>& split(const string &s, char delim, vector<string> &tokens);
     vector<string> split(string const &s, char delim);
 public:
 	InitPlayerUnits();
-	InitPlayerUnits(const std::string& filePath);
+    InitPlayerUnits(const std::string& path);
     void readStats();
-	std::string getFilePath() const;
-	void setFilePath(const std::string& filePath);
+    std::string getPath() const;
+    void setPath(const std::string& path);
     void init(const std::vector<std::string> &unitVec, PlayerState<Race>& pl);
-    void init (const std::vector<std::string>& unitVec, const std::string& filePath, PlayerState<Race>& pl);
+    void init (const std::vector<std::string>& unitVec, const std::string& path, PlayerState<Race>& pl);
 	
 };
 

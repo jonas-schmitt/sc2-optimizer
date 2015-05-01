@@ -1,24 +1,26 @@
 #include<unordered_map>
 #include<string>
 #include<algorithm>
+#include<fstream>
 #include "../include/InitPlayerUnits.h"
 using std::string;
 using std::stringstream;
 using std::vector;
 using std::sort;
+using std::ifstream;
 
 template<class Race>
 InitPlayerUnits<Race>::InitPlayerUnits()
 {}
 
 template<class Race>
-InitPlayerUnits<Race>::InitPlayerUnits(const std::string& filePath)
+InitPlayerUnits<Race>::InitPlayerUnits(const std::string& path) : mFactory(path)
 {
-	if (filePath.empty())
+    if (path.empty())
 	{
 		throw std::invalid_argument("InitPlayerUnits::InitPlayerUnits(const string&): The file path passed as argument is an empty string.");
 	}
-	mFilePath = filePath;
+    mPath = path;
 	readStats();
 }
 template<class Race>
@@ -39,19 +41,20 @@ vector<string> InitPlayerUnits<Race>::split(string const &s, char delim) {
 }
 
 template<class Race>
-void InitPlayerUnits<Race>::setFilePath(const std::string& filePath)
+void InitPlayerUnits<Race>::setPath(const std::string& path)
 {
-	if (filePath.empty())
+    if (path.empty())
 	{
-		throw std::invalid_argument("InitPlayerUnits::setFilePath(const string&): The file path passed as argument is an empty string.");
+        throw std::invalid_argument("InitPlayerUnits::setpath(const string&): The file path passed as argument is an empty string.");
 	}
-	mFilePath = filePath;
+    mPath = path;
+    mFactory.setPath (path);
 }
 
 template <class Race>
-std::string InitPlayerUnits<Race>::getFilePath() const
+std::string InitPlayerUnits<Race>::getPath() const
 {
-	return mFilePath;
+    return mPath;
 }
 
 
@@ -59,13 +62,13 @@ template <class Race>
 void InitPlayerUnits<Race>::readStats()
 {
 
-	DataReader reader(mFilePath);
+    ifstream file;
+    file.open (mPath+"/stats.txt");
 	std::string line;
 	std::string name;
 
     std::unordered_map<std::string, UnitStats> statMap;
-
-	while (!((line = reader.getLine()).empty()))
+    while (std::getline(file, line))
 	{
 		std::stringstream stream(line);
 		if (!(stream >> name) || name == "Name" || name.empty())
@@ -300,14 +303,15 @@ void InitPlayerUnits<Race>::readStats()
         statMap[name] = stats;
 
 	}
-    mFactory.setUmap(statMap);
+    mFactory.setHashMap(statMap);
+    file.close ();
 }
 
 
 template <class Race>
 void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, PlayerState<Race>& pl)
 {
-	if (mFilePath.empty())
+    if (mPath.empty())
 	{
 		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&): The file path currently stored is an empty string.");
 	}
@@ -315,7 +319,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, Player
 	{
 		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&): The vector containing the names of all units to create is empty");
 	}
-	if (mFactory.isUmapEmpty())
+    if (mFactory.isHashMapEmpty())
 	{
 		readStats();
 	}
@@ -334,9 +338,9 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, Player
 }
 
 template <class Race>
-void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const std::string& filePath, PlayerState<Race>& pl)
+void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const std::string& path, PlayerState<Race>& pl)
 {
-	if (filePath.empty())
+    if (path.empty())
 	{
 		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&, const string&): The file path passed as argument is an empty string.");
 	}
@@ -344,7 +348,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 	{
 		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&, const string&): The vector containing the names of all units to create is empty");
 	}
-	setFilePath(filePath);
+    setPath(path);
 	readStats();
     mFactory.create(unitVec, pl);
 

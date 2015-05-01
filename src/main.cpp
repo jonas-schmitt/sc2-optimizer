@@ -118,8 +118,8 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    std::string filePath1 = baseDir+"./data/"+race1+"/stats.txt";
-    std::string filePath2 = baseDir+"./data/"+race2+"/stats.txt";
+    std::string filePath1 = baseDir+"./data/"+race1;
+    std::string filePath2 = baseDir+"./data/"+race2;
     std::string folder = "mkdir -p " + baseDir+"../results/";
     if (system(folder.c_str()))
     {}

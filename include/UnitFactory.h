@@ -27,33 +27,53 @@ template <class Race>
 class UnitFactory : public Race 
 {
 private:
-	unordered_map<string, UnitStats> mUmap;
+    unordered_map<string, UnitStats> mHashMap;
+    string mPath;
 	
 public:
 	UnitFactory()
 	{}
 
-	UnitFactory(const unordered_map<string, UnitStats> &umap)
-        : mUmap(umap)
+    UnitFactory(string const& path)
+        : mPath(path)
+    {}
+
+    UnitFactory(unordered_map<string, UnitStats> const &hashMap)
+        : mHashMap(hashMap)
 	{}
 
-    UnitFactory(const UnitFactory<Race>& unitFactory)
-        : mUmap(unitFactory.getUmap())
+    UnitFactory(unordered_map<string, UnitStats> const &hashMap, string const& path)
+        : mHashMap(hashMap), mPath(path)
     {}
-    
-    unordered_map<string,UnitStats> const& getUmap() const
+
+    UnitFactory(const UnitFactory<Race>& unitFactory)
+        : mHashMap(unitFactory.getHashMap()), mPath(mPath)
+    {}
+
+    string getPath() const
     {
-        return mUmap;
+        return mPath;
     }
 
-	void setUmap(const unordered_map<string, UnitStats> &umap)
+    void setPath(const string &path)
+    {
+        mPath = path;
+    }
+
+    unordered_map<string,UnitStats> const& getHashMap() const
+    {
+        return mHashMap;
+    }
+
+    void setHashMap(const unordered_map<string, UnitStats> &hashMap)
 	{
-		mUmap = umap;
+        mHashMap = hashMap;
 	}
 
-	bool isUmapEmpty() const
+
+    bool isHashMapEmpty() const
 	{
-		return mUmap.empty();
+        return mHashMap.empty();
 	}
 
     template<typename T>
@@ -61,15 +81,16 @@ public:
     {
         T unit;
         unit.setName(name);
-        unit.setStats(mUmap[name]);
+        unit.setStats(mHashMap[name]);
         ifstream file;
-        file.open("./data/upgrades/"+name);
+        file.open(mPath+"/upgrades/"+name+".txt");
         string buf;
+        std::getline(file, buf);
         std::getline(file, buf);
         int flag;
         stringstream ss(buf);
         vector<int> flags;
-        while(!(ss >> flag))
+        while(ss >> flag)
         {
             flags.push_back (flag);
         }
