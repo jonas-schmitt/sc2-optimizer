@@ -95,8 +95,13 @@ public:
             flags.push_back (flag);
         }
         file.close ();
+        if(flags.size () < 2)
+        {
+            flags.resize(2);
+        }
         //TODO implement unit specific method for applying upgrades
         // this method sets the upgrades according to the flags that are passed
+        unit.initUpgrades(flags);
 
         unit.setIdentifier(x);
         unitListX.push_back (std::move(unit));

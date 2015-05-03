@@ -116,9 +116,9 @@ protected:
 
     int mMovementUpdate = 100;
 
-    int mAttackUpgrade = 0;
-    int mArmorUpgrade = 0;
-    int mShieldUpgrade = 0;
+    int mAttackUpgrade;
+    int mArmorUpgrade;
+    int mShieldUpgrade;
 
     double mAttackMultiplier = 1.0;
     double mDefenseMultiplier = 1.0;
@@ -247,7 +247,7 @@ public:
 
     BaseUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
-    BaseUnit(BaseUnit const& baseUnit);
+    //BaseUnit(BaseUnit const& baseUnit);
 
 
     Vec2D computeFriendForce(BaseUnit & other);
@@ -388,6 +388,12 @@ public:
 
     void initUpgrades(vector<int> const& flags);
 
+
+    template<typename T> double computeDistance(T const& unit)
+    {
+        Vec2D distVec(unit.getX()-mPos.x, unit.getY()-mPos.y);
+        return distVec.computeLength();
+    }
 
 
 
@@ -571,17 +577,17 @@ public:
 class TerranUnit : public BaseUnit
 {
 public:
-    TerranUnit();
+//    TerranUnit();
 
-    TerranUnit(string name);
+//    TerranUnit(string name);
 
-    TerranUnit(const UnitStats& baseStats);
+//    TerranUnit(const UnitStats& baseStats);
 
-    TerranUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
+//    TerranUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
-    TerranUnit(TerranUnit const& terranUnit);
+//    TerranUnit(TerranUnit const& terranUnit);
 
-    TerranUnit(BaseUnit const& baseUnit);
+//    TerranUnit(BaseUnit const& baseUnit);
 
     template <typename T> void regenerate(PlayerState<T>&) {}
 
@@ -590,23 +596,84 @@ public:
         BaseUnit::timestep(own, other);
         regenerate(own);
     }
+    //void initUpgrades(vector<int> const& flags);
+};
+
+class TerranBioUnit : public TerranUnit
+{
+    bool mStimpackAvail = false;
+    bool mStimpack = false;
+    int mStimpackTimer = 0;
+
+    template<typename T> void stimpack(vector<T *> const & unitList)
+    {
+        if(mStimpackTimer <= 0)
+        {
+            if(mStimpack)
+            {
+                mStats.gaCooldown *= 2.0;
+                mStats.aaCooldown *= 2.0;
+                //mStats.speed *= 0.5;
+                mMoveDist *= 0.5;
+                mStimpack = false;
+            }
+            double const multiplier = 2.0;
+            double const threshold = 20.0;
+
+            bool applyStimpack = false;
+            if(mStats.health > threshold)
+            {
+                for(auto const unit : unitList)
+                {
+                    if(computeDistance(*unit) < mMoveDist*multiplier + computeRange(*unit))
+                    {
+                        applyStimpack = true;
+                        break;
+                    }
+                }
+            }
+            if(applyStimpack)
+            {
+                mStats.gaCooldown *= 0.5;
+                mStats.aaCooldown *= 0.5;
+                //mStats.speed *= 2.0;
+                mMoveDist *= 2.0;
+                mStats.health -= 10.0;
+                mStimpackTimer = 15000;
+                mStimpack = true;
+                return;
+            }
+        }
+        mStimpackTimer -= mTimeSlice;
+    }
+
+public:
+    void initUpgrades(vector<int> const& flags);
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        if(mStimpackAvail)
+        {
+            stimpack(other.unitList);
+        }
+        TerranUnit::timestep(own, other);
+    }
 };
 
 class ZergUnit : public BaseUnit
 {
 
 public:
-    ZergUnit();
+//    ZergUnit();
 
-    ZergUnit(string name);
+//    ZergUnit(string name);
 
-    ZergUnit(const UnitStats& baseStats);
+//    ZergUnit(const UnitStats& baseStats);
 
-    ZergUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
+//    ZergUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
-    ZergUnit(ZergUnit const& zergUnit);
+//    ZergUnit(ZergUnit const& zergUnit);
 
-    ZergUnit(BaseUnit const& baseUnit);
+//    ZergUnit(BaseUnit const& baseUnit);
 
     template <typename T> void regenerate(PlayerState<T>& state)
     {
@@ -623,6 +690,7 @@ public:
         BaseUnit::timestep(own, other);
         regenerate(own);
     }
+    //void initUpgrades(vector<int> const& flags);
 
 };
 
@@ -631,17 +699,17 @@ class ProtossUnit : public BaseUnit
 protected:
     int mShieldRegenCount = 0;
 public:
-    ProtossUnit();
+//    ProtossUnit();
 
-    ProtossUnit(string name);
+//    ProtossUnit(string name);
 
-    ProtossUnit(const UnitStats& baseStats);
+//    ProtossUnit(const UnitStats& baseStats);
 
-    ProtossUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
+//    ProtossUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
-    ProtossUnit(ProtossUnit const& protossUnit);
+//    ProtossUnit(ProtossUnit const& protossUnit);
 
-    ProtossUnit(BaseUnit const& baseUnit);
+//    ProtossUnit(BaseUnit const& baseUnit);
 
     void subShield(double const value);
 
@@ -681,28 +749,18 @@ public:
 class SCV final : public TerranUnit
 {};
 
-class Marine final : public TerranUnit
-{
-    bool mStimpackAvail = false;
-    bool mStimpack = false;
-    int mStimpackTimer = 0;
-    void initUpgrades(vector<int> const& flags);
-    void stimpack();
-
+class Marine final : public TerranBioUnit
+{ 
 public:
-    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
-    {
-        TerranUnit::timestep(own, other);
-        if(mStimpackAvail)
-        {
-            stimpack();
-        }
-    }
-
+    void initUpgrades(vector<int> const& flags);
 };
 
-class Marauder final : public TerranUnit
-{};
+class Marauder final : public TerranBioUnit
+{
+    bool mConcussiveShellsAvail = false;
+public:
+    void initUpgrades(vector<int> const& flags);
+};
 
 class Reaper final : public TerranUnit
 {
@@ -710,19 +768,19 @@ protected:
     int mHealthRegenCount = 0;
 public:
 
-    Reaper();
+//    Reaper();
 
-    Reaper(string name);
+//    Reaper(string name);
 
-    Reaper(const UnitStats& baseStats);
+//    Reaper(const UnitStats& baseStats);
 
-    Reaper(const UnitStats& baseStats, Vec2D min, Vec2D max);
+//    Reaper(const UnitStats& baseStats, Vec2D min, Vec2D max);
 
-    Reaper(Reaper const& Reaper);
+//    Reaper(Reaper const& Reaper);
 
-    Reaper(BaseUnit const& baseUnit);
+//    Reaper(BaseUnit const& baseUnit);
 
-    Reaper(TerranUnit const& terranUnit);
+//    Reaper(TerranUnit const& terranUnit);
 
     void subHealth(double const value);
 
@@ -799,7 +857,10 @@ class Baneling final : public ZergUnit
 {};
 
 class Roach final : public ZergUnit
-{};
+{
+public:
+    void initUpgrades (vector<int> const& flags);
+};
 
 class Hydralisk final : public ZergUnit
 {};

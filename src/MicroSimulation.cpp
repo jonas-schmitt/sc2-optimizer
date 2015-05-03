@@ -270,16 +270,14 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
     {
         resetBothPlayers();
     }
+
+    res.score = res.health+res.damage;
+    res.health /= maxHealth;
+    res.damage /= maxDamage;
     if(res.damage < res.health)
     {
         res.score = 0;
     }
-    else
-    {
-        res.score = res.health+res.damage;
-    }
-    res.health /= maxHealth;
-    res.damage /= maxDamage;
     return res;
 }
 
