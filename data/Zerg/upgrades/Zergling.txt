@@ -1,2 +1,2 @@
-Attack-Upgrade  Armor-Upgrade   Adrenal-Glands  Metabolic-Boost
+Attack-Upgrade  Armor-Upgrade   Metabolic-Boost Adrenal-Glands
 0               0               0               0

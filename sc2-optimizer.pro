@@ -25,21 +25,28 @@ HEADERS += include/DataReader.h \
            include/Race.h \
            include/raceSelector.h \
            include/TemplateInit.h \
-           include/Unit.h \
            include/UnitFactory.h \ 
 	   include/UnitOptimizer.h \
 	   include/UnitOptimizerBase.h \
            include/UnitGenes.h \
-           include/Utilities.h
+           include/Utilities.h \
+    include/Terran.h \
+    include/Zerg.h \
+    include/BaseUnit.h \
+    include/Unit.h \
+    include/Protoss.h
 
 SOURCES += src/DataReader.cpp \
            src/GuiWindow.cpp \
 	   src/raceSelector.cpp \
            src/InitPlayerUnits.cpp \
-           src/Unit.cpp \
            src/MicroSimulation.cpp \
 	   src/GuiInterface.cpp \
 	   src/PlayerToolbar.cpp \
            src/PlayGround.cpp \
 	   src/UnitOptimizer.cpp \
-	   src/main.cpp
+	   src/main.cpp \
+    src/Terran.cpp \
+    src/Zerg.cpp \
+    src/BaseUnit.cpp \
+    src/Protoss.cpp

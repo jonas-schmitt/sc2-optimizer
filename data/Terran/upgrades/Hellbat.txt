@@ -1,0 +1,2 @@
+Attack-Upgrade  Armor-Upgrade   Infernal-Pre-Igniter
+0               0               0
