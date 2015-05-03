@@ -84,6 +84,8 @@ void BaseUnit::setStats(const UnitStats& newStats)
     this->mStats = newStats;
 }
 
+
+
 void BaseUnit::setMaxHealth (double const value)
 {
     mStats.maxHealth = value;
@@ -535,10 +537,12 @@ double BaseUnit::getMoveDist() const
     return mMoveDist;
 }
 
-void BaseUnit::setMoveDist(double value)
+void BaseUnit::multSpeed (double value)
 {
-    mMoveDist = value;
+    mStats.speed *= value;
+    mMoveDist *= value;
 }
+
 Damage BaseUnit::computeDamage(BaseUnit const& other) const
 {
     double totalDamage = 0.0;
@@ -637,6 +641,7 @@ bool BaseUnit::attack(BaseUnit& unit)
     {
         this->setAttackTimer(this->getGACooldown());
     }
+    mTarget = &unit;
     return unit.getHealth() < EPS;
 }
 
@@ -841,13 +846,20 @@ void ProtossUnit::subShield(double const value)
     BaseUnit::subShield(value);
 }
 
+void ProtossUnit::subHealth(double const value)
+{
+    mShieldRegenCount = 10;
+    BaseUnit::subHealth(value);
+}
+
 void ProtossUnit::initUpgrades (vector<int> const &flags)
 {
     BaseUnit::initUpgrades(flags);
     if(flags.size() < 3)
     {
-        mShieldUpgrade = flags[2];
+        return;
     }
+    mShieldUpgrade = flags[2];
 }
 
 
@@ -878,6 +890,21 @@ void Marine::initUpgrades(const vector<int> &flags)
     }
 }
 
+void Marauder::concussiveShells ()
+{
+    if(mTarget == nullptr)
+    {
+        return;
+    }
+    if(!mTarget->mCSAffected)
+    {
+        mTarget->multSpeed (0.5);
+        mTarget->mCSAffected = true;
+        mCSData.emplace_back(1500, mTarget);
+        mTarget = nullptr;
+    }
+}
+
 void Marauder::initUpgrades(const vector<int> &flags)
 {
     TerranBioUnit::initUpgrades (flags);
@@ -887,7 +914,7 @@ void Marauder::initUpgrades(const vector<int> &flags)
     }
     if(flags[3] == 1)
     {
-        mConcussiveShellsAvail = true;
+        mCSAvail = true;
     }
 }
 

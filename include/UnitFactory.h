@@ -99,7 +99,6 @@ public:
         {
             flags.resize(2);
         }
-        //TODO implement unit specific method for applying upgrades
         // this method sets the upgrades according to the flags that are passed
         unit.initUpgrades(flags);
 

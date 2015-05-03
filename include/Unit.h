@@ -11,6 +11,7 @@
 #include<vector>
 #include<typeinfo>
 #include<array>
+#include<deque>
 
 
 #include "PlayerState.h"
@@ -26,6 +27,7 @@ using std::list;
 using std::string;
 using std::vector;
 using std::array;
+using std::deque;
 
 
 enum Attribute
@@ -116,9 +118,9 @@ protected:
 
     int mMovementUpdate = 100;
 
-    int mAttackUpgrade;
-    int mArmorUpgrade;
-    int mShieldUpgrade;
+    int mAttackUpgrade = 0.0;
+    int mArmorUpgrade = 0.0;
+    int mShieldUpgrade = 0.0;
 
     double mAttackMultiplier = 1.0;
     double mDefenseMultiplier = 1.0;
@@ -137,6 +139,9 @@ protected:
     double mMoveDist;
 
     bool mCollision = false;
+
+    BaseUnit *mTarget = nullptr;
+
 
 
 
@@ -239,6 +244,8 @@ public:
     Damage mPossibleDamage[18];
     int mMovementUpdateBackup;
 
+    bool mCSAffected = false;
+
     BaseUnit();
 
     BaseUnit(string name);
@@ -260,6 +267,8 @@ public:
 
     // getter and setter
     void setStats(const UnitStats& newStats);
+
+    void setSpeed(double value);
 
     void setMaxHealth(double const value);
 
@@ -568,7 +577,8 @@ public:
     bool hasCollision() const;
     void setCollision(bool value);
     double getMoveDist() const;
-    void setMoveDist(double value);
+    void multSpeed(double value);
+
 };
 
 
@@ -713,6 +723,8 @@ public:
 
     void subShield(double const value);
 
+    void subHealth(double const value);
+
     template <typename T> void regenerate(PlayerState<T>& state)
     {
         if(state.regenerationTimer <= 0)
@@ -721,13 +733,11 @@ public:
             {
                 BaseUnit::addShield(2.0 * state.regenerationUpdate / 1000);
             }
-            else
+            else if(mShieldRegenCount > 0)
             {
-                if(mShieldRegenCount > 0)
-                {
-                    --mShieldRegenCount;
-                }
+                --mShieldRegenCount;
             }
+
         }
     }
 
@@ -757,9 +767,36 @@ public:
 
 class Marauder final : public TerranBioUnit
 {
-    bool mConcussiveShellsAvail = false;
+private:
+    bool mCSAvail = false;
+    deque<pair<int,BaseUnit *>> mCSData;
+
+    void concussiveShells();
+
 public:
     void initUpgrades(vector<int> const& flags);
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        TerranBioUnit::timestep(own, other);
+        if(mCSAvail)
+        {
+            concussiveShells();
+            if(mCSData.size() > 0)
+            {
+                if(mCSData.front().first <= 0)
+                {
+                    BaseUnit& unit = *mCSData.front().second;
+                    unit.multSpeed (2.0);
+                    unit.mCSAffected = false;
+                    mCSData.pop_front();
+                }
+                for(auto& el : mCSData)
+                {
+                    el.first -= mTimeSlice;
+                }
+            }
+        }
+    }
 };
 
 class Reaper final : public TerranUnit
