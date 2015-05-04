@@ -1,6 +1,34 @@
 #ifndef BASEUNIT_H_
 #define BASEUNIT_H_
 
+#include<utility>
+#include<functional>
+#include<cmath>
+#include<list>
+#include<chrono>
+#include<random>
+#include<string>
+#include<vector>
+#include<typeinfo>
+#include<array>
+#include<deque>
+
+
+#include "PlayerState.h"
+#include "Utilities.h"
+#include "UnitGenes.h"
+#include "BaseUnit.h"
+
+using std::pair;
+using std::tuple;
+using std::function;
+using std::pow;
+using std::sqrt;
+using std::list;
+using std::string;
+using std::vector;
+using std::array;
+using std::deque;
 
 enum Attribute
 {
@@ -60,6 +88,8 @@ struct UnitStats
     int aaCooldown = 0;
 
     double sumMaxHealthAndShield = 0;
+
+    double creepMultiplier = 1.0;
 
 
     vector<Attribute> attributes;
@@ -297,6 +327,8 @@ public:
 
     void subHealth(double const value);
 
+    void setHealth(double const value);
+
     void addShield(double const value);
 
     void subShield(double const value);
@@ -386,7 +418,6 @@ public:
         }
         decAttackTimer();
         decMovementTimer();
-
     }
 
 

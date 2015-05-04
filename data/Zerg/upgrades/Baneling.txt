@@ -1,2 +1,2 @@
-Attack-Upgrade  Armor-Upgrade   Centrifugal-Hooks
-0               0               0
+Attack-Upgrade  Armor-Upgrade   Creep   Centrifugal-Hooks 
+0               0               0       0

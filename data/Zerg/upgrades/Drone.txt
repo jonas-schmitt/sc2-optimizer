@@ -1,2 +1,2 @@
-Attack-Upgrade  Armor-Upgrade 
-0               0           
+Attack-Upgrade  Armor-Upgrade   Creep 
+0               0               0    

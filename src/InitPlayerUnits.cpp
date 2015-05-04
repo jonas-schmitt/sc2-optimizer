@@ -293,7 +293,8 @@ void InitPlayerUnits<Race>::readStats()
              >> stats.groundRange
              >> stats.airRange
              >> stats.energy
-             >> stats.maxEnergy))
+             >> stats.maxEnergy
+             >> stats.creepMultiplier))
         {
             continue;
         }

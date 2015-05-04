@@ -31,24 +31,32 @@
 //    : BaseUnit(baseUnit)
 //{}
 
-//void ZergUnit::initUpgrades (vector<int> const &flags)
-//{
-//    BaseUnit::initUpgrades (flags);
-//}
-
-void Zergling::initUpgrades (vector<int> const& flags)
+void ZergUnit::initUpgrades (vector<int> const &flags)
 {
-    ZergUnit::initUpgrades (flags);
-    if(flags.size () < 4)
+    BaseUnit::initUpgrades (flags);
+    if(flags.size () < 3)
     {
         return;
     }
     if(flags[2] == 1)
     {
+        mStats.speed *= mStats.creepMultiplier;
+    }
+}
+
+void Zergling::initUpgrades (vector<int> const& flags)
+{
+    ZergUnit::initUpgrades (flags);
+    if(flags.size () < 5)
+    {
+        return;
+    }
+    if(flags[3] == 1)
+    {
         mStats.speed *= 1.6;
         mMoveDist *= 1.6;
     }
-    if(flags[3] == 1)
+    if(flags[4] == 1)
     {
         mStats.gaCooldown -= 109;
     }
@@ -57,15 +65,18 @@ void Zergling::initUpgrades (vector<int> const& flags)
 void Baneling::initUpgrades (vector<int> const& flags)
 {
     ZergUnit::initUpgrades (flags);
-    if(flags.size () < 3)
+    if(flags.size () < 4)
     {
         return;
     }
-    if(flags[2] == 1)
+    if(flags[3] == 1)
     {
+        bool const creep = flags[2] == 1;
+        if(creep) mStats.speed /= mStats.creepMultiplier;
         mStats.speed += 0.4531;
-        mMoveDist = mStats.speed*mTimeSlice/1000.0;
+        if(creep) mStats.speed *= mStats.creepMultiplier;
     }
+
 
 }
 
@@ -74,15 +85,15 @@ void Baneling::initUpgrades (vector<int> const& flags)
 void Roach::initUpgrades (vector<int> const& flags)
 {
     ZergUnit::initUpgrades (flags);
-    if(flags.size () < 3)
+    if(flags.size () < 4)
     {
         return;
     }
-    if(flags[2] == 1)
+    if(flags[3] == 1)
     {
         mStats.speed += 0.75;
-        mMoveDist = mStats.speed*mTimeSlice/1000.0;
     }
+
 }
 
 

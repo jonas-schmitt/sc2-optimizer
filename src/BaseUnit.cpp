@@ -217,6 +217,11 @@ void BaseUnit::subHealth(double const value)
     mStats.health = mStats.health > value ? mStats.health - value : 0.0;
 }
 
+void BaseUnit::setHealth(double const value)
+{
+    mStats.health = value;
+}
+
 void BaseUnit::addShield(double const value)
 {
     if(mStats.shield + value > mStats.maxShield)
