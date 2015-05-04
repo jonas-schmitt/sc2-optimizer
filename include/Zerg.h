@@ -52,7 +52,7 @@ public:
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
-                BaseUnit::addHealth(0.27 * state.regenerationUpdate / 1000);
+                BaseUnit::addHealth(0.27 * state.regenerationUpdate * 1e-3);
             }
         }
     }
