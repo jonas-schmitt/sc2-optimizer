@@ -91,6 +91,7 @@ void Roach::initUpgrades (vector<int> const& flags)
     }
     if(flags[3] == 1)
     {
+        bool const creep = flags[2] == 1;
         if(creep) mStats.speed /= mStats.creepMultiplier;
         mStats.speed += 0.75;
         if(creep) mStats.speed *= mStats.creepMultiplier;
