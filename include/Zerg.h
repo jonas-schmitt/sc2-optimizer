@@ -71,7 +71,61 @@ class Drone final : public ZergUnit
 {};
 
 class Queen final : public ZergUnit
-{};
+{
+    int mTransfusionTimer = 0;
+    template<typename T> void transfuse(PlayerState<T> own)
+    {
+        if(mTransfusionTimer <= 0 && mStats.energy >= 50)
+        {
+            typename T::RUT *target = nullptr;
+            double max = 0.0;
+            for(auto unit : own.unitList)
+            {
+                if(unit == this) continue;
+                double const lostHealth = unit->getMaxHealth() - unit->getHealth();
+                if(lostHealth > 100.0)
+                {
+                    if(lostHealth > max)
+                    {
+                        max = lostHealth;
+                        target = unit;
+                    }
+                }
+            }
+            if(max > 0.0)
+            {
+                target->incHealth(125.0);
+                mStats.energy -= 50.0;
+                mTransfusionTimer = 1000;
+            }
+
+        }
+
+    }
+
+public:
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        ZergUnit::regenerate(state);
+        if(state.regenerationTimer <= 0)
+        {
+            if(mStats.energy < mStats.maxEnergy)
+            {
+                mStats.energy += 0.5625;
+                if(mStats.energy > mStats.maxEnergy)
+                {
+                    mStats.energy = mStats.maxEnergy;
+                }
+            }
+        }
+    }
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        BaseUnit::timestep(own, other);
+        regenerate(own);
+        transfuse(own);
+    }
+};
 
 class Zergling final : public ZergUnit
 {

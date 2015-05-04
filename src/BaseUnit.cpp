@@ -244,6 +244,7 @@ void BaseUnit::subShield(double const value)
     mStats.shield = mStats.shield > value ? mStats.shield - value : 0;
 }
 
+
 void BaseUnit::resetHealth()
 {
     mStats.health = mStats.maxHealth;

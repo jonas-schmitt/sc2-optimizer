@@ -443,7 +443,7 @@ public:
             }
             for(auto buddy :  own.unitList)
             {
-                if(buddy->getHealth() < EPS)
+                if(buddy->getHealth() < EPS || static_cast<BaseUnit*>(buddy) == this)
                 {
                     continue;
                 }
