@@ -415,8 +415,9 @@ public:
         if(!(attack(other)))
         {
             move(own, other);
+            decAttackTimer ();
+            return;
         }
-        decAttackTimer();
         decMovementTimer();
     }
 
