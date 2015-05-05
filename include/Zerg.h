@@ -52,7 +52,7 @@ public:
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
-                BaseUnit::addHealth(0.27 * state.regenerationUpdate * 1e-3);
+                addHealth(0.27 * state.regenerationUpdate * 1e-3);
             }
         }
     }
@@ -73,17 +73,21 @@ class Drone final : public ZergUnit
 class Queen final : public ZergUnit
 {
     int mTransfusionTimer = 0;
-    template<typename T> void transfuse(PlayerState<T> own)
+    template<typename T> void transfuse(vector<T *>& unitList)
     {
         if(mTransfusionTimer <= 0 && mStats.energy >= 50)
         {
-            typename T::RUT *target = nullptr;
+            T *target = nullptr;
             double max = 0.0;
-            for(auto unit : own.unitList)
+            double const threshold = 100.0;
+            for(T* unit : unitList)
             {
-                if(unit == this) continue;
+                if(unit == static_cast<T *>(this) || unit->getHealth() < EPS)
+                {
+                    continue;
+                }
                 double const lostHealth = unit->getMaxHealth() - unit->getHealth();
-                if(lostHealth > 100.0)
+                if(lostHealth > threshold && computeDistance(*unit) - 7.0 < EPS)
                 {
                     if(lostHealth > max)
                     {
@@ -97,8 +101,13 @@ class Queen final : public ZergUnit
                 target->incHealth(125.0);
                 mStats.energy -= 50.0;
                 mTransfusionTimer = 1000;
+                return;
             }
 
+        }
+        if(mTransfusionTimer > 0)
+        {
+            mTransfusionTimer -= mTimeSlice;
         }
 
     }
@@ -106,12 +115,15 @@ class Queen final : public ZergUnit
 public:
     template <typename T> void regenerate(PlayerState<T>& state)
     {
-        ZergUnit::regenerate(state);
         if(state.regenerationTimer <= 0)
         {
+            if(mStats.health > EPS && mStats.health < mStats.maxHealth)
+            {
+                addHealth(0.27 * state.regenerationUpdate * 1e-3);
+            }
             if(mStats.energy < mStats.maxEnergy)
             {
-                mStats.energy += 0.5625;
+                mStats.energy += 0.5625 *state.regenerationUpdate * 1e-3;
                 if(mStats.energy > mStats.maxEnergy)
                 {
                     mStats.energy = mStats.maxEnergy;
@@ -123,7 +135,7 @@ public:
     {
         BaseUnit::timestep(own, other);
         regenerate(own);
-        transfuse(own);
+        transfuse(own.unitList);
     }
 };
 
