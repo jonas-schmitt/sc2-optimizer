@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     {}
     std::string outPath = baseDir+"./results/" + race1 + "_" + race2 + "/" + tmp1 + "_" + tmp2 + ".txt";
     std::cout << outPath << std::endl;
-    size_t const iterations = 5, stepsPerIteration = 1000, initialPopulationSize = 100;
+    size_t const iterations = 5, stepsPerIteration = 100, initialPopulationSize = 50;
 
     int const x = (MAX-MIN)/2;
 

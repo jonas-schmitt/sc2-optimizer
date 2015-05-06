@@ -55,3 +55,18 @@ void ProtossUnit::initUpgrades (vector<int> const &flags)
     }
     mShieldUpgrade = flags[2];
 }
+
+void Zealot::initUpgrades(const vector<int> &flags)
+{
+    ProtossUnit::initUpgrades(flags);
+    if(flags.size() < 4)
+    {
+        return;
+    }
+    if(flags[3] == 1)
+    {
+        mChargeAvail = true;
+        mStats.speed += 0.5;
+    }
+
+}

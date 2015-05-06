@@ -58,20 +58,20 @@ class TerranUnit : public BaseUnit
 class TerranBioUnit : public TerranUnit
 {
     bool mStimpackAvail = false;
-    bool mStimpack = false;
-    int mStimpackTimer = 0;
+    bool mStimpackActive = false;
+    int mStimpackDurationTimer = 0;
 
     template<typename T> void stimpack(vector<T *> const & unitList)
     {
-        if(mStimpackTimer <= 0)
+        if(mStimpackDurationTimer <= 0)
         {
-            if(mStimpack)
+            if(mStimpackActive)
             {
                 mStats.gaCooldown *= 2.0;
                 mStats.aaCooldown *= 2.0;
                 //mStats.speed *= 0.5;
                 mMoveDist *= 0.5;
-                mStimpack = false;
+                mStimpackActive = false;
             }
             double const multiplier = 2.0;
             double const threshold = 20.0;
@@ -95,12 +95,12 @@ class TerranBioUnit : public TerranUnit
                 //mStats.speed *= 2.0;
                 mMoveDist *= 2.0;
                 mStats.health -= 10.0;
-                mStimpackTimer = 15000;
-                mStimpack = true;
+                mStimpackDurationTimer = 15000;
+                mStimpackActive = true;
                 return;
             }
         }
-        mStimpackTimer -= mTimeSlice;
+        mStimpackDurationTimer -= mTimeSlice;
     }
 
 public:

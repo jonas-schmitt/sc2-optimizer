@@ -84,7 +84,68 @@ class Probe final : public ProtossUnit
 {};
 
 class Zealot final : public ProtossUnit
-{};
+{
+    bool mChargeAvail = false;
+    bool mChargeActive = false;
+    int mChargeAvailTimer = 0;
+    int mChargeDurationTimer = 0;
+    double const mApplyChargeFactor = 2.2;
+    double const mRemoveChargeFactor = 1.0/mApplyChargeFactor;
+
+    template<typename T> void charge(vector<T *> const & unitList)
+    {
+
+        if(mChargeAvailTimer <= 0 && !mChargeActive)
+        {
+            bool applyCharge = false;
+            for(T *enemy : unitList)
+            {
+                if(enemy->attackPossible(*this))
+                {
+                    applyCharge = true;
+                    break;
+                }
+            }
+            if(applyCharge)
+            {
+                mStats.speed *= mApplyChargeFactor;
+                mMoveDist *= mApplyChargeFactor;
+
+                mChargeActive = true;
+                mChargeDurationTimer = 3500;
+
+                mChargeAvailTimer = 10000;
+            }
+        }
+        if(mChargeAvailTimer > 0)
+        {
+            mChargeAvailTimer -= mTimeSlice;
+        }
+
+        if(mChargeDurationTimer > 0)
+        {
+            mChargeDurationTimer -= mTimeSlice;
+        }
+        else if(mChargeActive)
+        {
+            mChargeActive = false;
+            mStats.speed *= mRemoveChargeFactor;
+            mMoveDist *= mRemoveChargeFactor;
+        }
+    }
+
+public:
+    void initUpgrades(vector<int> const& flags);
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        if(mChargeAvail)
+        {
+            charge(other.unitList);
+        }
+        ProtossUnit::timestep(own, other);
+    }
+
+};
 
 class Stalker final : public ProtossUnit
 {};
