@@ -391,11 +391,11 @@ double BaseUnit::getGroundAttack() const
 
 double BaseUnit::getGAUpgradeBonus() const
 {
-    return mStats.gaUpgradeBonus;
+    return mStats.gaUpgrade;
 }
 double BaseUnit::getAAUpgradeBonus() const
 {
-    return mStats.aaUpgradeBonus;
+    return mStats.aaUpgrade;
 }
 
 double BaseUnit::getArmorUpgradeBonus() const
@@ -554,11 +554,11 @@ Damage BaseUnit::computeDamage(BaseUnit const& other) const
     double totalDamage = 0.0;
     if(other.isAirUnit())
     {
-        totalDamage += mAttackUpgrade * mStats.aaUpgradeBonus + mStats.airAttack;
+        totalDamage += mAttackUpgrade * mStats.aaUpgrade + mStats.airAttack;
     }
     else
     {
-        totalDamage += mAttackUpgrade * mStats.gaUpgradeBonus + mStats.groundAttack;
+        totalDamage += mAttackUpgrade * mStats.gaUpgrade + mStats.groundAttack;
     }
     for(Bonus const& bonus : mStats.bonuses)
     {

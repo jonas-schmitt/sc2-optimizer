@@ -32,7 +32,7 @@ using std::deque;
 
 class TerranUnit : public BaseUnit
 {
-public:
+//public:
 //    TerranUnit();
 
 //    TerranUnit(string name);
@@ -45,13 +45,13 @@ public:
 
 //    TerranUnit(BaseUnit const& baseUnit);
 
-    template <typename T> void regenerate(PlayerState<T>&) {}
+//    template <typename T> void regenerate(PlayerState<T>&) {}
 
-    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
-    {
-        BaseUnit::timestep(own, other);
-        regenerate(own);
-    }
+//    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+//    {
+//        BaseUnit::timestep(own, other);
+//        regenerate(own);
+//    }
     //void initUpgrades(vector<int> const& flags);
 };
 
@@ -224,7 +224,7 @@ public:
             return false;
         }
 
-        auto aim = *(other.unitList.begin());
+        typename T::RUT *mainTarget = nullptr;
         double maxDamage = 0.0;
         bool kill = false;
         for(auto enemy : other.unitList)
@@ -248,14 +248,14 @@ public:
                     if(higher)
                     {
                         maxDamage = damage.total;
-                        aim = enemy;
+                        mainTarget = enemy;
                         mPossibleDamage[enemy->getIdentifier()] = damage;
                     }
                 }
                 else
                 {
                     maxDamage = damage.total;
-                    aim = enemy;
+                    mainTarget = enemy;
                     mPossibleDamage[enemy->getIdentifier()] = damage;
                 }
             }
@@ -264,7 +264,7 @@ public:
                 if(higher)
                 {
                     maxDamage = damage.total;
-                    aim = enemy;
+                    mainTarget = enemy;
                     mPossibleDamage[enemy->getIdentifier()] = damage;
                 }
             }
@@ -273,7 +273,7 @@ public:
         {
             return false;
         }
-        Vec2D distVec = computeDistance(*aim);
+        Vec2D distVec = computeDistance(*mainTarget);
         distVec = distVec.getNormedVec ();
         double const x1 = mPos.x;
         double const y1 = mPos.y;
@@ -287,7 +287,10 @@ public:
         vector<typename T::RUT *> targets;
         for(typename T::RUT *enemy : other.unitList)
         {
-
+            if(mainTarget == enemy)
+            {
+                continue;
+            }
             double const x0 = enemy->getX();
             double const y0 = enemy->getY();
             double const distFromLine = std::abs(b*x0 - a*y0 + c)*d;
@@ -307,7 +310,7 @@ public:
 
         }
 
-        if(BaseUnit::attack(*aim))
+        if(BaseUnit::attack(*mainTarget))
         {
             --other.unitCount;
         }
@@ -326,10 +329,9 @@ public:
         if(!(attack(other)))
         {
             move(own, other);
-            decAttackTimer ();
-            return;
         }
         decMovementTimer();
+        decAttackTimer ();
     }
 };
 

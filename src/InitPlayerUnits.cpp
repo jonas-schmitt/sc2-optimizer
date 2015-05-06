@@ -135,9 +135,9 @@ void InitPlayerUnits<Race>::readStats()
         sort(stats.attributes.begin (), stats.attributes.end ());
         if(!(stream
              >> stats.groundAttack
-             >> stats.gaUpgradeBonus
+             >> stats.gaUpgrade
              >> stats.airAttack
-             >> stats.aaUpgradeBonus))
+             >> stats.aaUpgrade))
         {
             continue;
         }

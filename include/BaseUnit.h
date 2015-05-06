@@ -80,10 +80,10 @@ struct UnitStats
     bool airUnit = false;
 
     double groundAttack = 0;
-    double gaUpgradeBonus = 0;
+    double gaUpgrade = 0;
 
     double airAttack = 0;
-    double aaUpgradeBonus = 0;
+    double aaUpgrade = 0;
     int gaCooldown = 0;
     int aaCooldown = 0;
 
@@ -415,10 +415,9 @@ public:
         if(!(attack(other)))
         {
             move(own, other);
-            decAttackTimer ();
-            return;
         }
         decMovementTimer();
+        decAttackTimer ();
     }
 
 
