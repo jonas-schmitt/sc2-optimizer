@@ -32,6 +32,17 @@ using std::deque;
 
 class ZergUnit : public BaseUnit
 {
+protected:
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer <= 0)
+        {
+            if(mStats.health > EPS && mStats.health < mStats.maxHealth)
+            {
+                addHealth(0.27 * state.regenerationUpdate * 1e-3);
+            }
+        }
+    }
 
 public:
 //    ZergUnit();
@@ -46,16 +57,6 @@ public:
 
 //    ZergUnit(BaseUnit const& baseUnit);
 
-    template <typename T> void regenerate(PlayerState<T>& state)
-    {
-        if(state.regenerationTimer <= 0)
-        {
-            if(mStats.health > EPS && mStats.health < mStats.maxHealth)
-            {
-                addHealth(0.27 * state.regenerationUpdate * 1e-3);
-            }
-        }
-    }
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
@@ -72,7 +73,28 @@ class Drone final : public ZergUnit
 
 class Queen final : public ZergUnit
 {
+private:
+
     int mTransfusionTimer = 0;
+
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer <= 0)
+        {
+            if(mStats.health > EPS && mStats.health < mStats.maxHealth)
+            {
+                addHealth(0.27 * state.regenerationUpdate * 1e-3);
+            }
+            if(mStats.energy < mStats.maxEnergy)
+            {
+                mStats.energy += 0.5625 *state.regenerationUpdate * 1e-3;
+                if(mStats.energy > mStats.maxEnergy)
+                {
+                    mStats.energy = mStats.maxEnergy;
+                }
+            }
+        }
+    }
     template<typename T> void transfuse(vector<T *>& unitList)
     {
         if(mTransfusionTimer <= 0 && mStats.energy >= 50)
@@ -113,24 +135,7 @@ class Queen final : public ZergUnit
     }
 
 public:
-    template <typename T> void regenerate(PlayerState<T>& state)
-    {
-        if(state.regenerationTimer <= 0)
-        {
-            if(mStats.health > EPS && mStats.health < mStats.maxHealth)
-            {
-                addHealth(0.27 * state.regenerationUpdate * 1e-3);
-            }
-            if(mStats.energy < mStats.maxEnergy)
-            {
-                mStats.energy += 0.5625 *state.regenerationUpdate * 1e-3;
-                if(mStats.energy > mStats.maxEnergy)
-                {
-                    mStats.energy = mStats.maxEnergy;
-                }
-            }
-        }
-    }
+
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);

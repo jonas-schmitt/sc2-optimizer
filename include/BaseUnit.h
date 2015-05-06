@@ -462,6 +462,12 @@ public:
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
+            for(auto const& forceField : own.forceFieldQueue)
+            {
+                Vec2D const generatedForce = forceField.second.computeForce(*this);
+                force.x += generatedForce.x;
+                force.y += generatedForce.y;
+            }
 
             currentForce = force.getNormedVec ();
             mMovementTimer = mMovementUpdate;

@@ -520,11 +520,10 @@ void BaseUnit::resetTimer ()
 
 void BaseUnit::decMovementTimer()
 {
-    if(mMovementTimer < 0)
+    if(mMovementTimer > 0)
     {
-        return;
+        mMovementTimer -= mTimeSlice;
     }
-    mMovementTimer -= mTimeSlice;
 }
 
 
@@ -719,11 +718,11 @@ void BaseUnit::setAttackTimer(int value)
 
 void BaseUnit::decAttackTimer()
 {
-    if(mAttackTimer < 0)
+    if(mAttackTimer > 0)
     {
-	return;
+        mAttackTimer -= mTimeSlice;
     }
-    mAttackTimer -= mTimeSlice;
+
 }
 
 

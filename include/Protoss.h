@@ -32,6 +32,21 @@ using std::deque;
 class ProtossUnit : public BaseUnit
 {
 protected:
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer <= 0)
+        {
+            if(mShieldRegenCount <= 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
+            {
+                BaseUnit::addShield(2.0 * state.regenerationUpdate * 1e-3);
+            }
+            else if(mShieldRegenCount > 0)
+            {
+                --mShieldRegenCount;
+            }
+
+        }
+    }
     int mShieldRegenCount = 0;
 public:
 //    ProtossUnit();
@@ -50,21 +65,6 @@ public:
 
     void subHealth(double const value);
 
-    template <typename T> void regenerate(PlayerState<T>& state)
-    {
-        if(state.regenerationTimer <= 0)
-        {
-            if(mShieldRegenCount <= 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
-            {
-                BaseUnit::addShield(2.0 * state.regenerationUpdate / 1000);
-            }
-            else if(mShieldRegenCount > 0)
-            {
-                --mShieldRegenCount;
-            }
-
-        }
-    }
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -85,6 +85,7 @@ class Probe final : public ProtossUnit
 
 class Zealot final : public ProtossUnit
 {
+private:
     bool mChargeAvail = false;
     bool mChargeActive = false;
     int mChargeAvailTimer = 0;
@@ -151,7 +152,112 @@ class Stalker final : public ProtossUnit
 {};
 
 class Sentry final : public ProtossUnit
-{};
+{
+private:
+    int mForceFieldTimer = 0;
+    bool mForceFieldPlaced = false;
+
+    std::function<Vec2D(Vec2D const& pos, BaseUnit const& unit)> forceFieldFunc = [](Vec2D const& pos, BaseUnit const& unit)
+    {
+        double const radius = 1.7;
+        Vec2D distVec(unit.getX() - pos.x, unit.getY() - pos.y);
+
+        double const dist = distVec.computeLength();
+        if(dist - radius < EPS)
+        {
+            distVec = distVec.getNormedVec(dist);
+            return Vec2D(1e5 * distVec.x, 1e5 * distVec.y);
+        }
+        return Vec2D(0.0);
+    };
+
+    template <typename T, typename U> void forceField(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        if(mForceFieldPlaced)
+        {
+            mForceFieldPlaced = false;
+            other.forceFieldPlaced = false;
+        }
+        if(!other.forceFieldPlaced && mForceFieldTimer <= 0 && mStats.energy >= 50.0)
+        {
+            int enemyMovementTimer = mMovementUpdate;
+            for(typename U::RUT *enemy : other.unitList)
+            {
+                if(enemy->getHealth() > EPS)
+                {
+                    enemyMovementTimer = enemy->getMovementTimer();
+                }
+            }
+            if(enemyMovementTimer > 0 && enemyMovementTimer <= mTimeSlice)
+            {
+                // apply force field
+                Vec2D center(0.0);
+                for(typename U::RUT *enemy : other.unitList)
+                {
+                    center.x += enemy->getX();
+                    center.y += enemy->getY();
+                }
+                double const n = 1.0/static_cast<double>(other.unitList.size());
+                center.x *= n;
+                center.y *= n;
+                Vec2D distVec(center.x - mPos.x, center.y - mPos.y);
+                double const dist = distVec.computeLength();
+                double const forceFieldRange = 9.0;
+                if(dist - forceFieldRange > EPS)
+                {
+                    distVec = distVec.getNormedVec(dist);
+                    center.x = mPos.x + forceFieldRange * distVec.x;
+                    center.y = mPos.y + forceFieldRange * distVec.y;
+                }
+                // create Force Field
+
+                mForceFieldTimer = 15000;
+                other.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<U>(center,forceFieldFunc));
+                own.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<T>(center,forceFieldFunc));
+                mStats.energy -= 50.0;
+                mForceFieldPlaced = true;
+                other.forceFieldPlaced = true;
+            }
+        }
+        if(mForceFieldTimer > 0)
+        {
+            mForceFieldTimer -= mTimeSlice;
+        }
+
+    }
+
+    template <typename T> void regenerate(PlayerState<T>& state)
+    {
+        if(state.regenerationTimer <= 0)
+        {
+            if(mShieldRegenCount <= 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
+            {
+                BaseUnit::addShield(2.0 * state.regenerationUpdate * 1e-3);
+            }
+            else if(mShieldRegenCount > 0)
+            {
+                --mShieldRegenCount;
+            }
+            if(mStats.energy < mStats.maxEnergy)
+            {
+                mStats.energy += 0.5625 *state.regenerationUpdate * 1e-3;
+                if(mStats.energy > mStats.maxEnergy)
+                {
+                    mStats.energy = mStats.maxEnergy;
+                }
+            }
+        }
+    }
+
+public:
+
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        forceField(own, other);
+        BaseUnit::timestep(own, other);
+        regenerate(own);
+    }
+};
 
 class HighTemplar final : public ProtossUnit
 {};

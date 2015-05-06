@@ -57,6 +57,7 @@ class TerranUnit : public BaseUnit
 
 class TerranBioUnit : public TerranUnit
 {
+private:
     bool mStimpackAvail = false;
     bool mStimpackActive = false;
     int mStimpackDurationTimer = 0;
@@ -165,26 +166,8 @@ public:
 
 class Reaper final : public TerranUnit
 {
-protected:
+private:
     int mHealthRegenCount = 0;
-public:
-
-//    Reaper();
-
-//    Reaper(string name);
-
-//    Reaper(const UnitStats& baseStats);
-
-//    Reaper(const UnitStats& baseStats, Vec2D min, Vec2D max);
-
-//    Reaper(Reaper const& Reaper);
-
-//    Reaper(BaseUnit const& baseUnit);
-
-//    Reaper(TerranUnit const& terranUnit);
-
-    void subHealth(double const value);
-
     template <typename T> void regenerate(PlayerState<T>& state)
     {
         if(state.regenerationTimer <= 0)
@@ -202,6 +185,23 @@ public:
             }
         }
     }
+public:
+
+//    Reaper();
+
+//    Reaper(string name);
+
+//    Reaper(const UnitStats& baseStats);
+
+//    Reaper(const UnitStats& baseStats, Vec2D min, Vec2D max);
+
+//    Reaper(Reaper const& Reaper);
+
+//    Reaper(BaseUnit const& baseUnit);
+
+//    Reaper(TerranUnit const& terranUnit);
+
+    void subHealth(double const value);
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {

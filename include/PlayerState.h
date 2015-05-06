@@ -7,6 +7,7 @@
 #include<algorithm>
 #include<functional>
 #include<vector>
+#include<queue>
 
 #include"Utilities.h"
 
@@ -15,6 +16,7 @@ using std::list;
 using std::pair;
 using std::function;
 using std::vector;
+using std::deque;
 
 template<typename Race> struct PotentialField : public Race
 {
@@ -45,6 +47,7 @@ struct SimulationResult
 template <class Race> struct PlayerState : public Race
 {
 
+    bool forceFieldPlaced = false;
     Vec2D startPos;
 
     Vec2D minPos;
@@ -52,6 +55,7 @@ template <class Race> struct PlayerState : public Race
     Vec2D fieldSize;
 
     vector<PotentialField<Race>> potentialList;
+    deque<pair<int,PotentialField<Race>>> forceFieldQueue;
 
 
     vector<typename Race::UT0> unitList0;
@@ -81,6 +85,7 @@ template <class Race> struct PlayerState : public Race
     int regenerationTimer = 0;
 
     int regenerationUpdate = 1000;
+
 
 
 
@@ -159,12 +164,28 @@ template <class Race> struct PlayerState : public Race
         {
             elem.timestep(*this, other);
         }
-        if(regenerationTimer < 0)
+
+        if(!forceFieldQueue.empty())
+        {
+            for(auto& forceField : forceFieldQueue)
+            {
+                forceField.first -= timeSlice;
+            }
+            if(forceFieldQueue.front().first <= 0)
+            {
+                forceFieldQueue.pop_front();
+            }
+        }
+        if(regenerationTimer <= 0)
         {
             regenerationTimer = regenerationUpdate;
         }
+        else
+        {
+            regenerationTimer -= timeSlice;
+        }
         time += timeSlice;
-        regenerationTimer -= timeSlice;
+
     }
 
 
