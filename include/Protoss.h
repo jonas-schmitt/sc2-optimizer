@@ -172,9 +172,9 @@ private:
             double const n = 1.0/static_cast<double>(unitList.size());
             center_x *= n;
             center_y *= n;
-            Vec2D distVec(mPos.x - center_x, mPos.y - center_y);
+            Vec2D distVec(center_x - mPos.x, center_y - mPos.y);
             distVec = std::move(distVec.getNormedVec());
-            setPos(8.0 * distVec.x + mPos.x, 8.0 * distVec.y + mPos.y);
+            setPos(-8.0 * distVec.x + mPos.x, -8.0 * distVec.y + mPos.y);
             mBlinkTimer = 10000;
         }
         if(mBlinkTimer > 0)
@@ -210,7 +210,7 @@ private:
         if(dist - radius < EPS)
         {
             distVec = std::move(distVec.getNormedVec(dist));
-            return Vec2D(1e5 * distVec.x, 1e5 * distVec.y);
+            return Vec2D(-1e5 * distVec.x, -1e5 * distVec.y);
         }
         return Vec2D(0.0);
     };
@@ -251,7 +251,8 @@ private:
                 Vec2D distVec(center.x - mPos.x, center.y - mPos.y);
                 double const dist = distVec.computeLength();
                 double const forceFieldRange = 9.0;
-                double const threshold = 2.0 * forceFieldRange;
+                double const forceFieldRadius = 1.7;
+                double const threshold = 2.0 * forceFieldRange + forceFieldRadius;
                 if(dist < threshold)
                 {
                     if(dist - forceFieldRange > EPS)
@@ -263,8 +264,8 @@ private:
                     // create Force Field
 
                     mForceFieldTimer = 15000;
-                    other.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<U>(center,forceFieldFunc));
                     own.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<T>(center,forceFieldFunc));
+                    other.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<U>(center,forceFieldFunc));
                     mStats.energy -= 50.0;
                     mForceFieldPlaced = true;
                     other.forceFieldPlaced = true;
@@ -284,7 +285,7 @@ private:
         {
             if(mShieldRegenCount <= 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
             {
-                BaseUnit::addShield(2.0 * state.regenerationUpdate * 1e-3);
+                BaseUnit::addShield(2.0 * 1e-3 * state.regenerationUpdate);
             }
             else if(mShieldRegenCount > 0)
             {
@@ -292,7 +293,7 @@ private:
             }
             if(mStats.energy < mStats.maxEnergy)
             {
-                mStats.energy += 0.5625 *state.regenerationUpdate * 1e-3;
+                mStats.energy += 0.5625 * 1e-3 * state.regenerationUpdate;
                 if(mStats.energy > mStats.maxEnergy)
                 {
                     mStats.energy = mStats.maxEnergy;

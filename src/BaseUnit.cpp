@@ -744,9 +744,7 @@ void BaseUnit::setTimeSlice(int value)
 void BaseUnit::computeTemporaryValues()
 {
     param1 = getMaxDist()*getGene(0);
-
-    param3 = getGene(8);
-    mMoveDist = getSpeed()*mTimeSlice/1000.0;
+    mMoveDist = getSpeed()*mTimeSlice*1e-3;
     mMovementUpdateBackup = mMovementUpdate;
 }
 

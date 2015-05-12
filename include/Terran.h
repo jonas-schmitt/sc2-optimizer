@@ -150,20 +150,6 @@ public:
         if(mCSAvail)
         {
             concussiveShells();
-            if(mCSData.size() > 0)
-            {
-                if(mCSData.front().first <= 0)
-                {
-                    BaseUnit& unit = *mCSData.front().second;
-                    unit.multSpeed (2.0);
-                    unit.mCSAffected = false;
-                    mCSData.pop_front();
-                }
-                for(auto& el : mCSData)
-                {
-                    el.first -= mTimeSlice;
-                }
-            }
         }
     }
 };
@@ -178,7 +164,7 @@ private:
         {
             if(mHealthRegenCount <= 0 && mStats.health < mStats.maxHealth && mStats.health > EPS)
             {
-                TerranUnit::addHealth(2.0 * state.regenerationUpdate / 1000);
+                TerranUnit::addHealth(2.0 * 1e-3 * state.regenerationUpdate);
             }
             else
             {

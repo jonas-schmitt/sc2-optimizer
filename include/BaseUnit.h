@@ -155,14 +155,14 @@ protected:
         if(dist < own.getSize () + buddy.getSize())
         {
             Vec2D force = distVec.getNormedVec(dist);
-            return Vec2D(-force.x*100000.0, -force.y*100000.0);
+            return Vec2D(-1e5*force.x, -1e5*force.y);
         }
 
 
         if(dist < own.param1)
         {
             Vec2D res = distVec.getNormedVec(dist);
-            double const value = 4000.0*own.getGene(1) + own.getGene(2)*10.0*own.getResources();
+            double const value = 1e3*own.getGene(1) + 1e2*own.getResources()*own.getGene(2);
             res.x *= value;
             res.y *= value;
             return res;
@@ -182,7 +182,7 @@ protected:
         if(dist < own.getSize () + enemy.getSize())
         {
             Vec2D force = distVec.getNormedVec(dist);
-            return Vec2D(-force.x*100000.0, -force.y*100000.0);
+            return Vec2D(-1e5*force.x, -1e5*force.y);
         }
 
         Vec2D res1, res2;
@@ -197,20 +197,20 @@ protected:
             own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
-        double const threshold = (ownRange-(enemy.getSpeed() * enemy.getMovementUpdate()/1000));
+        double const threshold = (ownRange-(enemy.getSpeed() * enemy.getMovementUpdate() * 1e-3));
         if(dist > ownRange*own.getGene(3))
         {
             res1 = distVec.getNormedVec(dist);
             double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
-            int const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
+            double const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                              : std::max(own.getGACooldown () - own.getAttackTimer (),0);
-            double const val = own.getGene(4)* 10.0 * a + own.getGene(5)*b + own.getGene(6)*100.0*ownDamage.total + 1000.0*own.getGene(7);
+            double const val = 1e1*a*own.getGene(4) + b*own.getGene(5) + 1e2*ownDamage.total*own.getGene(6) + 1e3*own.getGene(7);
             res1.x *= val;
             res1.y *= val;
         }
         else if(dist < threshold*own.getGene(8))
         {
-            double const val = 5000.0*own.getGene(9);
+            double const val = 1e4*own.getGene(9);
             res2.x *= val;
             res2.y *= val;
         }
@@ -223,13 +223,13 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < 2.0*own.getGene (10) * (enemyRange + enemy.getSpeed() * enemy.getMovementUpdate()/1000))
+        if(dist < 2.0*own.getGene (10)*(enemyRange + enemy.getMoveDist()))
         {
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
-            int const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
+            double const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            double const val = own.getGene(11) * 10.0 * a + own.getGene(12)*b + own.getGene(13)*100.0*enemyDamage.total + 1000.0*own.getGene(14);
+            double const val = 1e1*a*own.getGene(11) + b*own.getGene(12) + 1e2*enemyDamage.total*own.getGene(13) + 1e3*own.getGene(14);
             res2.x *= val;
             res2.y *= val;
         }
@@ -439,34 +439,34 @@ public:
             Vec2D force(0.0);
             for(const auto& pot : own.potentialList)
             {
-                Vec2D const generatedForce = pot.computeForce(*this);
+                Vec2D const generatedForce = std::move(pot.computeForce(*this));
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
             for(auto buddy :  own.unitList)
             {
-                if(buddy->getHealth() < EPS || static_cast<BaseUnit*>(buddy) == this)
+                if(buddy->isDead() || static_cast<BaseUnit*>(buddy) == this)
                 {
                     continue;
                 }
-                Vec2D const generatedForce = this->computeFriendForce(*buddy);
+                Vec2D const generatedForce = std::move(this->computeFriendForce(*buddy));
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
             for(auto enemy :  other.unitList)
             {
-                if(enemy->getHealth() < EPS)
+                if(enemy->isDead())
                 {
                     continue;
                 }
 
-                Vec2D const generatedForce = this->computeEnemyForce(*enemy);
+                Vec2D const generatedForce = std::move(this->computeEnemyForce(*enemy));
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
             for(auto const& forceField : own.forceFieldQueue)
             {
-                Vec2D const generatedForce = forceField.second.computeForce(*this);
+                Vec2D const generatedForce = std::move(forceField.second.computeForce(*this));
                 force.x += generatedForce.x;
                 force.y += generatedForce.y;
             }
@@ -484,7 +484,7 @@ public:
 
     template<typename T> bool attack(PlayerState<T>& other)
     {
-        if(this->mAttackTimer > 0 || this->getHealth() < EPS || other.unitList.empty())
+        if(this->mAttackTimer > 0 || this->isDead() || other.unitList.empty())
         {
             return false;
         }

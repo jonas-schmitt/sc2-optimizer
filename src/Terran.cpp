@@ -65,15 +65,12 @@ void Marine::initUpgrades(const vector<int> &flags)
 
 void Marauder::concussiveShells ()
 {
-    if(mTarget == nullptr)
-    {
-        return;
-    }
-    if(!mTarget->mCSAffected)
+    if(mTarget != nullptr && !mTarget->mCSAffected)
     {
         mTarget->multSpeed (0.5);
         mTarget->mCSAffected = true;
-        mCSData.emplace_back(1500, mTarget);
+        int const duration = 1500;
+        mCSData.emplace_back(duration, mTarget);
         mTarget = nullptr;
     }
     if(!mCSData.empty())
