@@ -102,10 +102,7 @@ public:
     // copy constructor
     UnitGenes(UnitGenes const& clone)
     {
-        for(int i = 0; i < 15; ++i)
-        {
-            X[i] = clone.get(i);
-        }
+        X = clone.X;
 
         fitness = clone.fitness;
         count = clone.count;
@@ -129,7 +126,7 @@ public:
             }
             else
             {
-                X[i] = mother.get(i)/2+father.get(i)/2;
+                X[i] = 0.5*(mother.get(i)+father.get(i));
             }
         }
 

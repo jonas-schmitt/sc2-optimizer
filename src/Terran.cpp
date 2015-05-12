@@ -76,6 +76,20 @@ void Marauder::concussiveShells ()
         mCSData.emplace_back(1500, mTarget);
         mTarget = nullptr;
     }
+    if(!mCSData.empty())
+    {
+        if(mCSData.front().first <= 0)
+        {
+            BaseUnit& unit = *mCSData.front().second;
+            unit.multSpeed (2.0);
+            unit.mCSAffected = false;
+            mCSData.pop_front();
+        }
+        for(auto& el : mCSData)
+        {
+            el.first -= mTimeSlice;
+        }
+    }
 }
 
 void Marauder::initUpgrades(const vector<int> &flags)

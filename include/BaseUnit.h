@@ -395,6 +395,8 @@ public:
 
     void setEnemyForce(function<Vec2D(BaseUnit &, BaseUnit &)> func);
 
+    bool isDead() const;
+
     double computeRange(BaseUnit const& other) const;
     double computeAirRange(BaseUnit const& other) const;
     double computeGroundRange(BaseUnit const& other) const;
@@ -473,9 +475,7 @@ public:
             mMovementTimer = mMovementUpdate;
         }
 
-
-        setX(currentForce.x*mMoveDist+getX());
-        setY(currentForce.y*mMoveDist+getY());
+        setPos (currentForce.x*mMoveDist + mPos.x, currentForce.y*mMoveDist + mPos.y);
 
     }
 

@@ -149,7 +149,51 @@ public:
 };
 
 class Stalker final : public ProtossUnit
-{};
+{
+private:
+    int mBlinkTimer = 0;
+    bool mBlinkAvail = false;
+
+    template<typename T> void blink(vector<T *> const & unitList)
+    {
+        if(mBlinkTimer <= 0 && mStats.shield <= 0)
+        {
+            double center_x = 0.0;
+            double center_y = 0.0;
+            for(T *enemy : unitList)
+            {
+                if(enemy->isDead())
+                {
+                    continue;
+                }
+                center_x += enemy->getX();
+                center_y += enemy->getY();
+            }
+            double const n = 1.0/static_cast<double>(unitList.size());
+            center_x *= n;
+            center_y *= n;
+            Vec2D distVec(mPos.x - center_x, mPos.y - center_y);
+            distVec = std::move(distVec.getNormedVec());
+            setPos(8.0 * distVec.x + mPos.x, 8.0 * distVec.y + mPos.y);
+            mBlinkTimer = 10000;
+        }
+        if(mBlinkTimer > 0)
+        {
+            mBlinkTimer -= mTimeSlice;
+        }
+    }
+
+public:
+    void initUpgrades(vector<int> const& flags);
+    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
+    {
+        if(mBlinkAvail)
+        {
+            blink(other.unitList);
+        }
+        ProtossUnit::timestep(own, other);
+    }
+};
 
 class Sentry final : public ProtossUnit
 {
@@ -165,7 +209,7 @@ private:
         double const dist = distVec.computeLength();
         if(dist - radius < EPS)
         {
-            distVec = distVec.getNormedVec(dist);
+            distVec = std::move(distVec.getNormedVec(dist));
             return Vec2D(1e5 * distVec.x, 1e5 * distVec.y);
         }
         return Vec2D(0.0);
@@ -194,6 +238,10 @@ private:
                 Vec2D center(0.0);
                 for(typename U::RUT *enemy : other.unitList)
                 {
+                    if(enemy->isDead())
+                    {
+                        continue;
+                    }
                     center.x += enemy->getX();
                     center.y += enemy->getY();
                 }
@@ -203,20 +251,24 @@ private:
                 Vec2D distVec(center.x - mPos.x, center.y - mPos.y);
                 double const dist = distVec.computeLength();
                 double const forceFieldRange = 9.0;
-                if(dist - forceFieldRange > EPS)
+                double const threshold = 2.0 * forceFieldRange;
+                if(dist < threshold)
                 {
-                    distVec = distVec.getNormedVec(dist);
-                    center.x = mPos.x + forceFieldRange * distVec.x;
-                    center.y = mPos.y + forceFieldRange * distVec.y;
-                }
-                // create Force Field
+                    if(dist - forceFieldRange > EPS)
+                    {
+                        distVec = std::move(distVec.getNormedVec(dist));
+                        center.x = mPos.x + forceFieldRange * distVec.x;
+                        center.y = mPos.y + forceFieldRange * distVec.y;
+                    }
+                    // create Force Field
 
-                mForceFieldTimer = 15000;
-                other.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<U>(center,forceFieldFunc));
-                own.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<T>(center,forceFieldFunc));
-                mStats.energy -= 50.0;
-                mForceFieldPlaced = true;
-                other.forceFieldPlaced = true;
+                    mForceFieldTimer = 15000;
+                    other.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<U>(center,forceFieldFunc));
+                    own.forceFieldQueue.emplace_back(mForceFieldTimer, PotentialField<T>(center,forceFieldFunc));
+                    mStats.energy -= 50.0;
+                    mForceFieldPlaced = true;
+                    other.forceFieldPlaced = true;
+                }
             }
         }
         if(mForceFieldTimer > 0)

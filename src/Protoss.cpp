@@ -70,3 +70,16 @@ void Zealot::initUpgrades(const vector<int> &flags)
     }
 
 }
+
+void Stalker::initUpgrades (const vector<int> &flags)
+{
+    ProtossUnit::initUpgrades(flags);
+    if(flags.size() < 4)
+    {
+        return;
+    }
+    if(flags[3] == 1)
+    {
+        mBlinkAvail = true;
+    }
+}

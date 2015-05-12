@@ -82,6 +82,10 @@ private:
             {
                 for(auto const unit : unitList)
                 {
+                    if(unit->isDead())
+                    {
+                        continue;
+                    }
                     if(computeDistance(*unit) < mMoveDist*multiplier + computeRange(*unit))
                     {
                         applyStimpack = true;
@@ -274,7 +278,7 @@ public:
             return false;
         }
         Vec2D distVec = computeDistance(*mainTarget);
-        distVec = distVec.getNormedVec ();
+        distVec = std::move(distVec.getNormedVec ());
         double const x1 = mPos.x;
         double const y1 = mPos.y;
         double const x2 = 5.0 * distVec.x + x1;

@@ -548,6 +548,11 @@ void BaseUnit::multSpeed (double value)
     mMoveDist *= value;
 }
 
+bool BaseUnit::isDead () const
+{
+    return mStats.health < EPS;
+}
+
 Damage BaseUnit::computeDamage(BaseUnit const& other) const
 {
     double totalDamage = 0.0;
