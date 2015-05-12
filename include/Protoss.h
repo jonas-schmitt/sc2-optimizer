@@ -136,6 +136,7 @@ private:
     }
 
 public:
+    int const nGenes = BaseUnit::nGenes + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -184,6 +185,7 @@ private:
     }
 
 public:
+    int const nGenes = BaseUnit::nGenes + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -252,7 +254,7 @@ private:
                 double const dist = distVec.computeLength();
                 double const forceFieldRange = 9.0;
                 double const forceFieldRadius = 1.7;
-                double const threshold = 2.0 * forceFieldRange + forceFieldRadius;
+                double const threshold = 2.0 * (forceFieldRange + forceFieldRadius);
                 if(dist < threshold)
                 {
                     if(dist - forceFieldRange > EPS)
@@ -303,7 +305,7 @@ private:
     }
 
 public:
-
+    int const nGenes = BaseUnit::nGenes + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         forceField(own, other);

@@ -135,7 +135,7 @@ private:
     }
 
 public:
-
+    int const nGenes = BaseUnit::nGenes + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);

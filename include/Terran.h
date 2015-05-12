@@ -109,6 +109,7 @@ private:
     }
 
 public:
+    int const nGenes = BaseUnit::nGenes + 2;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -209,7 +210,7 @@ public:
     void initUpgrades(vector<int> const& flags);
     template<typename T> bool attack(PlayerState<T>& other)
     {
-        if(this->mAttackTimer > 0 || this->getHealth() < EPS || other.unitList.empty())
+        if(this->mAttackTimer > 0 || this->isDead() || other.unitList.empty())
         {
             return false;
         }

@@ -148,6 +148,8 @@ protected:
 
 
 
+
+
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mFriendFunc = [] (BaseUnit & own, BaseUnit & buddy)
     {
         Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
@@ -242,6 +244,8 @@ protected:
     bool attack(BaseUnit& unit);
 
 public:
+
+    int const nGenes = 16;
 
     Damage mPossibleDamage[18];
     int mMovementUpdateBackup;
