@@ -252,7 +252,6 @@ private:
             {
                 // apply force field
                 Vec2D center(0.0);
-                double n = 0.0;
                 for(typename U::RUT *enemy : other.unitList)
                 {
                     if(enemy->isDead())
@@ -261,11 +260,10 @@ private:
                     }
                     center.x += enemy->getX();
                     center.y += enemy->getY();
-                    n += 1.0;
                 }
-                double const n_inv = 1.0/n;
-                center.x *= n_inv;
-                center.y *= n_inv;
+                double const n = 1.0/other.unitCount;
+                center.x *= n;
+                center.y *= n;
                 Vec2D distVec(center.x - mPos.x, center.y - mPos.y);
                 double const dist = distVec.computeLength();
                 double const forceFieldRange = 9.0;

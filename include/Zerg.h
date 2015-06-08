@@ -189,6 +189,10 @@ public:
                     unit->subShield(damage.shield);
                 }
                 unit->subHealth(damage.health);
+                if(unit->getHealth() < EPS)
+                {
+                    --other.unitCount;
+                }
             }
             this->setHealth(0.0);
             return true;
