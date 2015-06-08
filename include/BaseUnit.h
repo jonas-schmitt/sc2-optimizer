@@ -134,10 +134,7 @@ protected:
 
     int mId;
 
-    double mForceParameters[10];
-    double param1;
-    double param2[2];
-    double param3;
+    double param;
     double mMoveDist;
 
     bool mCollision = false;
@@ -161,7 +158,7 @@ protected:
         }
 
 
-        if(dist < own.param1)
+        if(dist < own.param)
         {
             Vec2D res = distVec.getNormedVec(dist);
             double const value = 1e3*own.getGene(1) + 1e2*own.getResources()*own.getGene(2);
@@ -475,7 +472,7 @@ public:
                 force.y += generatedForce.y;
             }
 
-            currentForce = force.getNormedVec ();
+            currentForce = std::move(force.getNormedVec());
             mMovementTimer = mMovementUpdate;
         }
 

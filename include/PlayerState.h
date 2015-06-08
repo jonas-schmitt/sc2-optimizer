@@ -86,6 +86,8 @@ template <class Race> struct PlayerState : public Race
 
     int regenerationUpdate = 1000;
 
+    int nGenes = 0;
+
 
 
 

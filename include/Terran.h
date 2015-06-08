@@ -57,6 +57,7 @@ class TerranUnit : public BaseUnit
 
 class TerranBioUnit : public TerranUnit
 {
+
 private:
     bool mStimpackAvail = false;
     bool mStimpackActive = false;
@@ -109,7 +110,7 @@ private:
     }
 
 public:
-    int const nGenes = BaseUnit::nGenes + 2;
+    int const nGenes = TerranUnit::nGenes + 2;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {

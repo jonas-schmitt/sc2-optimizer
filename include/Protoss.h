@@ -99,12 +99,24 @@ private:
         if(mChargeAvailTimer <= 0 && !mChargeActive)
         {
             bool applyCharge = false;
+            double const threshold = 0;
             for(T *enemy : unitList)
             {
-                if(enemy->attackPossible(*this))
+                if(!enemy->isDead())
                 {
-                    applyCharge = true;
-                    break;
+
+                    double const x = this->getX() - enemy->getX();
+                    double const y = this->getY() - enemy->getY();
+                    double dist = std::sqrt(x*x+y*y);
+                    if(std::isnan(dist))
+                    {
+                        dist = 0.0;
+                    }
+                    if(enemy->computeRange(*this) > dist + threshold)
+                    {
+                        applyCharge = true;
+                        break;
+                    }
                 }
             }
             if(applyCharge)
@@ -136,7 +148,7 @@ private:
     }
 
 public:
-    int const nGenes = BaseUnit::nGenes + 1;
+    int const nGenes = ProtossUnit::nGenes + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -157,7 +169,8 @@ private:
 
     template<typename T> void blink(vector<T *> const & unitList)
     {
-        if(mBlinkTimer <= 0 && mStats.shield <= 0)
+        int const threshold = 0;
+        if(mBlinkTimer <= 0 && mStats.shield <= threshold)
         {
             double center_x = 0.0;
             double center_y = 0.0;
@@ -185,7 +198,7 @@ private:
     }
 
 public:
-    int const nGenes = BaseUnit::nGenes + 1;
+    int const nGenes = ProtossUnit::nGenes + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -305,7 +318,7 @@ private:
     }
 
 public:
-    int const nGenes = BaseUnit::nGenes + 1;
+    int const nGenes = ProtossUnit::nGenes + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         forceField(own, other);

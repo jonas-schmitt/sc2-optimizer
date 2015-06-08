@@ -49,7 +49,7 @@ void TerranBioUnit::initUpgrades (vector<int> const& flags)
     }
 }
 
-void Marine::initUpgrades(const vector<int> &flags)
+void Marine::initUpgrades(vector<int> const &flags)
 {
     TerranBioUnit::initUpgrades (flags);
     if(flags.size () < 4)
