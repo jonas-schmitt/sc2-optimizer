@@ -651,8 +651,15 @@ bool BaseUnit::attack(BaseUnit& unit)
     {
         this->setAttackTimer(this->getGACooldown());
     }
-    mTarget = &unit;
-    return unit.getHealth() < EPS;
+    if(unit.getHealth() < EPS)
+    {
+        return true;
+    }
+    else
+    {
+        mTarget = &unit;
+        return false;
+    }
 }
 
 

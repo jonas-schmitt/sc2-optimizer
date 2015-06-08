@@ -103,7 +103,6 @@ private:
                 mStats.health -= 10.0;
                 mStimpackDurationTimer = 15000;
                 mStimpackActive = true;
-                return;
             }
         }
         mStimpackDurationTimer -= mTimeSlice;

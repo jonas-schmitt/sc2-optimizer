@@ -39,7 +39,7 @@ protected:
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
-                addHealth(0.27 * state.regenerationUpdate * 1e-3);
+                addHealth(0.27 * 1e-3 * state.regenerationUpdate);
             }
         }
     }
@@ -83,11 +83,11 @@ private:
         {
             if(mStats.health > EPS && mStats.health < mStats.maxHealth)
             {
-                addHealth(0.27 * state.regenerationUpdate * 1e-3);
+                addHealth(0.27 * 1e-3 * state.regenerationUpdate);
             }
             if(mStats.energy < mStats.maxEnergy)
             {
-                mStats.energy += 0.5625 *state.regenerationUpdate * 1e-3;
+                mStats.energy += 0.5625 * 1e-3 * state.regenerationUpdate;
                 if(mStats.energy > mStats.maxEnergy)
                 {
                     mStats.energy = mStats.maxEnergy;
