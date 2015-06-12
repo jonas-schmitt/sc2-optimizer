@@ -105,7 +105,11 @@ private:
                 mStimpackActive = true;
             }
         }
-        mStimpackDurationTimer -= mTimeSlice;
+        if(mStimpackDurationTimer > 0)
+        {
+            mStimpackDurationTimer -= mTimeSlice;
+        }
+
     }
 
 public:
@@ -115,7 +119,7 @@ public:
     {
         if(mStimpackAvail)
         {
-            stimpack(other.unitList);
+            TerranBioUnit::stimpack(other.unitList);
         }
         TerranUnit::timestep(own, other);
     }
@@ -150,7 +154,7 @@ public:
         TerranBioUnit::timestep(own, other);
         if(mCSAvail)
         {
-            concussiveShells();
+            Marauder::concussiveShells();
         }
     }
 };
@@ -197,7 +201,7 @@ public:
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         TerranUnit::timestep(own, other);
-        regenerate(own);
+        Reaper::regenerate(own);
     }
 };
 
@@ -264,7 +268,7 @@ public:
         {
             return false;
         }
-        Vec2D distVec = computeDistance(*mainTarget);
+        Vec2D distVec(mainTarget->getX() - mPos.x, mainTarget->getY() - mPos.y);
         distVec = std::move(distVec.getNormedVec ());
         double const x1 = mPos.x;
         double const y1 = mPos.y;
@@ -317,12 +321,12 @@ public:
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
-        if(!(attack(other)))
+        if(!(Hellion::attack(other)))
         {
-            move(own, other);
+            TerranUnit::move(own, other);
         }
-        decMovementTimer();
-        decAttackTimer ();
+        TerranUnit::decMovementTimer();
+        TerranUnit::decAttackTimer ();
     }
 };
 

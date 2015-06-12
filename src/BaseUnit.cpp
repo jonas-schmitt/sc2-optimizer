@@ -642,7 +642,10 @@ bool BaseUnit::attack(BaseUnit& unit)
     {
         unit.subShield(damage.shield);
     }
-    unit.subHealth(damage.health);
+    if(damage.health > 0)
+    {
+        unit.subHealth(damage.health);
+    }
     if(unit.isAirUnit())
     {
         this->setAttackTimer(this->getAACooldown());

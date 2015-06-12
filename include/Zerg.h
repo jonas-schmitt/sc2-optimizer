@@ -139,8 +139,8 @@ public:
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
-        regenerate(own);
-        transfuse(own.unitList);
+        Queen::regenerate(own);
+        Queen::transfuse(own.unitList);
     }
 };
 
@@ -153,17 +153,17 @@ public:
 class Baneling final : public ZergUnit
 {
 public:
-    int const nGenes = ZergUnit::nGenes + 1;
+    int const nGenes = ZergUnit::nGenes + 2;
 
     void initUpgrades (vector<int> const& flags);
-    template<typename T> bool attack(PlayerState<T>& other)
+    template<typename U, typename T> bool attack(PlayerState<U>& own, PlayerState<T>& other)
     {
         if(this->getHealth() < EPS || other.unitList.empty())
         {
             return false;
         }
-        bool hasTarget = false;
-        double const threshold = 0.5*this->getGroundAttack ();
+        double sum = 0.0;
+        double const threshold = this->getGroundAttack ();
         vector<pair<Damage,typename T::RUT *>> targets;
         for(auto enemy : other.unitList)
         {
@@ -172,13 +172,12 @@ public:
             {
                 damage = computeDamage(*enemy);
                 targets.emplace_back(damage, enemy);
-                if(damage.total > threshold)
-                {
-                    hasTarget = true;
-                }
+                sum += damage.total;
+
             }
         }
-        if(hasTarget)
+
+        if(sum > threshold)
         {
             for(auto el : targets)
             {
@@ -188,13 +187,18 @@ public:
                 {
                     unit->subShield(damage.shield);
                 }
-                unit->subHealth(damage.health);
+                if(damage.health > 0)
+                {
+                    unit->subHealth(damage.health);
+                }
                 if(unit->getHealth() < EPS)
                 {
                     --other.unitCount;
                 }
             }
             this->setHealth(0.0);
+            --own.unitCount;
+
             return true;
         }
         return false;
@@ -202,11 +206,11 @@ public:
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
-        if(!(attack(other)))
+        if(!(Baneling::attack(own, other)))
         {
-            move(own, other);
+            ZergUnit::move(own, other);
         }
-        decMovementTimer();
+        ZergUnit::decMovementTimer();
     }
 };
 

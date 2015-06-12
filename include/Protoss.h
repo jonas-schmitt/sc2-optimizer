@@ -38,7 +38,7 @@ protected:
         {
             if(mShieldRegenCount <= 0 && mStats.shield < mStats.maxShield && mStats.health > EPS)
             {
-                BaseUnit::addShield(2.0 * state.regenerationUpdate * 1e-3);
+                BaseUnit::addShield(2.0 * 1e-3 * state.regenerationUpdate);
             }
             else if(mShieldRegenCount > 0)
             {
@@ -204,7 +204,7 @@ public:
     {
         if(mBlinkAvail)
         {
-            blink(other.unitList);
+            Stalker::blink(other.unitList);
         }
         ProtossUnit::timestep(own, other);
     }
