@@ -31,29 +31,7 @@ using std::deque;
 
 
 class TerranUnit : public BaseUnit
-{
-//public:
-//    TerranUnit();
-
-//    TerranUnit(string name);
-
-//    TerranUnit(const UnitStats& baseStats);
-
-//    TerranUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
-
-//    TerranUnit(TerranUnit const& terranUnit);
-
-//    TerranUnit(BaseUnit const& baseUnit);
-
-//    template <typename T> void regenerate(PlayerState<T>&) {}
-
-//    template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
-//    {
-//        BaseUnit::timestep(own, other);
-//        regenerate(own);
-//    }
-    //void initUpgrades(vector<int> const& flags);
-};
+{};
 
 class TerranBioUnit : public TerranUnit
 {
@@ -113,7 +91,7 @@ private:
     }
 
 public:
-    int const nGenes = TerranUnit::nGenes + 2;
+    int const NGENES = TerranUnit::NGENES + 2;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {

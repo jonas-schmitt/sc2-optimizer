@@ -362,81 +362,81 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 
     if(!pl.unitList0.empty())
     {
-        pl.nGenes += pl.unitList0.front().nGenes;
+        pl.NGENES += pl.unitList0.front().NGENES;
     }
     if(!pl.unitList1.empty())
     {
-        pl.nGenes += pl.unitList1.front().nGenes;
+        pl.NGENES += pl.unitList1.front().NGENES;
     }
 
     if(!pl.unitList2.empty())
     {
-        pl.nGenes += pl.unitList2.front().nGenes;
+        pl.NGENES += pl.unitList2.front().NGENES;
     }
 
     if(!pl.unitList3.empty())
     {
-        pl.nGenes += pl.unitList3.front().nGenes;
+        pl.NGENES += pl.unitList3.front().NGENES;
     }
 
     if(!pl.unitList4.empty())
     {
-        pl.nGenes += pl.unitList4.front().nGenes;
+        pl.NGENES += pl.unitList4.front().NGENES;
     }
 
     if(!pl.unitList5.empty())
     {
-        pl.nGenes += pl.unitList5.front().nGenes;
+        pl.NGENES += pl.unitList5.front().NGENES;
     }
 
     if(!pl.unitList6.empty())
     {
-        pl.nGenes += pl.unitList6.front().nGenes;
+        pl.NGENES += pl.unitList6.front().NGENES;
     }
 
     if(!pl.unitList7.empty())
     {
-        pl.nGenes += pl.unitList7.front().nGenes;
+        pl.NGENES += pl.unitList7.front().NGENES;
     }
     if(!pl.unitList8.empty())
     {
-        pl.nGenes += pl.unitList8.front().nGenes;
+        pl.NGENES += pl.unitList8.front().NGENES;
     }
     if(!pl.unitList9.empty())
     {
-        pl.nGenes += pl.unitList9.front().nGenes;
+        pl.NGENES += pl.unitList9.front().NGENES;
     }
     if(!pl.unitList10.empty())
     {
-        pl.nGenes += pl.unitList10.front().nGenes;
+        pl.NGENES += pl.unitList10.front().NGENES;
     }
     if(!pl.unitList11.empty())
     {
-        pl.nGenes += pl.unitList11.front().nGenes;
+        pl.NGENES += pl.unitList11.front().NGENES;
     }
     if(!pl.unitList12.empty())
     {
-        pl.nGenes += pl.unitList12.front().nGenes;
+        pl.NGENES += pl.unitList12.front().NGENES;
     }
     if(!pl.unitList13.empty())
     {
-        pl.nGenes += pl.unitList13.front().nGenes;
+        pl.NGENES += pl.unitList13.front().NGENES;
     }
     if(!pl.unitList14.empty())
     {
-        pl.nGenes += pl.unitList14.front().nGenes;
+        pl.NGENES += pl.unitList14.front().NGENES;
     }
     if(!pl.unitList15.empty())
     {
-        pl.nGenes += pl.unitList15.front().nGenes;
+        pl.NGENES += pl.unitList15.front().NGENES;
     }
     if(!pl.unitList16.empty())
     {
-        pl.nGenes += pl.unitList16.front().nGenes;
+        pl.NGENES += pl.unitList16.front().NGENES;
     }
     if(!pl.unitList17.empty())
     {
-        pl.nGenes += pl.unitList17.front().nGenes;
+        pl.NGENES += pl.unitList17.front().NGENES;
     }
 
 

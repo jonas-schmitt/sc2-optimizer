@@ -49,17 +49,6 @@ protected:
     }
     int mShieldRegenCount = 0;
 public:
-//    ProtossUnit();
-
-//    ProtossUnit(string name);
-
-//    ProtossUnit(const UnitStats& baseStats);
-
-//    ProtossUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
-
-//    ProtossUnit(ProtossUnit const& protossUnit);
-
-//    ProtossUnit(BaseUnit const& baseUnit);
 
     void subShield(double const value);
 
@@ -69,7 +58,7 @@ public:
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
-        regenerate(own);
+        ProtossUnit::regenerate(own);
     }
 
     void initUpgrades(vector<int> const& flags);
@@ -99,7 +88,6 @@ private:
         if(mChargeAvailTimer <= 0 && !mChargeActive)
         {
             bool applyCharge = false;
-            double const threshold = 0;
             for(T *enemy : unitList)
             {
                 if(!enemy->isDead())
@@ -112,7 +100,8 @@ private:
                     {
                         dist = 0.0;
                     }
-                    if(enemy->computeRange(*this) > dist + threshold)
+                    double const threshold = enemy->computeRange(*this);
+                    if(dist < threshold)
                     {
                         applyCharge = true;
                         break;
@@ -148,13 +137,13 @@ private:
     }
 
 public:
-    int const nGenes = ProtossUnit::nGenes + 1;
+    int const NGENES = ProtossUnit::NGENES + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(mChargeAvail)
         {
-            charge(other.unitList);
+            Zealot::charge(other.unitList);
         }
         ProtossUnit::timestep(own, other);
     }
@@ -170,6 +159,7 @@ private:
     template<typename T> void blink(vector<T *> const & unitList)
     {
         int const threshold = 0;
+
         if(mBlinkTimer <= 0 && mStats.shield <= threshold)
         {
             double center_x = 0.0;
@@ -198,7 +188,7 @@ private:
     }
 
 public:
-    int const nGenes = ProtossUnit::nGenes + 1;
+    int const NGENES = ProtossUnit::NGENES + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -271,7 +261,7 @@ private:
                 double const threshold = 2.0 * (forceFieldRange + forceFieldRadius);
                 if(dist < threshold)
                 {
-                    if(dist - forceFieldRange > EPS)
+                    if(dist > forceFieldRange)
                     {
                         distVec = std::move(distVec.getNormedVec(dist));
                         center.x = mPos.x + forceFieldRange * distVec.x;
@@ -319,12 +309,12 @@ private:
     }
 
 public:
-    int const nGenes = ProtossUnit::nGenes + 1;
+    int const NGENES = ProtossUnit::NGENES + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
-        forceField(own, other);
+        Sentry::forceField(own, other);
         BaseUnit::timestep(own, other);
-        regenerate(own);
+        Sentry::regenerate(own);
     }
 };
 

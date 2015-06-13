@@ -86,7 +86,7 @@ template <class Race> struct PlayerState : public Race
 
     int regenerationUpdate = 1000;
 
-    int nGenes = 0;
+    int NGENES = 0;
 
 
 
@@ -178,13 +178,13 @@ template <class Race> struct PlayerState : public Race
                 forceFieldQueue.pop_front();
             }
         }
-        if(regenerationTimer <= 0)
+        if(regenerationTimer > 0)
         {
-            regenerationTimer = regenerationUpdate;
+            regenerationTimer -= timeSlice;
         }
         else
         {
-            regenerationTimer -= timeSlice;
+            regenerationTimer = regenerationUpdate;
         }
         time += timeSlice;
 

@@ -63,8 +63,6 @@ struct UnitStats
 {
     double minerals = 0;
     double gas = 0;
-    double gdps = 0;
-    double adps = 0;
     double groundRange = 0;
     double airRange = 0;
     double health = 0;
@@ -84,6 +82,7 @@ struct UnitStats
 
     double airAttack = 0;
     double aaUpgrade = 0;
+
     int gaCooldown = 0;
     int aaCooldown = 0;
 
@@ -134,10 +133,8 @@ protected:
 
     int mId;
 
-    double param;
+    double tmp0;
     double mMoveDist;
-
-    bool mCollision = false;
 
     BaseUnit *mTarget = nullptr;
 
@@ -158,7 +155,7 @@ protected:
         }
 
 
-        if(dist < own.param)
+        if(dist < own.tmp0)
         {
             Vec2D res = distVec.getNormedVec(dist);
             double const value = 1e3*own.getGene(1) + 1e2*own.getResources()*own.getGene(2);
@@ -242,7 +239,7 @@ protected:
 
 public:
 
-    int const nGenes = 16;
+    int const NGENES = 16;
 
     Damage mPossibleDamage[18];
     int mMovementUpdateBackup;
@@ -288,10 +285,6 @@ public:
     double getGas() const;
 
     double getResources() const;
-
-    double getGdps() const ;
-
-    double getAdps() const;
 
     double getGroundRange() const;
 
@@ -584,8 +577,7 @@ public:
     void decMovementTimer();
     int getMovementUpdate() const;
     void setMovementUpdate(int value);
-    bool hasCollision() const;
-    void setCollision(bool value);
+
     double getMoveDist() const;
     void multSpeed(double value);
 

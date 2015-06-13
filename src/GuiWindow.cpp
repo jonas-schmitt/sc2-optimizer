@@ -129,8 +129,7 @@ void GuiWindow::setUnits(T *pl1, U *pl2)
 		i++;
 
 		values.push_back(std::to_string(in->getHealth()));
-		values.push_back(std::to_string(in->getGdps()));
-		values.push_back(std::to_string(in->getAdps()));
+
 	}
 	mPlayer1->setUnitNames(names);
 	mPlayer1->setUnitStats(stats);
@@ -149,8 +148,7 @@ void GuiWindow::setUnits(T *pl1, U *pl2)
 		names.push_back(name);
 
 		values.push_back(std::to_string(in->getHealth()));
-		values.push_back(std::to_string(in->getGdps()));
-		values.push_back(std::to_string(in->getAdps()));
+
 	}
 	mPlayer2->setUnitNames(names);
 	mPlayer2->setUnitStats(stats);

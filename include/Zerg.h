@@ -45,17 +45,6 @@ protected:
     }
 
 public:
-//    ZergUnit();
-
-//    ZergUnit(string name);
-
-//    ZergUnit(const UnitStats& baseStats);
-
-//    ZergUnit(const UnitStats& baseStats, Vec2D min, Vec2D max);
-
-//    ZergUnit(ZergUnit const& zergUnit);
-
-//    ZergUnit(BaseUnit const& baseUnit);
 
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -135,7 +124,7 @@ private:
     }
 
 public:
-    int const nGenes = ZergUnit::nGenes + 1;
+    int const NGENES = ZergUnit::NGENES + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
@@ -153,7 +142,7 @@ public:
 class Baneling final : public ZergUnit
 {
 public:
-    int const nGenes = ZergUnit::nGenes + 2;
+    int const NGENES = ZergUnit::NGENES + 2;
 
     void initUpgrades (vector<int> const& flags);
     template<typename U, typename T> bool attack(PlayerState<U>& own, PlayerState<T>& other)
