@@ -158,10 +158,6 @@ double BaseUnit::getMaxEnergy() const
     return mStats.maxEnergy;
 }
 
-size_t BaseUnit::getHash() const
-{
-    return mGenes.getHash();
-}
 
 bool BaseUnit::isAirUnit() const
 {
@@ -658,15 +654,19 @@ double BaseUnit::computeAirRange(BaseUnit const& other) const
     return getAirRange() + getSize() + other.getSize();
 }
 
-double BaseUnit::getGene(int const pos) const
+double BaseUnit::getAllele(size_t const pos) const
 {
-    return mGenes.get(pos);
+    return mChromosomePtr->getPhenotype(mChromosomeStartPosition + pos);
 }
 
-void BaseUnit::setGenes(UnitGenes const& genes)
+void BaseUnit::setChromosomeStartPosition(size_t const pos)
 {
-    mGenes = genes;
-    computeTemporaryValues ();
+    mChromosomeStartPosition = pos;
+}
+
+void BaseUnit::setChromosome(Chromosome<> const& chromosome)
+{
+    mChromosomePtr = &chromosome;
 }
 
 void BaseUnit::setTracking(bool const tracking)
@@ -722,7 +722,6 @@ void BaseUnit::setTimeSlice(int value)
 
 void BaseUnit::computeTemporaryValues()
 {
-    tmp0 = getMaxDist()*getGene(0);
     mMoveDist = getSpeed()*mTimeSlice*1e-3;
     mMovementUpdateBackup = mMovementUpdate;
 }

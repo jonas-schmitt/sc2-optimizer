@@ -15,7 +15,7 @@
 
 #include "PlayerState.h"
 #include "Utilities.h"
-#include "UnitGenes.h"
+#include "Chromosome.h"
 #include "BaseUnit.h"
 
 using std::pair;

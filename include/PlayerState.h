@@ -10,6 +10,7 @@
 #include<queue>
 
 #include"Utilities.h"
+#include"Chromosome.h"
 
 using std::string;
 using std::list;
@@ -56,6 +57,8 @@ template <class Race> struct PlayerState : public Race
 
     vector<PotentialField<Race>> potentialList;
     deque<pair<int,PotentialField<Race>>> forceFieldQueue;
+
+    Chromosome<> chromosome;
 
 
     vector<typename Race::UT0> unitList0;

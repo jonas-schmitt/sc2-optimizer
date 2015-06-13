@@ -1,6 +1,7 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 #include <cmath>
+#include <cstddef>
 
 static double const LIMIT = 10000;
 static double const EPS = 1e-11;
@@ -12,6 +13,7 @@ static double const STDLEN = 1./std::sqrt(2);
 static double const MIN = 0.0;
 static double const MAX = 1.0; //static_cast<int>(std::min(INTLIMIT,BOUND));
 static double const MAX_INV = 1.0/MAX;
+static size_t const NBITS = 32;
 
 
 struct Vec2D

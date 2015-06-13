@@ -70,17 +70,6 @@ void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
         unit->resetPos();
     }
 }
-template <class T, class U>
-void MicroSimulation<T,U>::initPlayer1(vector<string>const& unitList, UnitGenes const& genes, std::function<Vec2D(BaseUnit &, BaseUnit &)> friendForce, std::function<Vec2D(BaseUnit &,BaseUnit &)> enemyForce)
-{
-    initPlayer1(unitList);
-    for(auto& unit : pl1.unitList)
-    {
-        unit->setGenes(genes);
-        unit->setFriendForce(friendForce);
-        unit->setEnemyForce(enemyForce);
-    }
-}
 
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
@@ -108,22 +97,29 @@ void MicroSimulation<T, U>::initBothPlayers(const vector<string>& unitList1, con
     initPlayer2 (unitList2);
 
 }
+
 template<class T, class U>
-void MicroSimulation<T,U>::setPlayer1Genes(UnitGenes const& genes)
+template<typename V>
+void MicroSimulation<T,U>::setPlayerChromosome(PlayerState<V>& pl, Chromosome<> const& chromosome)
 {
-    for(auto unit : pl1.unitList)
+    pl.chromosome = chromosome;
+    size_t pos = 0;
+    for(auto unitPtr : pl.unitList)
     {
-        unit->setGenes(genes);
+        unitPtr->setChromosome(pl.chromosome);
     }
 }
 
 template<class T, class U>
-void MicroSimulation<T,U>::setPlayer2Genes(UnitGenes const& genes)
+void MicroSimulation<T,U>::setPlayer1Chromosome(Chromosome<> const& chromosome)
 {
-    for(auto unit : pl2.unitList)
-    {
-        unit->setGenes(genes);
-    }
+    setPlayerChromosome(pl1, chromosome);
+}
+
+template<class T, class U>
+void MicroSimulation<T,U>::setPlayer2Chromosome(Chromosome<> const& chromosome)
+{
+    setPlayerChromosome(pl2, chromosome);
 }
 
 template<class T, class U>
