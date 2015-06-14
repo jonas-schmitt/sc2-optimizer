@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 
-class DataReader
+class DataReader final
 {
 	private:
 		std::string pathToFile;

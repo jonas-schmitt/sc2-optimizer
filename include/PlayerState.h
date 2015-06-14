@@ -19,7 +19,7 @@ using std::function;
 using std::vector;
 using std::deque;
 
-template<typename Race> struct PotentialField : public Race
+template<typename Race> struct PotentialField final : public Race
 {
     PotentialField(Vec2D p, function<Vec2D(Vec2D const&,typename Race::BUT const&)> f)
         : pos(p), func(f)
@@ -36,7 +36,7 @@ private:
 };
 
 
-struct SimulationResult
+struct SimulationResult final
 {
     double damage = 0;
     double damagePercent = 0;
@@ -45,7 +45,7 @@ struct SimulationResult
     vector<vector<Vec2Df>> paths;
 };
 
-template <class Race> struct PlayerState : public Race
+template <class Race> struct PlayerState final : public Race
 {
 
     bool forceFieldPlaced = false;

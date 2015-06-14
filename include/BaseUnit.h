@@ -153,14 +153,14 @@ protected:
         double const dist = distVec.computeLength();
         if(dist < own.getSize () + buddy.getSize())
         {
-            Vec2D force = distVec.getNormedVec(dist);
+            Vec2D force = std::move(distVec.getNormedVec(dist));
             return Vec2D(-1e5*force.x, -1e5*force.y);
         }
 
 
         if(dist < own.getMaxDist()*own.getPhenotype(0))
         {
-            Vec2D res = distVec.getNormedVec(dist);
+            Vec2D res = std::move(distVec.getNormedVec(dist));
             double const value = 1e3*own.getPhenotype(1) + 1e2*own.getResources()*own.getPhenotype(2);
             res.x *= value;
             res.y *= value;
@@ -180,7 +180,7 @@ protected:
         double const dist = distVec.computeLength ();
         if(dist < own.getSize () + enemy.getSize())
         {
-            Vec2D force = distVec.getNormedVec(dist);
+            Vec2D force = std::move(distVec.getNormedVec(dist));
             return Vec2D(-1e5*force.x, -1e5*force.y);
         }
 

@@ -24,7 +24,7 @@ using std::unordered_map;
 using std::pair;
 
 template <class Race> 
-class UnitFactory : public Race 
+class UnitFactory final : public Race
 {
 private:
     unordered_map<string, UnitStats> mHashMap;

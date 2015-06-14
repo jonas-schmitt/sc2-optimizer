@@ -19,7 +19,7 @@ using std::vector;
 using std::list;
 using std::pair;
 
-struct PlayerStats
+struct PlayerStats final
 {
 PlayerStats()
 : groundArmor(0), groundHealth(0), groundDps(0), airArmor(0), airHealth(0), airDps(0)
@@ -35,7 +35,7 @@ PlayerStats()
 };
 
 template<class T, class U>
-    class MicroSimulation
+    class MicroSimulation final
 {
 private:
 

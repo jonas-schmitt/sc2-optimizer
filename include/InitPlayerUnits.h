@@ -18,7 +18,7 @@ using std::string;
 
 
 template<class Race>
-class InitPlayerUnits : public Race
+class InitPlayerUnits final : public Race
 {
 
 private:

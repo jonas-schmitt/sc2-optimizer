@@ -15,7 +15,7 @@ static double const MAX = 1.0; //static_cast<int>(std::min(INTLIMIT,BOUND));
 static double const MAX_INV = 1.0/MAX;
 
 
-struct Vec2D
+struct Vec2D final
 {
 
     double x;
@@ -85,7 +85,7 @@ struct Vec2D
         return getNormedVec (computeLength ());
     }
 };
-struct Vec2Df
+struct Vec2Df final
 {
 
     float x;
@@ -158,7 +158,7 @@ struct Vec2Df
 };
 
 
-struct Fitness
+struct Fitness final
 {
     double damage;
     double health;
