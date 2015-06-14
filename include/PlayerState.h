@@ -58,7 +58,7 @@ template <class Race> struct PlayerState : public Race
     vector<PotentialField<Race>> potentialList;
     deque<pair<int,PotentialField<Race>>> forceFieldQueue;
 
-    Chromosome<> chromosome;
+    Chromosome chromosome;
 
 
     vector<typename Race::UT0> unitList0;
@@ -89,7 +89,7 @@ template <class Race> struct PlayerState : public Race
 
     int regenerationUpdate = 1000;
 
-    int NGENES = 0;
+    int NGenes = 0;
 
 
 

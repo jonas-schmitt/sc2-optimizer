@@ -518,6 +518,11 @@ bool BaseUnit::isDead () const
     return mStats.health < EPS;
 }
 
+
+size_t BaseUnit::getChromosomeStartPosition() const
+{
+    return mChromosomeStartPosition;
+}
 Damage BaseUnit::computeDamage(BaseUnit const& other) const
 {
     double totalDamage = 0.0;
@@ -654,9 +659,9 @@ double BaseUnit::computeAirRange(BaseUnit const& other) const
     return getAirRange() + getSize() + other.getSize();
 }
 
-double BaseUnit::getAllele(size_t const pos) const
+double BaseUnit::getPhenotype(size_t const pos) const
 {
-    return mChromosomePtr->getPhenotype(mChromosomeStartPosition + pos);
+    return mPhenotype[pos];
 }
 
 void BaseUnit::setChromosomeStartPosition(size_t const pos)
@@ -664,9 +669,22 @@ void BaseUnit::setChromosomeStartPosition(size_t const pos)
     mChromosomeStartPosition = pos;
 }
 
-void BaseUnit::setChromosome(Chromosome<> const& chromosome)
+void BaseUnit::setChromosome(Chromosome const& chromosome)
 {
-    mChromosomePtr = &chromosome;
+
+    mChromosome = chromosome.data();
+    mPhenotype.reserve(mNGenes);
+    double constexpr max = 1.0/(std::pow(2, NBITS) - 1);
+    for(int i = 0; i < mNGenes; ++i)
+    {
+        mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max);
+    }
+}
+
+void BaseUnit::setChromosome(Chromosome const& chromosome, size_t const startPos)
+{
+    mChromosomeStartPosition = startPos;
+    setChromosome(chromosome);
 }
 
 void BaseUnit::setTracking(bool const tracking)

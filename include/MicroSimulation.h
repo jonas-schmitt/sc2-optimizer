@@ -57,9 +57,9 @@ public:
     MicroSimulation(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2);
     void initPlayer1(vector<string> const&);
     void initPlayer2(vector<string> const&);
-    template<typename V> void setPlayerChromosome(PlayerState<V>& pl, Chromosome<> const&);
-    void setPlayer1Chromosome(Chromosome<> const&);
-    void setPlayer2Chromosome(Chromosome<> const&);
+    template<typename V> void setPlayerChromosome(PlayerState<V>& pl, Chromosome const&);
+    void setPlayer1Chromosome(Chromosome const&);
+    void setPlayer2Chromosome(Chromosome const&);
     void setPlayer1Pos(Vec2D const pos);
     void setPlayer2Pos(Vec2D const pos);
     void initBothPlayers(vector<string> const&, vector<string> const&);

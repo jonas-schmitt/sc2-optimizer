@@ -364,171 +364,171 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 
     if(!pl.unitList0.empty())
     {
-        pl.NGENES += pl.unitList0.front().NGENES;
+        pl.NGenes += pl.unitList0.front().mNGenes;
         for(auto unit : pl.unitList0)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList1.empty())
     {
-        pl.NGENES += pl.unitList1.front().NGENES;
+        pl.NGenes += pl.unitList1.front().mNGenes;
         for(auto unit : pl.unitList1)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
     if(!pl.unitList2.empty())
     {
-        pl.NGENES += pl.unitList2.front().NGENES;
+        pl.NGenes += pl.unitList2.front().mNGenes;
         for(auto unit : pl.unitList2)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
     if(!pl.unitList3.empty())
     {
-        pl.NGENES += pl.unitList3.front().NGENES;
+        pl.NGenes += pl.unitList3.front().mNGenes;
         for(auto unit : pl.unitList3)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
     if(!pl.unitList4.empty())
     {
-        pl.NGENES += pl.unitList4.front().NGENES;
+        pl.NGenes += pl.unitList4.front().mNGenes;
         for(auto unit : pl.unitList4)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
     if(!pl.unitList5.empty())
     {
-        pl.NGENES += pl.unitList5.front().NGENES;
+        pl.NGenes += pl.unitList5.front().mNGenes;
         for(auto unit : pl.unitList5)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
     if(!pl.unitList6.empty())
     {
-        pl.NGENES += pl.unitList6.front().NGENES;
+        pl.NGenes += pl.unitList6.front().mNGenes;
         for(auto unit : pl.unitList6)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
     if(!pl.unitList7.empty())
     {
-        pl.NGENES += pl.unitList7.front().NGENES;
+        pl.NGenes += pl.unitList7.front().mNGenes;
         for(auto unit : pl.unitList7)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList8.empty())
     {
-        pl.NGENES += pl.unitList8.front().NGENES;
+        pl.NGenes += pl.unitList8.front().mNGenes;
         for(auto unit : pl.unitList8)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList9.empty())
     {
-        pl.NGENES += pl.unitList9.front().NGENES;
+        pl.NGenes += pl.unitList9.front().mNGenes;
         for(auto unit : pl.unitList9)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList10.empty())
     {
-        pl.NGENES += pl.unitList10.front().NGENES;
+        pl.NGenes += pl.unitList10.front().mNGenes;
         for(auto unit : pl.unitList10)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList11.empty())
     {
-        pl.NGENES += pl.unitList11.front().NGENES;
+        pl.NGenes += pl.unitList11.front().mNGenes;
         for(auto unit : pl.unitList11)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList12.empty())
     {
-        pl.NGENES += pl.unitList12.front().NGENES;
+        pl.NGenes += pl.unitList12.front().mNGenes;
         for(auto unit : pl.unitList12)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList13.empty())
     {
-        pl.NGENES += pl.unitList13.front().NGENES;
+        pl.NGenes += pl.unitList13.front().mNGenes;
         for(auto unit : pl.unitList13)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList14.empty())
     {
-        pl.NGENES += pl.unitList14.front().NGENES;
+        pl.NGenes += pl.unitList14.front().mNGenes;
         for(auto unit : pl.unitList14)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList15.empty())
     {
-        pl.NGENES += pl.unitList15.front().NGENES;
+        pl.NGenes += pl.unitList15.front().mNGenes;
         for(auto unit : pl.unitList15)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList16.empty())
     {
-        pl.NGENES += pl.unitList16.front().NGENES;
+        pl.NGenes += pl.unitList16.front().mNGenes;
         for(auto unit : pl.unitList16)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
     if(!pl.unitList17.empty())
     {
-        pl.NGENES += pl.unitList17.front().NGENES;
+        pl.NGenes += pl.unitList17.front().mNGenes;
         for(auto unit : pl.unitList17)
         {
             unit.setChromosomeStartPosition(pos);
         }
-        pos = pl.NGENES;
+        pos = pl.NGenes;
     }
 
 

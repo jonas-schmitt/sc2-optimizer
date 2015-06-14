@@ -100,7 +100,7 @@ void MicroSimulation<T, U>::initBothPlayers(const vector<string>& unitList1, con
 
 template<class T, class U>
 template<typename V>
-void MicroSimulation<T,U>::setPlayerChromosome(PlayerState<V>& pl, Chromosome<> const& chromosome)
+void MicroSimulation<T,U>::setPlayerChromosome(PlayerState<V>& pl, Chromosome const& chromosome)
 {
     pl.chromosome = chromosome;
     size_t pos = 0;
@@ -111,13 +111,13 @@ void MicroSimulation<T,U>::setPlayerChromosome(PlayerState<V>& pl, Chromosome<> 
 }
 
 template<class T, class U>
-void MicroSimulation<T,U>::setPlayer1Chromosome(Chromosome<> const& chromosome)
+void MicroSimulation<T,U>::setPlayer1Chromosome(Chromosome const& chromosome)
 {
     setPlayerChromosome(pl1, chromosome);
 }
 
 template<class T, class U>
-void MicroSimulation<T,U>::setPlayer2Chromosome(Chromosome<> const& chromosome)
+void MicroSimulation<T,U>::setPlayer2Chromosome(Chromosome const& chromosome)
 {
     setPlayerChromosome(pl2, chromosome);
 }

@@ -137,7 +137,7 @@ private:
     }
 
 public:
-    int const NGENES = ProtossUnit::NGENES + 1;
+    int const mNGenes = ProtossUnit::mNGenes + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -188,7 +188,7 @@ private:
     }
 
 public:
-    int const NGENES = ProtossUnit::NGENES + 1;
+    int const mNGenes = ProtossUnit::mNGenes + 1;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
@@ -309,7 +309,7 @@ private:
     }
 
 public:
-    int const NGENES = ProtossUnit::NGENES + 1;
+    int const mNGenes = ProtossUnit::mNGenes + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         Sentry::forceField(own, other);

@@ -124,7 +124,7 @@ private:
     }
 
 public:
-    int const NGENES = ZergUnit::NGENES + 1;
+    int const mNGenes = ZergUnit::mNGenes + 1;
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         BaseUnit::timestep(own, other);
@@ -142,7 +142,7 @@ public:
 class Baneling final : public ZergUnit
 {
 public:
-    int const NGENES = ZergUnit::NGENES + 2;
+    int const mNGenes = ZergUnit::mNGenes + 2;
 
     void initUpgrades (vector<int> const& flags);
     template<typename U, typename T> bool attack(PlayerState<U>& own, PlayerState<T>& other)

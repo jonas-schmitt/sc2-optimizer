@@ -100,7 +100,8 @@ class BaseUnit
 {  
 protected:
 
-    Chromosome<> const* mChromosomePtr;
+    bitset<NBITS> const* mChromosome;
+    vector<double> mPhenotype;
     size_t mChromosomeStartPosition;
 
     UnitStats mStats;
@@ -157,10 +158,10 @@ protected:
         }
 
 
-        if(dist < own.getMaxDist()*own.getAllele(0))
+        if(dist < own.getMaxDist()*own.getPhenotype(0))
         {
             Vec2D res = distVec.getNormedVec(dist);
-            double const value = 1e3*own.getAllele(1) + 1e2*own.getResources()*own.getAllele(2);
+            double const value = 1e3*own.getPhenotype(1) + 1e2*own.getResources()*own.getPhenotype(2);
             res.x *= value;
             res.y *= value;
             return res;
@@ -196,19 +197,19 @@ protected:
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
         double const threshold = (ownRange-(enemy.getSpeed() * enemy.getMovementUpdate() * 1e-3));
-        if(dist > ownRange*own.getAllele(3))
+        if(dist > ownRange*own.getPhenotype(3))
         {
             res1 = distVec.getNormedVec(dist);
             double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
             double const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                              : std::max(own.getGACooldown () - own.getAttackTimer (),0);
-            double const val = 1e1*a*own.getAllele(4) + b*own.getAllele(5) + 1e2*ownDamage.total*own.getAllele(6) + 1e3*own.getAllele(7);
+            double const val = 1e1*a*own.getPhenotype(4) + b*own.getPhenotype(5) + 1e2*ownDamage.total*own.getPhenotype(6) + 1e3*own.getPhenotype(7);
             res1.x *= val;
             res1.y *= val;
         }
-        else if(dist < threshold*own.getAllele(8))
+        else if(dist < threshold*own.getPhenotype(8))
         {
-            double const val = 1e4*own.getAllele(9);
+            double const val = 1e4*own.getPhenotype(9);
             res2.x *= val;
             res2.y *= val;
         }
@@ -221,13 +222,13 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < 2.0*own.getAllele (10)*(enemyRange + enemy.getMoveDist()))
+        if(dist < 2.0*own.getPhenotype (10)*(enemyRange + enemy.getMoveDist()))
         {
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
             double const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            double const val = 1e1*a*own.getAllele(11) + b*own.getAllele(12) + 1e2*enemyDamage.total*own.getAllele(13) + 1e3*own.getAllele(14);
+            double const val = 1e1*a*own.getPhenotype(11) + b*own.getPhenotype(12) + 1e2*enemyDamage.total*own.getPhenotype(13) + 1e3*own.getPhenotype(14);
             res2.x *= val;
             res2.y *= val;
         }
@@ -241,7 +242,7 @@ protected:
 
 public:
 
-    int const NGENES = 16;
+    int const mNGenes = 16;
 
     Damage mPossibleDamage[18];
     int mMovementUpdateBackup;
@@ -541,10 +542,11 @@ public:
         return true;
     }
 
-    double getAllele(size_t const pos) const;
+    double getPhenotype(size_t const pos) const;
 
     void setChromosomeStartPosition(size_t const pos);
-    void setChromosome(Chromosome<>const & chromosome);
+    void setChromosome(Chromosome const & chromosome, size_t const pos);
+    void setChromosome(Chromosome const & chromosome);
 
     void setTracking(bool const tracking);
     void reservePathStorage(size_t const sz);
@@ -584,6 +586,7 @@ public:
     double getMoveDist() const;
     void multSpeed(double value);
 
+    size_t getChromosomeStartPosition() const;
 };
 
 

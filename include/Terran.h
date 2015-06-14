@@ -91,7 +91,7 @@ private:
     }
 
 public:
-    int const NGENES = TerranUnit::NGENES + 2;
+    int const mNGenes = TerranUnit::mNGenes + 2;
     void initUpgrades(vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
