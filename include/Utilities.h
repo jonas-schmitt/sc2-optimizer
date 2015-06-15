@@ -158,32 +158,4 @@ struct Vec2Df final
 };
 
 
-struct Fitness final
-{
-    double damage;
-    double health;
-    double score;
-    Fitness()
-        : damage(0), health(0), score(0)
-    {}
-    Fitness(double d, double h, double s)
-        : damage(d), health(h), score(s)
-    {}
-    Fitness(Fitness const& sim)
-    {
-        damage = sim.damage;
-        health = sim.health;
-        score = sim.score;
-    }
-    Fitness operator+(Fitness const& other) const
-    {
-        return Fitness(this->damage+other.damage,this->health+other.health,this->score+other.score);
-    }
-    Fitness operator/(double value) const
-    {
-        return Fitness(this->damage/value,this->health/value,this->score/value);
-    }
-
-
-};
 #endif // UTILITIES_H

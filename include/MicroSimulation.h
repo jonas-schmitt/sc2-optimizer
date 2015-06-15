@@ -90,6 +90,9 @@ public:
     void setTracking(bool const tracking, size_t const steps);
     void clearUnitPaths();
 
+    size_t getPlayer1ChromosomeLength() const;
+    size_t getPlayer2ChromosomeLength() const;
+
 };
 
 #endif

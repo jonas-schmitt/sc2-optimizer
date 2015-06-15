@@ -8,6 +8,7 @@
 
 #include "../include/TemplateInit.h"
 #include "../include/MicroSimulation.h"
+#include "../include/soga.h"
 
 
 

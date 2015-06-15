@@ -327,3 +327,16 @@ void MicroSimulation<T,U>::clearUnitPaths()
         unit->clearPath();
     }
 }
+
+template<class T, class U>
+size_t MicroSimulation<T,U>::getPlayer1ChromosomeLength() const
+{
+    return pl1.NGenes;
+}
+
+template<class T, class U>
+size_t MicroSimulation<T,U>::getPlayer2ChromosomeLength() const
+{
+    return pl2.NGenes;
+}
+
