@@ -15,9 +15,18 @@ typedef vector<bitset<NBITS>> Chromosome;
 
 struct Fitness final
 {
-    double damage;
-    double health;
+
     double score;
+    double damage;
+    double damage_killed;
+    double gas_killed;
+    double minerals_killed;
+
+    double health;
+    double health_alive;
+    double gas_alive;
+    double minerals_alive;
+
     Fitness()
         : damage(0), health(0), score(0)
     {}

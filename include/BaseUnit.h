@@ -501,7 +501,7 @@ public:
                 continue;
             }
 
-            bool const newKill = 0.75 * damage.total > enemy->getHealth() + enemy->getShield();
+            bool const newKill = getPhenotype(15) * damage.total > enemy->getHealth() + enemy->getShield();
             bool const higher = damage.total > maxDamage;
             if(newKill)
             {

@@ -672,10 +672,11 @@ void BaseUnit::setChromosomeStartPosition(size_t const pos)
 void BaseUnit::setChromosome(Chromosome const& chromosome)
 {
 
+    computeTemporaryValues();
     mChromosome = chromosome.data();
     mPhenotype.reserve(mNGenes);
     double constexpr max = 1.0/(std::pow(2, NBITS) - 1);
-    for(int i = 0; i < mNGenes; ++i)
+    for(int i = 0; i < chromosome.size(); ++i)
     {
         mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max);
     }

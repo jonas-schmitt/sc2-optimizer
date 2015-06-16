@@ -158,7 +158,7 @@ private:
 
     template<typename T> void blink(vector<T *> const & unitList)
     {
-        int const threshold = 0;
+        int const threshold = mStats.shield * getPhenotype(mNGenes - 1);
 
         if(mBlinkTimer <= 0 && mStats.shield <= threshold)
         {

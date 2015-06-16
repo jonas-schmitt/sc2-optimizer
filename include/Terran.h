@@ -53,8 +53,8 @@ private:
                 mMoveDist *= 0.5;
                 mStimpackActive = false;
             }
-            double const multiplier = 2.0;
-            double const threshold = 20.0;
+            double const multiplier = 1e1*getPhenotype(mNGenes - 2);
+            double const threshold = mStats.maxHealth * getPhenotype(mNGenes - 1);
 
             bool applyStimpack = false;
             if(mStats.health > threshold)

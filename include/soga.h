@@ -27,14 +27,14 @@ struct Statistics
     double mean;
     double max;
     double sum;
-    double var;
-    Individual const* optimum;
+    double stdev;
+    Individual optimum;
     void print()
     {
         cout << "Total: " << sum << endl;
         cout << "Average: " << mean << endl;
         cout << "Maximum: " << max << endl;
-        cout << "Variance: " << var << endl;
+        cout << "Standard Deviation: " << stdev << endl;
     }
 };
 
@@ -383,7 +383,7 @@ private:
             }
         }
         std::shuffle(positions.begin(), positions.end(), generator);
-        for(size_t i = 0; i < positions.size(); i += 2)
+        for(size_t i = 0; i < positions.size()-1; i += 2)
         {
             auto const& pos1 = positions[i];
             auto const& pos2 = positions[i+1];
@@ -455,7 +455,7 @@ private:
     void evaluate(Individual& ind)
     {
         sim.setPlayer1Chromosome(ind.chromosome);
-        ind.fitness = std::move(sim.run(true));
+        ind.fitness = sim.run(true);
     }
 
     void setGoal(Chromosome const& goal)
@@ -476,23 +476,22 @@ private:
 
     void computeStatistics()
     {
-        stats.max = 0.0;
-        stats.sum = 0.0;
-        for(Individual& ind : pop)
+        vector<double> v(pop.size());
+        for(size_t i = 0; i < v.size(); ++i)
         {
-            if(ind.fitness.score > stats.max)
-            {
-                stats.max = ind.fitness.score;
-                stats.optimum = &ind;
-            }
-            stats.sum += ind.fitness.score;
+            v[i] = pop[i].fitness.score;
         }
-        stats.mean = stats.sum / pop.size();
-
-        stats.var = 0.0;
-        for(Individual const & ind : pop)
-            stats.var += (stats.mean-ind.fitness.score)*(stats.mean-ind.fitness.score);
-        stats.var /= pop.size();
+        double sum = std::accumulate(v.begin(), v.end(), 0.0);
+        double mean = sum / v.size();
+        std::vector<double> diff(v.size());
+        std::transform(v.begin(), v.end(), diff.begin(),
+                       std::bind2nd(std::minus<double>(), mean));
+        double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+        double stdev = std::sqrt(sq_sum / v.size());
+        stats.sum = sum;
+        stats.mean = mean;
+        stats.max = *std::max_element(v.begin(), v.end());
+        stats.stdev = stdev;
 
     }
 
@@ -534,14 +533,8 @@ public:
                 }
             }
             evaluate(pop[i]);
-            if(pop[i].fitness.score > stats.max)
-            {
-                stats.max = pop[i].fitness.score;
-                stats.optimum = &pop[i];
-            }
-            stats.sum += pop[i].fitness.score;
         }
-        stats.mean = stats.sum / popSize;
+        computeStatistics();
         computeCDF();
 
     }
@@ -568,7 +561,7 @@ public:
             {
                 selected = selectionFuncs[selectionChoice](popSize);
             }
-            for(size_t i = 0; i < selected.size(); i += add)
+            for(size_t i = 0; i < selected.size()-1; i += add)
             {
                 pair<Individual, Individual> children;
                 if(tpco)
@@ -596,6 +589,7 @@ public:
                 return ind1.fitness.score > ind2.fitness.score;
             };
             sort(pop.begin(), pop.end(), cmp);
+            stats.optimum = pop.front();
             pop.resize(popSize);
 
             computeStatistics();
@@ -645,11 +639,11 @@ public:
     }
     string getCrossoverOperatorName()
     {
-        return crossoverFuncNames[selectionChoice];
+        return crossoverFuncNames[crossoverChoice];
     }
     string getMutationOperatorName()
     {
-        return mutationFuncNames[selectionChoice];
+        return mutationFuncNames[mutationChoice];
     }
 
 

@@ -365,7 +365,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList0.empty())
     {
         pl.NGenes += pl.unitList0.front().mNGenes;
-        for(auto unit : pl.unitList0)
+        for(auto & unit : pl.unitList0)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -374,7 +374,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList1.empty())
     {
         pl.NGenes += pl.unitList1.front().mNGenes;
-        for(auto unit : pl.unitList1)
+        for(auto & unit : pl.unitList1)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -384,7 +384,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList2.empty())
     {
         pl.NGenes += pl.unitList2.front().mNGenes;
-        for(auto unit : pl.unitList2)
+        for(auto & unit : pl.unitList2)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -394,7 +394,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList3.empty())
     {
         pl.NGenes += pl.unitList3.front().mNGenes;
-        for(auto unit : pl.unitList3)
+        for(auto & unit : pl.unitList3)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -404,7 +404,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList4.empty())
     {
         pl.NGenes += pl.unitList4.front().mNGenes;
-        for(auto unit : pl.unitList4)
+        for(auto & unit : pl.unitList4)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -414,7 +414,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList5.empty())
     {
         pl.NGenes += pl.unitList5.front().mNGenes;
-        for(auto unit : pl.unitList5)
+        for(auto & unit : pl.unitList5)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -424,7 +424,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList6.empty())
     {
         pl.NGenes += pl.unitList6.front().mNGenes;
-        for(auto unit : pl.unitList6)
+        for(auto & unit : pl.unitList6)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -434,7 +434,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList7.empty())
     {
         pl.NGenes += pl.unitList7.front().mNGenes;
-        for(auto unit : pl.unitList7)
+        for(auto & unit : pl.unitList7)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -443,7 +443,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList8.empty())
     {
         pl.NGenes += pl.unitList8.front().mNGenes;
-        for(auto unit : pl.unitList8)
+        for(auto & unit : pl.unitList8)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -452,7 +452,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList9.empty())
     {
         pl.NGenes += pl.unitList9.front().mNGenes;
-        for(auto unit : pl.unitList9)
+        for(auto & unit : pl.unitList9)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -461,7 +461,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList10.empty())
     {
         pl.NGenes += pl.unitList10.front().mNGenes;
-        for(auto unit : pl.unitList10)
+        for(auto & unit : pl.unitList10)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -470,7 +470,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList11.empty())
     {
         pl.NGenes += pl.unitList11.front().mNGenes;
-        for(auto unit : pl.unitList11)
+        for(auto & unit : pl.unitList11)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -479,7 +479,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList12.empty())
     {
         pl.NGenes += pl.unitList12.front().mNGenes;
-        for(auto unit : pl.unitList12)
+        for(auto & unit : pl.unitList12)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -488,7 +488,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList13.empty())
     {
         pl.NGenes += pl.unitList13.front().mNGenes;
-        for(auto unit : pl.unitList13)
+        for(auto & unit : pl.unitList13)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -497,7 +497,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList14.empty())
     {
         pl.NGenes += pl.unitList14.front().mNGenes;
-        for(auto unit : pl.unitList14)
+        for(auto & unit : pl.unitList14)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -506,7 +506,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList15.empty())
     {
         pl.NGenes += pl.unitList15.front().mNGenes;
-        for(auto unit : pl.unitList15)
+        for(auto & unit : pl.unitList15)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -515,7 +515,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList16.empty())
     {
         pl.NGenes += pl.unitList16.front().mNGenes;
-        for(auto unit : pl.unitList16)
+        for(auto & unit : pl.unitList16)
         {
             unit.setChromosomeStartPosition(pos);
         }
@@ -524,7 +524,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     if(!pl.unitList17.empty())
     {
         pl.NGenes += pl.unitList17.front().mNGenes;
-        for(auto unit : pl.unitList17)
+        for(auto & unit : pl.unitList17)
         {
             unit.setChromosomeStartPosition(pos);
         }

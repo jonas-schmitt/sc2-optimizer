@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         race1 = "Zerg";
 
     }
-    else if(std::find(terran.nameList.begin(), terran.nameList.end(), buildOrder1[0]) != terran.nameList.end())
+    else if(std::find(protoss.nameList.begin(), protoss.nameList.end(), buildOrder1[0]) != protoss.nameList.end())
     {
         race1 = "Protoss";
     }
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         race2 = "Zerg";
 
     }
-    else if(std::find(terran.nameList.begin(), terran.nameList.end(), buildOrder2[0]) != terran.nameList.end())
+    else if(std::find(protoss.nameList.begin(), terran.nameList.end(), buildOrder2[0]) != protoss.nameList.end())
     {
         race2 = "Protoss";
     }
@@ -87,20 +87,20 @@ int main(int argc, char *argv[])
     filePath1 = "./data/"+race1;
     filePath2 = "./data/"+race2;
 
-    size_t popSize = 100;
-    size_t iterations = 100;
-    size_t genPerIt = 10;
+    size_t popSize = 10;
+    size_t iterations = 2;
+    size_t genPerIt = 2;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
     if(race1 == "Terran" && race2 == "Terran")
     {
-        Optimizer<SOGA<Terran,Terran>,SOGA<Terran,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Terran,Terran>,SOGA<Terran,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -109,13 +109,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Zerg")
     {
-        Optimizer<SOGA<Terran,Zerg>,SOGA<Zerg,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Terran,Zerg>,SOGA<Zerg,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -123,13 +123,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Protoss")
     {
-        Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -137,13 +137,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {
-        Optimizer<SOGA<Zerg,Terran>,SOGA<Terran,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Zerg,Terran>,SOGA<Terran,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -151,13 +151,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Zerg")
     {
-        Optimizer<SOGA<Zerg,Zerg>,SOGA<Zerg,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Zerg,Zerg>,SOGA<Zerg,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -165,13 +165,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Protoss")
     {
-        Optimizer<SOGA<Zerg,Protoss>,SOGA<Protoss,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Zerg,Protoss>,SOGA<Protoss,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -179,13 +179,16 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Terran")
     {
-        Optimizer<SOGA<Protoss,Terran>,SOGA<Terran,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+
+
+
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Protoss,Terran>,SOGA<Terran,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -193,13 +196,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Zerg")
     {
-        Optimizer<SOGA<Protoss,Zerg>,SOGA<Zerg,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Protoss,Zerg>,SOGA<Zerg,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }
@@ -207,13 +210,13 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Protoss")
     {
-        Optimizer<SOGA<Protoss,Protoss>,SOGA<Protoss,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-        for(size_t i = 0; i < opt.getNumberOfSelectionOperators(); ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j < opt.getNumberOfCrossoverOperators(); ++j)
+            for(size_t j = 0; j < 5; ++j)
             {
-                for(size_t k = 0; k < opt.getNumberOfMutationOperators(); ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
+                    Optimizer<SOGA<Protoss,Protoss>,SOGA<Protoss,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
                     opt.optimize(i, j, k, iterations, genPerIt);
                 }
             }

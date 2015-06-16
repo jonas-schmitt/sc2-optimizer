@@ -243,37 +243,61 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
 
     }
     Fitness res;
-    double maxHealth = 0;
-    double maxDamage = 0;
+    double maxHealth = 0;;
+    double maxMinerals_alive = 0;
+    double maxGas_alive = 0;
     for(auto unit : pl1.unitList)
     {
-        maxHealth += unit->getMaxHealth();
-        maxHealth += unit->getMaxShield();
-        res.health += unit->getHealth();
-        res.health += unit->getShield();
-
+        maxHealth += unit->getMaxHealth() + unit->getMaxShield();
+        maxMinerals_alive += unit->getMinerals();
+        maxGas_alive += unit->getGas();
+        res.health += unit->getHealth() + unit->getShield();
+        if(!unit->isDead())
+        {
+            res.health_alive += unit->getMaxHealth() + unit->getShield();
+            res.minerals_alive += unit->getMinerals();
+            res.gas_alive += unit->getGas();
+        }
     }
+    double maxDamage = 0;
+    double maxMinerals_killed = 0;
+    double maxGas_killed = 0;
     for(auto unit : pl2.unitList)
     {
-        maxDamage += unit->getMaxHealth();
-        maxDamage += unit->getMaxShield();
-
-        res.damage += (unit->getMaxHealth() - unit->getHealth());
-        res.damage += (unit->getMaxShield() - unit->getShield());
+        maxDamage += unit->getMaxHealth() + unit->getMaxShield();
+        maxMinerals_killed += unit->getMinerals();
+        maxGas_killed += unit->getGas();
+        res.damage += unit->getHealth() + unit->getShield() - unit->getHealth() - unit->getShield();
+        if(unit->isDead())
+        {
+            res.damage_killed += unit->getMaxHealth() + unit->getShield();
+            res.minerals_killed += unit->getMinerals();
+            res.gas_killed += unit->getGas();
+        }
     }
+
+    double maxDamage_inv = 1.0/maxDamage;
+    res.damage *= maxDamage_inv;
+    res.damage_killed *= maxDamage_inv;
+    res.minerals_killed /= maxMinerals_killed;
+    res.gas_killed /= maxGas_killed;
+
+    double maxHealth_inv = 1.0/maxHealth;
+    res.health *= maxHealth_inv;
+    res.health_alive *= maxHealth_inv;
+    res.minerals_alive /= maxMinerals_alive;
+    res.gas_alive /= maxGas_alive;
+
+    res.score = res.damage * res.damage_killed + res.minerals_killed + res.gas_killed;
+    res.score += res.health * res.health_alive + res.minerals_alive + res.gas_alive;
+    res.score /= 6.0;
+    res.score *= 100.0;
 
     if(reset)
     {
         resetBothPlayers();
     }
 
-    res.score = res.health+res.damage;
-    res.health /= maxHealth;
-    res.damage /= maxDamage;
-    if(res.damage < res.health)
-    {
-        res.score = 0;
-    }
     return res;
 }
 
