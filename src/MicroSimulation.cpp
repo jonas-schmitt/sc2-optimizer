@@ -103,7 +103,6 @@ template<typename V>
 void MicroSimulation<T,U>::setPlayerChromosome(PlayerState<V>& pl, Chromosome const& chromosome)
 {
     pl.chromosome = chromosome;
-    size_t pos = 0;
     for(auto unitPtr : pl.unitList)
     {
         unitPtr->setChromosome(pl.chromosome);
@@ -267,10 +266,10 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
         maxDamage += unit->getMaxHealth() + unit->getMaxShield();
         maxMinerals_killed += unit->getMinerals();
         maxGas_killed += unit->getGas();
-        res.damage += unit->getHealth() + unit->getShield() - unit->getHealth() - unit->getShield();
+        res.damage += unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield();
         if(unit->isDead())
         {
-            res.damage_killed += unit->getMaxHealth() + unit->getShield();
+            res.damage_killed += unit->getMaxHealth() + unit->getMaxShield();
             res.minerals_killed += unit->getMinerals();
             res.gas_killed += unit->getGas();
         }

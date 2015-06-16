@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <utility>
 #include <functional>
+#include <omp.h>
 
 #include "Chromosome.h"
 #include "MicroSimulation.h"
@@ -61,7 +62,7 @@ private:
 
     vector<Individual> pop;
 
-    MicroSimulation<T,U> sim;
+    vector<MicroSimulation<T,U>> sim;
 
 
     vector<string> selectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
@@ -146,9 +147,10 @@ private:
         }
         for(double const p : pointers)
         {
-            auto it = func(p);
+            auto it = func(p/stats.sum);
             res.push_back(&(*it));
         }
+        std::shuffle(res.begin(), res.end(), generator);
         return res;
     };
 
@@ -452,15 +454,22 @@ private:
 
 
 
-    void evaluate(Individual& ind)
+    void evaluate(vector<Individual>& pop)
     {
-        sim.setPlayer1Chromosome(ind.chromosome);
-        ind.fitness = sim.run(true);
+        #pragma omp parallel for schedule(static)
+        for(size_t i = 0; i < pop.size(); ++i)
+        {
+            sim[omp_get_thread_num()].setPlayer1Chromosome(pop[i].chromosome);
+            pop[i].fitness = sim[omp_get_thread_num()].run(true);
+        }
     }
 
     void setGoal(Chromosome const& goal)
     {
-        sim.setPlayer2Chromosome(goal);
+        #pragma omp parallel
+        {
+            sim[omp_get_thread_num()].setPlayer2Chromosome(goal);
+        }
     }
 
     void computeCDF()
@@ -499,19 +508,23 @@ private:
 public:
 
     SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2)
-        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), dist1(0.5), dist2(0,popSize-1), dist3(0,1.0),
-          sim(minPos, maxPos, filePath1, filePath2)
+        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), dist1(0.5), dist2(0,popSize-1), dist3(0,1.0)
     {
-        sim.initBothPlayers(buildList1, buildList2);
-        NGenes = sim.getPlayer1ChromosomeLength();
+        sim.reserve(omp_get_max_threads());
+        for(int i = 0; i < omp_get_max_threads(); ++i)
+        {
+            sim.emplace_back(minPos, maxPos, filePath1, filePath2);
+            sim.back().initBothPlayers(buildList1, buildList2);
+        }
+        NGenes = sim[0].getPlayer1ChromosomeLength();
         dist4 = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
         Chromosome initChrom(NGenes);
         for(auto& gene : initChrom)
         {
             gene.flip(gene.size()-1);
         }
+        setGoal(initChrom);
 
-        sim.setPlayer2Chromosome(initChrom);
 
         pop.reserve(2*popSize);
         pop.resize(popSize);
@@ -532,8 +545,8 @@ public:
                     gene.set(j, flipCoin());
                 }
             }
-            evaluate(pop[i]);
         }
+        evaluate(pop);
         computeStatistics();
         computeCDF();
 
@@ -543,6 +556,7 @@ public:
     {
         mutationDist = std::move(std::bernoulli_distribution(mutationProbability));
         setGoal(goal);
+        evaluate(pop);
         computeStatistics();
         computeCDF();
         bool const tpco = crossoverChoice == crossoverFuncs.size()-1;
@@ -550,6 +564,8 @@ public:
         {
             // apply genetic algorithm
 
+            vector<Individual> newPop;
+            newPop.reserve(popSize);
             vector<Individual *> selected;
             size_t add = 2;
             if(tpco)
@@ -568,26 +584,26 @@ public:
                 {
                     children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1], *selected[i+2]});
                     mutationFuncs[mutationChoice](children.first);
-                    evaluate(children.first);
-                    pop.push_back(children.first);
+                    newPop.push_back(children.first);
                 }
                 else
                 {
                     children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1]});
                     mutationFuncs[mutationChoice](children.first);
-                    evaluate(children.first);
 
                     mutationFuncs[mutationChoice](children.second);
-                    evaluate(children.second);
 
-                    pop.push_back(children.first);
-                    pop.push_back(children.second);
+                    newPop.push_back(children.first);
+                    newPop.push_back(children.second);
                 }
             }
+            evaluate(newPop);
+            pop.insert(pop.begin(), newPop.begin(), newPop.end());
             auto cmp = [] (Individual const& ind1, Individual const& ind2)
             {
                 return ind1.fitness.score > ind2.fitness.score;
             };
+
             sort(pop.begin(), pop.end(), cmp);
             stats.optimum = pop.front();
             pop.resize(popSize);

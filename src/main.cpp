@@ -6,7 +6,8 @@
 #include <chrono>
 #include <algorithm>
 #include <fstream>
-
+#include <thread>
+#include <omp.h>
 
 #include "../include/TemplateInit.h"
 #include "../include/MicroSimulation.h"
@@ -26,6 +27,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    omp_set_num_threads(omp_get_max_threads());
+    cout << "Number of Threads used: " << omp_get_max_threads() << std::endl;
 
     Terran terran;
     Zerg zerg;
@@ -87,9 +90,9 @@ int main(int argc, char *argv[])
     filePath1 = "./data/"+race1;
     filePath2 = "./data/"+race2;
 
-    size_t popSize = 10;
-    size_t iterations = 2;
-    size_t genPerIt = 2;
+    size_t popSize = 20;
+    size_t iterations = 10;
+    size_t genPerIt = 5;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
     if(race1 == "Terran" && race2 == "Terran")
@@ -101,7 +104,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Terran,Terran>,SOGA<Terran,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -116,13 +119,14 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Terran,Zerg>,SOGA<Zerg,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
     }
     else if(race1 == "Terran" && race2 == "Protoss")
     {
+        Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 5; ++j)
@@ -130,7 +134,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -144,7 +148,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Zerg,Terran>,SOGA<Terran,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -158,7 +162,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Zerg,Zerg>,SOGA<Zerg,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -172,7 +176,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Zerg,Protoss>,SOGA<Protoss,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -189,7 +193,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Protoss,Terran>,SOGA<Terran,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -203,7 +207,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Protoss,Zerg>,SOGA<Zerg,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }
@@ -217,7 +221,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<SOGA<Protoss,Protoss>,SOGA<Protoss,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
-                    opt.optimize(i, j, k, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
         }

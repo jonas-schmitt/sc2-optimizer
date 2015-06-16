@@ -44,6 +44,8 @@ public:
         optimum2 = stats2.optimum;
         for(size_t i = 0; i < iterations; ++i)
         {
+            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
+            printf("%c[2K", 27);
             ga1.optimize(optimum2.chromosome, genPerIt);
             ga2.optimize(optimum1.chromosome, genPerIt);
             stats1 = ga1.getStatistics();
