@@ -47,6 +47,7 @@ struct Individual
     Fitness fitness;
     Chromosome chromosome;
     double cdf;
+    Individual() {}
     Individual(size_t const N) : chromosome(N) {}
 };
 

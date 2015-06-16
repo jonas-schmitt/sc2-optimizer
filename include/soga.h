@@ -7,6 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <utility>
+#include <functional>
 
 #include "Chromosome.h"
 #include "MicroSimulation.h"
@@ -17,13 +18,24 @@ using std::mt19937;
 using std::bernoulli_distribution;
 using std::string;
 using std::pair;
+using std::function;
+using std::cout;
+using std::endl;
 
 struct Statistics
 {
-    double avg;
+    double mean;
     double max;
     double sum;
     double var;
+    Individual const* optimum;
+    void print()
+    {
+        cout << "Total: " << sum << endl;
+        cout << "Average: " << mean << endl;
+        cout << "Maximum: " << max << endl;
+        cout << "Variance: " << var << endl;
+    }
 };
 
 template <typename T, typename U>
@@ -38,6 +50,8 @@ private:
 
     size_t NGenes;
 
+    size_t NCrossoverPoints = 3;
+
     mt19937 generator;
     bernoulli_distribution dist1;
     std::uniform_int_distribution<size_t> dist2;
@@ -49,61 +63,76 @@ private:
 
     MicroSimulation<T,U> sim;
 
-    Individual const* optimum;
+
+    vector<string> selectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
+    vector<string> crossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover", "Three Parent Crossover"};
+    vector<string> mutationFuncNames = {"Bit Flipping Mutation", "Interchanging Mutation", "Reversing Mutation"};
+
+    size_t selectionChoice = 0;
+    size_t crossoverChoice = 0;
+    size_t mutationChoice = 0;
 
 
-    // Selection Methods
-    Individual& tournamentSelect()
+
+    function<vector<Individual *>(size_t const)> tournamentSelection = [&](size_t const N)
     {
-        auto pickIndividual = std::bind(dist2, generator);
-        Individual& ind1 = pop[pickIndividual()];
-        Individual& ind2 = pop[pickIndividual()];
-        return ind2.fitness.score < ind1.fitness.score ? ind1 : ind2;
-    }
-
-
-    Individual& rouletteWheelSelection(double const p)
-    {
-        auto cmp = [] (Individual const& ind, double val)
+        auto func = [&] ()
         {
-            return ind.cdf < val;
+            auto pickIndividual = std::bind(dist2, generator);
+            size_t pos1 = pickIndividual();
+            size_t pos2 = pickIndividual();
+            Individual const& ind1 = pop[pos1];
+            Individual const& ind2 = pop[pos2];
+            return ind2.fitness.score < ind1.fitness.score ? pos1 : pos2;
         };
 
-        auto low = std::lower_bound(pop.begin(), pop.end(), p);
-        return *low;
-    }
-
-    Individual& rouletteWheelSelection()
-    {
-        auto spinWheel = std::bind(dist3, generator);
-        return rouletteWheelSelection(spinWheel());
-    }
-
-    vector<Individual *> tournamentSelection(size_t const N)
-    {
         vector<Individual *> res;
         res.reserve(N);
         for(size_t i = 0; i < N; ++i)
         {
-            res.push_back(&tournamentSelection());
+            res.push_back(&pop[func()]);
         }
         return res;
-    }
+    };
 
 
-    vector<Individual *> rouletteWheelSelection(size_t const N)
+    function<vector<Individual *>(size_t const)> rouletteWheelSelection = [&](size_t const N)
     {
+        auto func = [&] ()
+        {
+            auto spinWheel = std::bind(dist3, generator);
+            auto cmp = [] (Individual const& ind, double val)
+            {
+                return ind.cdf < val;
+            };
+
+            auto low = std::lower_bound(pop.begin(), pop.end(), spinWheel(), cmp);
+            return low;
+        };
+
         vector<Individual *> res;
         res.reserve(N);
         for(size_t i = 0; i < N; ++i)
         {
-            res.push_back(&rouletteWheelSelection());
+            auto it = func();
+            res.push_back(&(*it));
         }
         return res;
-    }
+    };
 
-    vector<Individual *> stochasticUniversalSampling(size_t const N)
+    function<vector<Individual *>(size_t const)> stochasticUniversalSampling = [&](size_t const N)
     {
+        auto func = [&] (double const p)
+        {
+            auto spinWheel = std::bind(dist3, generator);
+            auto cmp = [] (Individual const& ind, double val)
+            {
+                return ind.cdf < val;
+            };
+
+            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
+            return low;
+        };
         vector<Individual *> res;
         res.reserve(N);
         double const distance = stats.sum / N;
@@ -117,15 +146,18 @@ private:
         }
         for(double const p : pointers)
         {
-            res.push_back(&rouletteWheelSelection(p));
+            auto it = func(p);
+            res.push_back(&(*it));
         }
         return res;
-    }
+    };
 
     // Crossover methods
 
-    pair<Individual, Individual> singlePointCrossover(Individual const& parent1, Individual const &parent2)
+    function<pair<Individual, Individual>(vector<Individual> const&)> singlePointCrossover = [&] (vector<Individual> const& parents)
     {
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
         auto chooseBit = std::bind(dist4, generator);
         size_t bitPos = chooseBit();
         size_t const genePos = bitPos / NBITS;
@@ -152,10 +184,12 @@ private:
             child2.chromosome[i] = parent1.chromosome[i];
         }
         return std::make_pair(child1, child2);
-    }
+    };
 
-    pair<Individual, Individual> twoPointCrossover(Individual const& parent1, Individual const &parent2)
+    function<pair<Individual, Individual>(vector<Individual> const&)> twoPointCrossover = [&] (vector<Individual> const& parents)
     {
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
         auto chooseBit = std::bind(dist4, generator);
         size_t bitPos1 = chooseBit();
         size_t bitPos2 = chooseBit();
@@ -214,10 +248,65 @@ private:
         }
 
         return std::make_pair(child1, child2);
-    }
+    };
 
-    pair<Individual, Individual> uniformCrossover(Individual const& parent1, Individual const &parent2)
+    function<pair<Individual, Individual>(vector<Individual> const&)> nPointCrossover = [&] (vector<Individual> const& parents)
     {
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+        auto chooseBit = std::bind(dist4, generator);
+        vector<size_t> bitPosArray(NCrossoverPoints);
+        for(size_t& bitPos : bitPosArray)
+        {
+            bitPos = chooseBit();
+        }
+        std::sort(bitPosArray.begin(), bitPosArray.end());
+        Individual child1(NGenes), child2(NGenes);
+        auto swap = [] (Individual& A, Individual& B)
+        {
+            Individual& tmp = A;
+            A = B;
+            B = A;
+        };
+        Individual& A = child1;
+        Individual& B = child2;
+
+        size_t start = 0;
+        for(size_t const bitPos : bitPosArray)
+        {
+            size_t const genePos = bitPos / NBITS;
+            size_t const coPoint = bitPos - genePos * NBITS;
+            for(size_t i = start; i < genePos; ++i)
+            {
+                A.chromosome[i] = parent1.chromosome[i];
+                B.chromosome[i] = parent2.chromosome[i];
+            }
+            for(size_t i = 0; i < coPoint; ++i)
+            {
+                A.chromosome[genePos][i] = parent1.chromosome[genePos][i];
+                B.chromosome[genePos][i] = parent2.chromosome[genePos][i];
+            }
+            swap(A,B);
+            for(size_t i = coPoint; i < NBITS; ++i)
+            {
+                A.chromosome[genePos][i] = parent1.chromosome[genePos][i];
+                B.chromosome[genePos][i] = parent2.chromosome[genePos][i];
+            }
+            start = genePos + 1;
+        }
+        for(size_t i = start; i < NGenes; ++i)
+        {
+            A.chromosome[i] = parent1.chromosome[i];
+            B.chromosome[i] = parent2.chromosome[i];
+        }
+        return std::make_pair(child1, child2);
+    };
+
+    function<pair<Individual, Individual>(vector<Individual> const&)> uniformCrossover = [&] (vector<Individual> const& parents)
+    {
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
         auto flipCoin = std::bind(dist1, generator);
         Individual child1(NGenes), child2(NGenes);
         for(size_t i = 0; i < NGenes; ++i)
@@ -237,10 +326,13 @@ private:
             }
         }
         return std::make_pair(child1, child2);
-    }
+    };
 
-    Individual threeParentCrossover(Individual const& parent1, Individual const &parent2, Individual const& parent3)
+    function<pair<Individual, Individual>(vector<Individual> const&)> threeParentCrossover = [&] (vector<Individual> const& parents)
     {
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+        Individual const& parent3 = parents.at(2);
         Individual child(NGenes);
         for(size_t i = 0; i < NGenes; ++i)
         {
@@ -258,10 +350,10 @@ private:
 
             }
         }
-        return child;
-    }
+        return std::make_pair(child, child);
+    };
 
-    void mutation(Individual& individual)
+    function<void(Individual&)> bitFlipMutation = [&] (Individual& individual)
     {
         auto flipBiasedCoin = std::bind(mutationDist, generator);
         for(size_t i = 0; i < NGenes; ++i)
@@ -274,7 +366,87 @@ private:
                 }
             }
         }
-    }
+    };
+
+    function<void(Individual&)> interchangingMutation = [&] (Individual& individual)
+    {
+        auto flipBiasedCoin = std::bind(mutationDist, generator);
+        vector<pair<size_t, size_t>> positions;
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            for(size_t j = 0; j < NBITS; ++j)
+            {
+                if(flipBiasedCoin())
+                {
+                    positions.emplace_back(i,j);
+                }
+            }
+        }
+        std::shuffle(positions.begin(), positions.end(), generator);
+        for(size_t i = 0; i < positions.size(); i += 2)
+        {
+            auto const& pos1 = positions[i];
+            auto const& pos2 = positions[i+1];
+            auto tmp = individual.chromosome[pos1.first][pos1.second];
+            individual.chromosome[pos1.first][pos1.second] = individual.chromosome[pos2.first][pos2.second];
+            individual.chromosome[pos2.first][pos2.second] = tmp;
+        }
+    };
+    function<void(Individual&)> reversingMutation = [&] (Individual& individual)
+    {
+        auto flipCoin = std::bind(dist1, generator);
+        auto flipBiasedCoin = std::bind(mutationDist, generator);
+        vector<pair<size_t, size_t>> positions;
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            for(size_t j = 0; j < NBITS; ++j)
+            {
+                if(flipBiasedCoin())
+                {
+                    positions.emplace_back(i,j);
+                }
+            }
+        }
+        for(auto const& pos1 : positions)
+        {
+            pair<size_t, size_t> pos2;
+            if((flipCoin() && !(pos1.first == NGenes-1 && pos1.second == NBITS-1)) || (pos1.first == 0 && pos1.second == 0))
+            {
+                // swap with right neighbour
+                if(pos1.second == NBITS-1)
+                {
+                    pos2.first = pos1.first+1;
+                    pos2.second = 0;
+                }
+                else
+                {
+                    pos2.first = pos1.first;
+                    pos2.second = pos1.second + 1;
+                }
+            }
+            else
+            {
+                if(pos1.second == 0)
+                {
+                    pos2.first = pos1.first-1;
+                    pos2.second = NBITS-1;
+                }
+                else
+                {
+                    pos2.first = pos1.first;
+                    pos2.second = pos1.second-1;
+                }
+            }
+            auto tmp = individual.chromosome[pos1.first][pos1.second];
+            individual.chromosome[pos1.first][pos1.second] = individual.chromosome[pos2.first][pos2.second];
+            individual.chromosome[pos2.first][pos2.second] = tmp;
+        }
+    };
+
+
+    vector<function<vector<Individual *>(size_t const) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
+    vector<function<pair<Individual, Individual>(vector<Individual> const&)> > crossoverFuncs = {singlePointCrossover, twoPointCrossover, nPointCrossover, uniformCrossover, threeParentCrossover};
+    vector<function<void(Individual &) > > mutationFuncs = {bitFlipMutation, interchangingMutation, reversingMutation};
 
 
 
@@ -288,7 +460,7 @@ private:
 
     void setGoal(Chromosome const& goal)
     {
-        sim.setPlayer2Chromosome(goal.size());
+        sim.setPlayer2Chromosome(goal);
     }
 
     void computeCDF()
@@ -311,11 +483,17 @@ private:
             if(ind.fitness.score > stats.max)
             {
                 stats.max = ind.fitness.score;
-                optimum = &ind;
+                stats.optimum = &ind;
             }
             stats.sum += ind.fitness.score;
         }
-        stats.avg = stats.sum / pop.size();
+        stats.mean = stats.sum / pop.size();
+
+        stats.var = 0.0;
+        for(Individual const & ind : pop)
+            stats.var += (stats.mean-ind.fitness.score)*(stats.mean-ind.fitness.score);
+        stats.var /= pop.size();
+
     }
 
 
@@ -336,7 +514,7 @@ public:
 
         sim.setPlayer2Chromosome(initChrom);
 
-        pop.clear();
+        pop.reserve(2*popSize);
         pop.resize(popSize);
 
 
@@ -359,11 +537,11 @@ public:
             if(pop[i].fitness.score > stats.max)
             {
                 stats.max = pop[i].fitness.score;
-                optimum = &pop[i];
+                stats.optimum = &pop[i];
             }
             stats.sum += pop[i].fitness.score;
         }
-        stats.avg = stats.sum / popSize;
+        stats.mean = stats.sum / popSize;
         computeCDF();
 
     }
@@ -372,14 +550,109 @@ public:
     {
         mutationDist = std::move(std::bernoulli_distribution(mutationProbability));
         setGoal(goal);
+        computeStatistics();
+        computeCDF();
+        bool const tpco = crossoverChoice == crossoverFuncs.size()-1;
         for(size_t i = 0; i < iterations; ++i)
         {
-            // TODO apply genetic algorithm
+            // apply genetic algorithm
+
+            vector<Individual *> selected;
+            size_t add = 2;
+            if(tpco)
+            {
+                selected = selectionFuncs[selectionChoice](3*popSize);
+                add = 3;
+            }
+            else
+            {
+                selected = selectionFuncs[selectionChoice](popSize);
+            }
+            for(size_t i = 0; i < selected.size(); i += add)
+            {
+                pair<Individual, Individual> children;
+                if(tpco)
+                {
+                    children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1], *selected[i+2]});
+                    mutationFuncs[mutationChoice](children.first);
+                    evaluate(children.first);
+                    pop.push_back(children.first);
+                }
+                else
+                {
+                    children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1]});
+                    mutationFuncs[mutationChoice](children.first);
+                    evaluate(children.first);
+
+                    mutationFuncs[mutationChoice](children.second);
+                    evaluate(children.second);
+
+                    pop.push_back(children.first);
+                    pop.push_back(children.second);
+                }
+            }
+            auto cmp = [] (Individual const& ind1, Individual const& ind2)
+            {
+                return ind1.fitness.score > ind2.fitness.score;
+            };
+            sort(pop.begin(), pop.end(), cmp);
+            pop.resize(popSize);
+
             computeStatistics();
             computeCDF();
         }
 
     }
+
+    size_t getNumberOfSelectionOperators()
+    {
+        return selectionFuncs.size();
+    }
+
+    size_t getNumberOfCrossoverOperators()
+    {
+        return crossoverFuncs.size();
+    }
+
+    size_t getNumberOfMutationOperators()
+    {
+        return mutationFuncs.size();
+    }
+
+    Statistics getStatistics()
+    {
+        return stats;
+    }
+
+    void setSelection(size_t const value)
+    {
+        selectionChoice = value < selectionFuncs.size() ? value : selectionChoice;
+    }
+
+    void setCrossover(size_t const value)
+    {
+        crossoverChoice = value < crossoverFuncs.size() ? value : crossoverChoice;
+    }
+
+    void setMutation(size_t const value)
+    {
+        mutationChoice = value < mutationFuncs.size() ? value : mutationChoice;
+    }
+
+    string getSelectionOperatorName()
+    {
+        return selectionFuncNames[selectionChoice];
+    }
+    string getCrossoverOperatorName()
+    {
+        return crossoverFuncNames[selectionChoice];
+    }
+    string getMutationOperatorName()
+    {
+        return mutationFuncNames[selectionChoice];
+    }
+
+
 
 
 };
