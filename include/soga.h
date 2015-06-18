@@ -43,7 +43,7 @@ template <typename T, typename U>
 class SOGA final
 {
 private:
-    double mutationProbability = 0.02;
+    double mutationProbability = 0.05;
 
     Statistics stats;
 
@@ -51,7 +51,7 @@ private:
 
     size_t NGenes;
 
-    size_t NCrossoverPoints = 3;
+    size_t NCrossoverPoints;
 
     mt19937 generator;
     bernoulli_distribution dist1;
@@ -517,6 +517,7 @@ public:
             sim.back().initBothPlayers(buildList1, buildList2);
         }
         NGenes = sim[0].getPlayer1ChromosomeLength();
+        NCrossoverPoints = NGenes;
         dist4 = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
         Chromosome initChrom(NGenes);
         for(auto& gene : initChrom)

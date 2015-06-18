@@ -126,7 +126,6 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Protoss")
     {
-        Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 5; ++j)
@@ -183,8 +182,6 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Terran")
     {
-
-
 
         for(size_t i = 0; i < 3; ++i)
         {
