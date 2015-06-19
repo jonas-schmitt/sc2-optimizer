@@ -21,6 +21,9 @@ using std::ifstream;
 
 int main(int argc, char *argv[])
 {
+
+
+
     if(argc < 3)
     {
         std::cout << "Usage: opt buildOrder1 buildOrder2" << std::endl;
@@ -47,6 +50,7 @@ int main(int argc, char *argv[])
     {
         buildOrder2.push_back(buf);
     }
+
 
     string race1, race2;
 
@@ -90,10 +94,36 @@ int main(int argc, char *argv[])
     filePath1 = "./data/"+race1;
     filePath2 = "./data/"+race2;
 
+
     size_t popSize = 20;
     size_t iterations = 10;
     size_t genPerIt = 5;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
+
+    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
+    sim.initBothPlayers(buildOrder1, buildOrder2);
+    Chromosome initChrom1(sim.getPlayer1ChromosomeLength ());
+    Chromosome initChrom2(sim.getPlayer2ChromosomeLength ());
+    for(auto& gene : initChrom1)
+    {
+        gene.flip(gene.size()-1);
+    }
+    for(auto& gene : initChrom2)
+    {
+        gene.flip(gene.size()-1);
+    }
+    sim.setPlayer1Chromosome (initChrom1);
+    sim.setPlayer2Chromosome (initChrom2);
+    Fitness fitness = sim.run (false);
+    cout << "Score: " << fitness.score << endl;
+    cout << "Damage: " << fitness.damage*100 << endl;
+    cout << "Health: " << fitness.health*100 << endl;
+    cout << "Minerals alive: " << fitness.minerals_alive*100 << endl;
+    cout << "Gas alive: " << fitness.gas_alive*100 << endl;
+    cout << "Minerals killed: " << fitness.minerals_killed*100 << endl;
+    cout << "Gas killed: " << fitness.gas_killed*100 << endl;
+
+/*
 
     if(race1 == "Terran" && race2 == "Terran")
     {
@@ -222,7 +252,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-    }
+    }*/
 
 
 }

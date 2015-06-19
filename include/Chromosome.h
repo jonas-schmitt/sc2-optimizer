@@ -18,12 +18,10 @@ struct Fitness final
 
     double score = 0.0;
     double damage = 0.0;
-    double damage_killed = 0.0;
     double gas_killed = 0.0;
     double minerals_killed = 0.0;
 
     double health = 0.0;
-    double health_alive = 0.0;
     double gas_alive = 0.0;
     double minerals_alive = 0.0;
 
@@ -36,6 +34,7 @@ struct Individual
     Fitness fitness;
     Chromosome chromosome;
     double cdf;
+    double total;
     Individual() {}
     Individual(size_t const N) : chromosome(N) {}
 };

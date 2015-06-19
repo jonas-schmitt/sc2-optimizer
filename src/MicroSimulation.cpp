@@ -253,7 +253,6 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
         res.health += unit->getHealth() + unit->getShield();
         if(!unit->isDead())
         {
-            res.health_alive += unit->getMaxHealth() + unit->getShield();
             res.minerals_alive += unit->getMinerals();
             res.gas_alive += unit->getGas();
         }
@@ -269,28 +268,21 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
         res.damage += unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield();
         if(unit->isDead())
         {
-            res.damage_killed += unit->getMaxHealth() + unit->getMaxShield();
             res.minerals_killed += unit->getMinerals();
             res.gas_killed += unit->getGas();
         }
     }
 
-    double maxDamage_inv = 1.0/maxDamage;
-    res.damage *= maxDamage_inv;
-    res.damage_killed *= maxDamage_inv;
+    res.damage /= maxDamage;
+
     res.minerals_killed /= maxMinerals_killed;
     res.gas_killed /= maxGas_killed;
 
-    double maxHealth_inv = 1.0/maxHealth;
-    res.health *= maxHealth_inv;
-    res.health_alive *= maxHealth_inv;
+    res.health /= maxHealth;
     res.minerals_alive /= maxMinerals_alive;
     res.gas_alive /= maxGas_alive;
 
-    res.score = res.damage * res.damage_killed + res.minerals_killed + res.gas_killed;
-    res.score += res.health * res.health_alive + res.minerals_alive + res.gas_alive;
-    res.score /= 6.0;
-    res.score *= 100.0;
+    res.score = (res.damage + res.minerals_killed + res.gas_killed + res.health + res.minerals_alive + res.gas_alive) * 100.0 / 6.0;
 
     if(reset)
     {
