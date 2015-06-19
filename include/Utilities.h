@@ -30,54 +30,60 @@ struct Vec2D final
     {
         return std::sqrt(x*x+y*y);
     }
+
+    double computeLengthSquared() const
+    {
+        return x*x+y*y;
+    }
+
     Vec2D getNormedVec(double const len) const
     {
-        if(len < EPS)
-        {
-            Vec2D result;
-            if(x > 0.0)
-            {
-                result.x = STDLEN;
-            }
-            else if(x < 0.0)
-            {
-                result.x = -STDLEN;
-            }
-            if(y > 0.0)
-            {
-                result.y = STDLEN;
-            }
-            else if(y < 0.0)
-            {
-                result.y = -STDLEN;
-            }
-            return result;
-        }
+//        if(len < EPS)
+//        {
+//            Vec2D result;
+//            if(x > 0.0)
+//            {
+//                result.x = STDLEN;
+//            }
+//            else if(x < 0.0)
+//            {
+//                result.x = -STDLEN;
+//            }
+//            if(y > 0.0)
+//            {
+//                result.y = STDLEN;
+//            }
+//            else if(y < 0.0)
+//            {
+//                result.y = -STDLEN;
+//            }
+//            return result;
+//        }
         double const tmp = 1.0/len;
         double const x_res = tmp * x;
         double const y_res = tmp * y;
-        if(std::isinf (x_res) || std::isnan(x_res) || std::isinf (y_res) || std::isnan(y_res))
-        {
-            // choose direction that brings the unit as much away from the border as possible
-            Vec2D result;
-            if(x > 0.0)
-            {
-                result.x = STDLEN;
-            }
-            else if(x < 0.0)
-            {
-                result.x = -STDLEN;
-            }
-            if(y > 0.0)
-            {
-                result.y = STDLEN;
-            }
-            else if(y < 0.0)
-            {
-                result.y = -STDLEN;
-            }
-            return result;
-        }
+//        if(std::isinf (x_res) || std::isnan(x_res) || std::isinf (y_res) || std::isnan(y_res))
+//        {
+//            // choose direction that brings the unit as much away from the border as possible
+//            Vec2D result;
+//            if(x > 0.0)
+//            {
+//                result.x = STDLEN;
+//            }
+//            else if(x < 0.0)
+//            {
+//                result.x = -STDLEN;
+//            }
+//            if(y > 0.0)
+//            {
+//                result.y = STDLEN;
+//            }
+//            else if(y < 0.0)
+//            {
+//                result.y = -STDLEN;
+//            }
+//            return result;
+//        }
         return Vec2D(x_res, y_res);
     }
     Vec2D getNormedVec() const

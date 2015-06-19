@@ -37,6 +37,17 @@ struct Individual
     double total;
     Individual() {}
     Individual(size_t const N) : chromosome(N) {}
+
+    size_t computeHash() const
+    {
+        size_t hash = 0;
+        std::hash<bitset<NBITS> > hash_func;
+        for(auto const bits : chromosome)
+        {
+            hash ^= hash_func(bits) + 0x9e3779b9 + (hash<<6) + (hash>>2);
+        }
+        return hash;
+    }
 };
 
 

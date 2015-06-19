@@ -100,30 +100,31 @@ int main(int argc, char *argv[])
     size_t genPerIt = 5;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
-    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
-    sim.initBothPlayers(buildOrder1, buildOrder2);
-    Chromosome initChrom1(sim.getPlayer1ChromosomeLength ());
-    Chromosome initChrom2(sim.getPlayer2ChromosomeLength ());
-    for(auto& gene : initChrom1)
-    {
-        gene.flip(gene.size()-1);
-    }
-    for(auto& gene : initChrom2)
-    {
-        gene.flip(gene.size()-1);
-    }
-    sim.setPlayer1Chromosome (initChrom1);
-    sim.setPlayer2Chromosome (initChrom2);
-    Fitness fitness = sim.run (false);
-    cout << "Score: " << fitness.score << endl;
-    cout << "Damage: " << fitness.damage*100 << endl;
-    cout << "Health: " << fitness.health*100 << endl;
-    cout << "Minerals alive: " << fitness.minerals_alive*100 << endl;
-    cout << "Gas alive: " << fitness.gas_alive*100 << endl;
-    cout << "Minerals killed: " << fitness.minerals_killed*100 << endl;
-    cout << "Gas killed: " << fitness.gas_killed*100 << endl;
+//    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
+//    sim.initBothPlayers(buildOrder1, buildOrder2);
+//    Chromosome initChrom1(sim.getPlayer1ChromosomeLength ());
+//    Chromosome initChrom2(sim.getPlayer2ChromosomeLength ());
+//    for(auto& gene : initChrom1)
+//    {
+//        gene.flip(gene.size()-1);
+//    }
+//    for(auto& gene : initChrom2)
+//    {
+//        gene.flip(gene.size()-1);
+//    }
+//    sim.setPlayer1Chromosome (initChrom1);
+//    sim.setPlayer2Chromosome (initChrom2);
+//    Fitness fitness = sim.run (false);
+//    cout << "Score: " << fitness.score << endl;
+//    cout << "Damage: " << fitness.damage*100 << endl;
+//    cout << "Health: " << fitness.health*100 << endl;
+//    cout << "Minerals alive: " << fitness.minerals_alive*100 << endl;
+//    cout << "Gas alive: " << fitness.gas_alive*100 << endl;
+//    cout << "Minerals killed: " << fitness.minerals_killed*100 << endl;
+//    cout << "Gas killed: " << fitness.gas_killed*100 << endl;
 
-/*
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
 
     if(race1 == "Terran" && race2 == "Terran")
     {
@@ -252,7 +253,11 @@ int main(int argc, char *argv[])
                 }
             }
         }
-    }*/
+    }
+
+    end = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
 
 
 }

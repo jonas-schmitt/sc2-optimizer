@@ -150,18 +150,19 @@ protected:
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mFriendFunc = [] (BaseUnit & own, BaseUnit & buddy)
     {
         Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
-        double const dist = distVec.computeLength();
-        if(dist < own.getSize () + buddy.getSize())
+        double const dist = distVec.computeLengthSquared();
+        double const tmp = own.getSize () + buddy.getSize();
+        if(dist < tmp*tmp)
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
-            return Vec2D(-1e5*force.x, -1e5*force.y);
+            return Vec2D(-1e6*force.x, -1e6*force.y);
         }
 
 
-        if(dist < own.getMaxDist()*own.getPhenotype(0))
+        if(dist < own.getMaxDistSquared()*own.getPhenotype(0))
         {
             Vec2D res = std::move(distVec.getNormedVec(dist));
-            double const value = 1e3*own.getPhenotype(1) + 1e2*own.getResources()*own.getPhenotype(2);
+            double const value = 1e4*own.getPhenotype(1) + 1e3*own.getResources()*own.getPhenotype(2);
             res.x *= value;
             res.y *= value;
             return res;
@@ -177,11 +178,12 @@ protected:
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mEnemyFunc = [] (BaseUnit & own, BaseUnit & enemy)
     {
         Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
-        double const dist = distVec.computeLength ();
-        if(dist < own.getSize () + enemy.getSize())
+        double const dist = distVec.computeLengthSquared();
+        double tmp = own.getSize () + enemy.getSize();
+        if(dist < tmp*tmp)
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
-            return Vec2D(-1e5*force.x, -1e5*force.y);
+            return Vec2D(-1e6*force.x, -1e6*force.y);
         }
 
         Vec2D res1, res2;
@@ -196,20 +198,21 @@ protected:
             own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
         }
         Damage const& ownDamage = own.mPossibleDamage[enemyId];
-        double const threshold = (ownRange-(enemy.getSpeed() * enemy.getMovementUpdate() * 1e-3));
-        if(dist > ownRange*own.getPhenotype(3))
+        double const threshold = (ownRange-(enemy.getSpeed() * enemy.getMovementUpdate() * 1e-3))*own.getPhenotype (8);
+        tmp = ownRange*own.getPhenotype (3);
+        if(dist > tmp*tmp)
         {
             res1 = distVec.getNormedVec(dist);
             double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
             double const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                              : std::max(own.getGACooldown () - own.getAttackTimer (),0);
-            double const val = 1e1*a*own.getPhenotype(4) + b*own.getPhenotype(5) + 1e2*ownDamage.total*own.getPhenotype(6) + 1e3*own.getPhenotype(7);
+            double const val = 1e2*a*own.getPhenotype(4) + 1e1*b*own.getPhenotype(5) + 1e3*ownDamage.total*own.getPhenotype(6) + 1e4*own.getPhenotype(7);
             res1.x *= val;
             res1.y *= val;
         }
-        else if(dist < threshold*own.getPhenotype(8))
+        else if(dist < threshold*threshold)
         {
-            double const val = 1e4*own.getPhenotype(9);
+            double const val = 1e5*own.getPhenotype(9);
             res2.x *= val;
             res2.y *= val;
         }
@@ -222,13 +225,14 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < 2.0*own.getPhenotype (10)*(enemyRange + enemy.getMoveDist()))
+        tmp = 2.0*own.getPhenotype (10)*(enemyRange + enemy.getMoveDist());
+        if(dist < tmp*tmp)
         {
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
             double const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            double const val = 1e1*a*own.getPhenotype(11) + b*own.getPhenotype(12) + 1e2*enemyDamage.total*own.getPhenotype(13) + 1e3*own.getPhenotype(14);
+            double const val = 1e2*a*own.getPhenotype(11) + 1e1*b*own.getPhenotype(12) + 1e3*enemyDamage.total*own.getPhenotype(13) + 1e4*own.getPhenotype(14);
             res2.x *= val;
             res2.y *= val;
         }
@@ -282,6 +286,8 @@ public:
     UnitStats& accessStats();
 
     double getMaxDist() const;
+
+    double getMaxDistSquared() const;
 
     double getMinerals() const;
 
@@ -405,6 +411,12 @@ public:
     {
         Vec2D distVec(unit.getX()-mPos.x, unit.getY()-mPos.y);
         return distVec.computeLength();
+    }
+    template<typename T> double computeDistanceSquared(T const& unit)
+    {
+        double const delta_x = unit.getX()-mPos.x;
+        double const delta_y = unit.getY()-mPos.y;
+        return delta_x*delta_x + delta_y*delta_y;
     }
 
 

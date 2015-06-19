@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <utility>
 #include <functional>
+#include <unordered_set>
 #include <omp.h>
 
 #include "Chromosome.h"
@@ -19,6 +20,7 @@ using std::mt19937;
 using std::bernoulli_distribution;
 using std::string;
 using std::pair;
+using std::unordered_set;
 using std::function;
 using std::cout;
 using std::endl;
@@ -63,6 +65,8 @@ private:
     vector<Individual> pop;
 
     vector<MicroSimulation<T,U>> sim;
+
+    unordered_set<size_t> control;
 
 
     vector<string> selectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
@@ -548,13 +552,20 @@ public:
         {
             Chromosome& chrom = pop[i].chromosome;
             chrom.resize(NGenes);
-            for(auto& gene : chrom)
+            double hash;
+            do
             {
-                for(size_t j = 0; j < gene.size(); ++j)
+                for(auto& gene : chrom)
                 {
-                    gene.set(j, flipCoin());
+                    for(size_t j = 0; j < gene.size(); ++j)
+                    {
+                        gene.set(j, flipCoin());
+                    }
                 }
+                hash = pop[i].computeHash();
             }
+            while(control.count(hash) == 1);
+            control.insert(hash);
         }
         evaluate(pop);
         computeStatistics();
@@ -587,26 +598,50 @@ public:
             {
                 selected = selectionFuncs[selectionChoice](popSize, generator, pop);
             }
-            for(size_t i = 0; i < selected.size()-1; i += add)
+            for(size_t count = 0; count < 100; ++count)
             {
-                pair<Individual, Individual> children;
-                if(tpco)
+                for(size_t i = 0; i < selected.size()-1 && newPop.size() < popSize; i += add)
                 {
-                    children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1], *selected[i+2]}, generator, NGenes, NBITS);
-                    mutationFuncs[mutationChoice](children.first, generator, mutationDist, NGenes, NBITS);
-                    newPop.push_back(children.first);
+                    pair<Individual, Individual> children;
+                    if(tpco)
+                    {
+                        children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1], *selected[i+2]}, generator, NGenes, NBITS);
+                        mutationFuncs[mutationChoice](children.first, generator, mutationDist, NGenes, NBITS);
+                        size_t hash = children.first.computeHash ();
+                        if(control.count(hash) == 0)
+                        {
+                            newPop.push_back(children.first);
+                            control.insert(hash);
+                        }
+                    }
+                    else
+                    {
+                        children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1]}, generator, NGenes, NBITS);
+                        mutationFuncs[mutationChoice](children.first, generator, mutationDist, NGenes, NBITS);
+
+                        mutationFuncs[mutationChoice](children.second, generator, mutationDist, NGenes, NBITS);
+
+                        size_t hash = children.first.computeHash ();
+                        if(control.count(hash) == 0)
+                        {
+                            newPop.push_back(children.first);
+                            control.insert(hash);
+                        }
+                        hash = children.second.computeHash();
+                        if(control.count(hash) == 0)
+                        {
+                            newPop.push_back(children.second);
+                            control.insert(hash);
+                        }
+                    }
                 }
-                else
+                if(newPop.size () >= popSize)
                 {
-                    children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1]}, generator, NGenes, NBITS);
-                    mutationFuncs[mutationChoice](children.first, generator, mutationDist, NGenes, NBITS);
-
-                    mutationFuncs[mutationChoice](children.second, generator, mutationDist, NGenes, NBITS);
-
-                    newPop.push_back(children.first);
-                    newPop.push_back(children.second);
+                    break;
                 }
+                std::shuffle(selected.begin (), selected.end(), generator);
             }
+
             evaluate(newPop);
             pop.insert(pop.begin(), newPop.begin(), newPop.end());
             auto cmp = [] (Individual const& ind1, Individual const& ind2)
@@ -616,7 +651,11 @@ public:
 
             sort(pop.begin(), pop.end(), cmp);
             stats.optimum = pop.front();
-            pop.resize(popSize);
+            do
+            {
+                control.erase(pop.back().computeHash());
+                pop.pop_back();
+            } while(pop.size() > popSize);
 
             computeStatistics();
             computeCDF();
