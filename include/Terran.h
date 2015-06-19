@@ -65,8 +65,7 @@ private:
                     {
                         continue;
                     }
-                    double const tmp = mMoveDist*multiplier + computeRange(*unit);
-                    if(computeDistanceSquared(*unit) < tmp*tmp)
+                    if(computeDistance(*unit) < mMoveDist*multiplier + computeRange(*unit))
                     {
                         applyStimpack = true;
                         break;
@@ -256,7 +255,7 @@ public:
         double const a = x2 - x1;
         double const b = y2 - y1;
         double const c = x2*y1 - y2*x1;
-        double const d = 1.0/(a*a + b*b);
+        double const d = 1.0/std::sqrt(a*a + b*b);
 
         vector<typename T::RUT *> targets;
         for(typename T::RUT *enemy : other.unitList)
@@ -268,15 +267,15 @@ public:
             double const x0 = enemy->getX();
             double const y0 = enemy->getY();
             double const distFromLine = std::abs(b*x0 - a*y0 + c)*d;
-            if(distFromLine - 0.15*0.15 < EPS)
+            if(distFromLine - 0.15 < EPS)
             {
                 double const delta_x1 = x0 - x1;
                 double const delta_y1 = y0 - y1;
                 double const delta_x2 = x0 - x2;
                 double const delta_y2 = y0 - y2;
-                double const dist1 = delta_x1*delta_x1 + delta_y1*delta_y1;
-                double const dist2 = delta_x2*delta_x2 + delta_y2*delta_y2;
-                if(dist1 < 5.15 * 5.15 && dist2 < 5.15 * 5.15)
+                double const dist1 = std::sqrt(delta_x1*delta_x1 + delta_y1*delta_y1);
+                double const dist2 = std::sqrt(delta_x2*delta_x2 + delta_y2*delta_y2);
+                if(dist1 - 5.15 < EPS && dist2 - 5.15 < EPS)
                 {
                     targets.push_back(enemy);
                 }

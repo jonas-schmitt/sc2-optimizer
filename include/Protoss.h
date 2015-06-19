@@ -92,8 +92,16 @@ private:
             {
                 if(!enemy->isDead())
                 {
+
+                    double const x = this->getX() - enemy->getX();
+                    double const y = this->getY() - enemy->getY();
+                    double dist = std::sqrt(x*x+y*y);
+                    if(std::isnan(dist))
+                    {
+                        dist = 0.0;
+                    }
                     double const threshold = enemy->computeRange(*this);
-                    if(computeDistanceSquared(*enemy) < threshold*threshold)
+                    if(dist < threshold)
                     {
                         applyCharge = true;
                         break;
@@ -200,12 +208,14 @@ private:
 
     std::function<Vec2D(Vec2D const& pos, BaseUnit const& unit)> forceFieldFunc = [](Vec2D const& pos, BaseUnit const& unit)
     {
+        double const radius = 1.7;
         Vec2D distVec(unit.getX() - pos.x, unit.getY() - pos.y);
-        double const dist = distVec.computeLengthSquared();
-        if(dist < 1.7*1.7)
+
+        double const dist = distVec.computeLength();
+        if(dist - radius < EPS)
         {
             distVec = std::move(distVec.getNormedVec(dist));
-            return Vec2D(-1e6 * distVec.x, -1e6 * distVec.y);
+            return Vec2D(-1e5 * distVec.x, -1e5 * distVec.y);
         }
         return Vec2D(0.0);
     };
@@ -245,15 +255,15 @@ private:
                 center.x *= n;
                 center.y *= n;
                 Vec2D distVec(center.x - mPos.x, center.y - mPos.y);
-                double const dist = distVec.computeLengthSquared();
+                double const dist = distVec.computeLength();
                 double const forceFieldRange = 9.0;
                 double const forceFieldRadius = 1.7;
                 double const threshold = 2.0 * (forceFieldRange + forceFieldRadius);
-                if(dist < threshold*threshold)
+                if(dist < threshold)
                 {
-                    if(dist > forceFieldRange*forceFieldRange)
+                    if(dist > forceFieldRange)
                     {
-                        distVec = std::move(distVec.getNormedVec(std::sqrt(dist)));
+                        distVec = std::move(distVec.getNormedVec(dist));
                         center.x = mPos.x + forceFieldRange * distVec.x;
                         center.y = mPos.y + forceFieldRange * distVec.y;
                     }

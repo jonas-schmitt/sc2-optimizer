@@ -594,9 +594,14 @@ bool BaseUnit::attackPossible(BaseUnit const& enemy)
     {
         return false;
     }
-    double dist = computeDistanceSquared(enemy);
-    double const range = computeRange(enemy);
-    return range*range > dist;
+    double const x = enemy.getX() - this->getX();
+    double const y = enemy.getY() - this->getY();
+    double dist = std::sqrt(x*x+y*y);
+    if(std::isnan(dist))
+    {
+        dist = 0.0;
+    }
+    return computeRange (enemy) > dist;
 
 }
 
@@ -636,13 +641,6 @@ double BaseUnit::getMaxDist() const
     double const x = this->mMaxPos.x-this->mMinPos.x;
     double const y = this->mMaxPos.y-this->mMinPos.y;
     return std::sqrt(x*x+y*y);
-}
-
-double BaseUnit::getMaxDistSquared() const
-{
-    double const x = this->mMaxPos.x-this->mMinPos.x;
-    double const y = this->mMaxPos.y-this->mMinPos.y;
-    return x*x+y*y;
 }
 
 

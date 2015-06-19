@@ -98,7 +98,7 @@ private:
                     continue;
                 }
                 double const lostHealth = unit->getMaxHealth() - unit->getHealth();
-                if(lostHealth > threshold && computeDistanceSquared(*unit) < 7.0*7.0)
+                if(lostHealth > threshold && computeDistance(*unit) - 7.0 < EPS)
                 {
                     if(lostHealth > max)
                     {

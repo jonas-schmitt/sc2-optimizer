@@ -95,9 +95,9 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = 20;
-    size_t iterations = 10;
-    size_t genPerIt = 5;
+    size_t popSize = 100;
+    size_t iterations = 100;
+    size_t genPerIt = 10;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
