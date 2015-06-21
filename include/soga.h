@@ -9,6 +9,7 @@
 #include <utility>
 #include <functional>
 #include <unordered_set>
+#include <thread>
 #include <omp.h>
 
 #include "Chromosome.h"
@@ -81,12 +82,12 @@ private:
 
     function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> tournamentSelection = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
     {
-        std::uniform_int_distribution<size_t> dist(0,pop.size());
+        std::uniform_int_distribution<size_t> dist(0,pop.size()-1);
         auto func = [&] (std::uniform_int_distribution<size_t>& dist, mt19937& generator)
         {
-            auto pickIndividual = std::bind(dist, generator);
-            size_t pos1 = pickIndividual();
-            size_t pos2 = pickIndividual();
+            size_t const pos1 = dist(generator);
+            size_t pos2 = dist(generator);
+            while(pos2 == pos1) pos2 = dist(generator);
             Individual const& ind1 = pop[pos1];
             Individual const& ind2 = pop[pos2];
             return ind2.fitness.score < ind1.fitness.score ? pos1 : pos2;
@@ -105,7 +106,6 @@ private:
     function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> rouletteWheelSelection = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
     {
         std::uniform_real_distribution<double> dist(0,1.0);
-        auto spinWheel = std::bind(dist, generator);
         auto func = [&] (double const p)
         {
             auto cmp = [] (Individual const& ind, double val)
@@ -121,7 +121,7 @@ private:
         res.reserve(N);
         for(size_t i = 0; i < N; ++i)
         {
-            auto it = func(spinWheel());
+            auto it = func(dist(generator));
             res.push_back(&(*it));
         }
         return res;
@@ -166,11 +166,10 @@ private:
     {
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
-        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-1);
-        auto chooseBit = std::bind(dist, generator);
-        size_t bitPos = chooseBit();
-        size_t const genePos = bitPos / NBITS;
-        size_t const coPoint = bitPos - genePos * NBITS;
+        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
+        size_t bitPos = dist(generator);
+        size_t const genePos = bitPos / NBits;
+        size_t const coPoint = bitPos - genePos * NBits;
         Individual child1(NGenes), child2(NGenes);
         for(size_t i = 0; i < genePos; ++i)
         {
@@ -199,26 +198,25 @@ private:
     {
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
-        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-1);
-        auto chooseBit = std::bind(dist, generator);
-        size_t bitPos1 = chooseBit();
-        size_t bitPos2 = chooseBit();
-        while(bitPos1 == bitPos2)
+        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
+        size_t bitPos1 = dist(generator);
+        size_t bitPos2 = dist(generator);
+        while(bitPos1 / NBits == bitPos2 / NBits)
         {
-            bitPos2 = chooseBit();
+            bitPos2 = dist(generator);
         }
 
         if(bitPos1 > bitPos2)
         {
-            size_t tmp = bitPos2;
+            size_t const tmp = bitPos2;
             bitPos2 = bitPos1;
             bitPos1 = tmp;
         }
-        size_t genePos1 = bitPos1 / NBits;
-        size_t coPoint1 = bitPos1 - genePos1 * NBits;
+        size_t const genePos1 = bitPos1 / NBits;
+        size_t const coPoint1 = bitPos1 - genePos1 * NBits;
 
-        size_t genePos2 = bitPos2 / NBits;
-        size_t coPoint2 = bitPos2 - genePos2 * NBits;
+        size_t const genePos2 = bitPos2 / NBits;
+        size_t const coPoint2 = bitPos2 - genePos2 * NBits;
 
         Individual child1(NGenes), child2(NGenes);
         for(size_t i = 0; i < genePos1; ++i)
@@ -264,12 +262,16 @@ private:
     {
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
-        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-1);
-        auto chooseBit = std::bind(dist, generator);
-        vector<size_t> bitPosArray(NGenes-1);
+        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
+
+        vector<size_t> bitPosArray((NGenes -1) / 2);
+        unordered_set<size_t> positions;
         for(size_t& bitPos : bitPosArray)
         {
-            bitPos = chooseBit();
+            do {
+            bitPos = dist(generator);
+            } while(positions.count(bitPos / NBits) == 1);
+            positions.insert(bitPos / NBits);
         }
         std::sort(bitPosArray.begin(), bitPosArray.end());
         Individual child1(NGenes), child2(NGenes);
@@ -319,13 +321,12 @@ private:
         Individual const& parent2 = parents.at(1);
 
         std::bernoulli_distribution dist(0.5);
-        auto flipCoin = std::bind(dist, generator);
         Individual child1(NGenes), child2(NGenes);
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(flipCoin())
+                if(dist(generator))
                 {
                     child1.chromosome[i][j] = parent1.chromosome[i][j];
                     child2.chromosome[i][j] = parent2.chromosome[i][j];
@@ -367,12 +368,11 @@ private:
 
     function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> bitFlipMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
     {
-        auto flipBiasedCoin = std::bind(dist, generator);
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(flipBiasedCoin())
+                if(dist(generator))
                 {
                     individual.chromosome[i].flip(j);
                 }
@@ -382,13 +382,12 @@ private:
 
     function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> interchangingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
     {
-        auto flipBiasedCoin = std::bind(dist, generator);
         vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(flipBiasedCoin())
+                if(dist(generator))
                 {
                     positions.emplace_back(i,j);
                 }
@@ -407,14 +406,12 @@ private:
     function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> reversingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
     {
         std::bernoulli_distribution coin(0.5);
-        auto flipCoin = std::bind(coin, generator);
-        auto flipBiasedCoin = std::bind(dist, generator);
         vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(flipBiasedCoin())
+                if(dist(generator))
                 {
                     positions.emplace_back(i,j);
                 }
@@ -423,7 +420,7 @@ private:
         for(auto const& pos1 : positions)
         {
             pair<size_t, size_t> pos2;
-            if((flipCoin() && !(pos1.first == NGenes-1 && pos1.second == NBits-1)) || (pos1.first == 0 && pos1.second == 0))
+            if((coin(generator) && !(pos1.first == NGenes-1 && pos1.second == NBits-1)) || (pos1.first == 0 && pos1.second == 0))
             {
                 // swap with right neighbour
                 if(pos1.second == NBits-1)
@@ -472,6 +469,7 @@ private:
         {
             sim[omp_get_thread_num()].setPlayer1Chromosome(pop[i].chromosome);
             pop[i].fitness = sim[omp_get_thread_num()].run(true);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 
@@ -480,6 +478,7 @@ private:
         #pragma omp parallel
         {
             sim[omp_get_thread_num()].setPlayer2Chromosome(goal);
+            #pragma omp barrier
         }
     }
 
@@ -547,7 +546,6 @@ public:
         stats.sum = 0.0;
         stats.max = 0.0;
 
-        auto flipCoin = std::bind(dist1, generator);
         for(size_t i = 0; i < popSize; ++i)
         {
             Chromosome& chrom = pop[i].chromosome;
@@ -559,7 +557,7 @@ public:
                 {
                     for(size_t j = 0; j < gene.size(); ++j)
                     {
-                        gene.set(j, flipCoin());
+                        gene.set(j, dist1(generator));
                     }
                 }
                 hash = pop[i].computeHash();

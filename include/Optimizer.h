@@ -38,10 +38,6 @@ public:
 //        cout << "Number of Iterations: " << iterations << endl;
 //        cout << "Generations per Iteration: " << genPerIt << endl;
 
-        stats1 = ga1.getStatistics();
-        stats2 = ga2.getStatistics();
-        optimum1 = stats1.optimum;
-        optimum2 = stats2.optimum;
         for(size_t i = 0; i < iterations; ++i)
         {
 //            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
@@ -53,6 +49,13 @@ public:
             optimum1 = stats1.optimum;
             optimum2 = stats2.optimum;
         }
+//        ga1.optimize(optimum2.chromosome, 0);
+//        ga2.optimize(optimum1.chromosome, 0);
+//        stats1 = ga1.getStatistics();
+//        stats2 = ga2.getStatistics();
+//        optimum1 = stats1.optimum;
+//        optimum2 = stats2.optimum;
+
         printStatistics();
         cout << "\n" << endl;
     }
