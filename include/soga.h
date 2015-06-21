@@ -10,6 +10,7 @@
 #include <functional>
 #include <unordered_set>
 #include <thread>
+#include <unistd.h>
 #include <omp.h>
 
 #include "Chromosome.h"
@@ -469,7 +470,7 @@ private:
         {
             sim[omp_get_thread_num()].setPlayer1Chromosome(pop[i].chromosome);
             pop[i].fitness = sim[omp_get_thread_num()].run(true);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            sleep(1);
         }
     }
 
@@ -521,7 +522,6 @@ public:
     SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2)
         :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), dist1(0.5), dist2(0,popSize-1), dist3(0,1.0)
     {
-        selectionFuncs.push_back (tournamentSelection);
         sim.reserve(omp_get_max_threads());
         for(int i = 0; i < omp_get_max_threads(); ++i)
         {
