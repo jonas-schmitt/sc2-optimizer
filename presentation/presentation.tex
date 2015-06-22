@@ -1,0 +1,246 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+\usepackage{amsmath}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{epstopdf,epsfig}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{A Multi-Objective Genetic Algorithm for Evaluating Build Order Effectiveness in Starcraft II} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Jonas Schmitt} % Your name
+\date{\today} % Date, can be changed to a custom date
+
+%\AtBeginSection[]
+%{
+% \begin{frame}
+% \frametitle{Overview}
+% \tableofcontents[currentsection]
+% \end{frame}
+%}
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Outline} % Table of contents slide, comment this block out to remove it
+%\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+%\end{frame}
+%------------------------------------------------
+\begin{frame}{Starcraft II}
+\begin{columns}[c] % the "c" option specifies center vertical alignment
+    \column{.5\textwidth} % column designated by a command
+    \begin{itemize}
+		\item Military science-fiction real-time strategy game
+		\item \alert{Goal:} Producing the right combination of units (\alert{Macromanagement}) to destroy the other player's units and structures in direct combat (\alert{Micromanagement})
+	\end{itemize}
+    \column{.5\textwidth}
+    	\includegraphics[width=1.0\linewidth]{starcraft-2-screenshot.jpg}
+\end{columns}
+\begin{itemize}
+\item E-Sport scene with growing popularity (price pools up to US\$170,000)
+\\ $\Rightarrow$ Importance of \alert{Balancing} (Are all three races equally strong?) 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Balancing}
+\begin{itemize}
+\item \alert{Macromanagement:} Which units can be produced in a certain amount of time?
+\\ $\Rightarrow$ `` A Multi-objective Genetic Algorithm for Build Order Optimization in StarCraft II '' by Harald K"ostler and Bj"orn Gmeiner
+\item \alert{Micromanagement:} Is it possible to predict which of two groups of units wins in combat?
+\\ $\Rightarrow$ No suitable approach for Starcraft II yet
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Roadmap}
+\begin{itemize}
+\item \alert{Input:} Build Order, i.e. the list of units that have been produced until a certain point of time in the game
+\item \alert{Goal:} Simulate and optimize the behaviour (moving and attacking) of each single unit
+\\ $\Rightarrow$ It can be predicted which player would succeed in a combat assuming optimal control
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Forward Simulation}
+    \begin{itemize}
+\item No freely available API for controlling units in the game directly
+\\ $\Rightarrow$ An efficient forward simulation is required that determines the winner of an encounter based on a finite set of parameters
+\item \alert{Idea:} Describe the behaviour of each unit by a number of parametrized \alert{Potential Fields}
+\end{itemize}
+\begin{center}
+  \includegraphics[width=0.45\linewidth]{friend-crop.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Forward Simulation}
+\begin{columns}[c] % the "c" option specifies center vertical alignment
+    \column{.5\textwidth} % column designated by a command
+  \includegraphics[width=1.0\linewidth]{enemy1-crop.pdf}
+    \column{.5\textwidth}
+  \includegraphics[width=1.0\linewidth]{enemy2-crop.pdf}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Optimization}
+\begin{itemize}
+\item \alert{Goal:} Iteratively optimize the parameters for both opponents' units against each other
+\item \alert{Challenges:} 
+\begin{itemize}
+\item Large search space (at least 16 parameters for each different type of unit) 
+\item No knowledge about the relationship between in- and output
+\end{itemize}
+$\Rightarrow$ \alert{Genetic Algorithms} are suitable search heuristics for problems of this type
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimization}
+\begin{itemize}
+\item Binary encode the parameters of both opponents
+\item Choose suitable starting values as optimization objective (strategy used by the opponent) for both populations
+\item Replace the objective every $n$ generation by the respective optimum and reevaluate the whole population
+\item The obtained optima can be used to evaluate the effectiveness of both build orders against the respective other one
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimization}
+\begin{enumerate}
+\item \alert{Single-Objective Genetic Algorithm:}
+The fitness of each individual is approximated with a simple formula: 
+\begin{equation*}
+		\text{Fitness}(x) =  \frac{\sum\limits_{i=1}^{n} \text{damage}(i) + \sum\limits_{j=1}^{m} \text{health}(j)}{2}
+\end{equation*}
+$\Rightarrow$ Determine the best combination of genetic operators
+\item \alert{Multi-Objective Genetic Algorithm:} Considers all relevant objectives (applied damage, remaining health, value of units killed, value of units remaining etc.)
+\\ $\Rightarrow$ Perform the actual optimization using NSGA-II
+\end{enumerate}
+
+\end{frame}
+
+
+
+
+%\begin{frame}{Task scheduling in concurrent computer environments}
+%Optimization goals:
+%\begin{itemize}
+%	\item[1)] Equally distribute the workload over the available processors 
+%	\item[2)] Minimize the communication between them 
+%\end{itemize}
+%\vspace*{0.5cm}
+%Can be formulated as Graph Partitioning problem:
+%%Graph partitioning for use in concurrent computer environments
+%\begin{itemize}
+%	\item[1)] \textcolor{red}{Vertices} represent \textcolor{red}{computational} costs \\
+%	\item[2)] \textcolor{blue}{Edges} represent \textcolor{blue}{communication} costs \\
+%\end{itemize}
+%\end{frame}
+
+
+
+
+%\section{References}
+%\begin{frame}
+%\frametitle{References}
+%\footnotesize{
+%\begin{thebibliography}{99} % Beamer does not support BibTeX so references must be inserted manually as below
+%
+%\input{biblio}
+%
+%%\bibitem[Smith, 2012]{p1} John Smith (2012)
+%%\newblock Title of the publication
+%%\newblock \emph{Journal Name} 12(3), 45 -- 678.
+%\end{thebibliography}
+%}
+%\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\Huge{\centerline{The End}}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
