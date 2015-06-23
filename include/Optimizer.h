@@ -17,6 +17,8 @@ private:
     GA2 ga2;
     Individual optimum1, optimum2;
     Statistics stats1, stats2;
+    double offlinePerformance = 0.0;
+    double onlinePerformance = 0.0;
 
 
 public:
@@ -40,15 +42,19 @@ public:
 
         for(size_t i = 0; i < iterations; ++i)
         {
-//            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
-//            printf("%c[2K", 27);
+            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
+            printf("%c[2K", 27);
             ga1.optimize(optimum2.chromosome, genPerIt);
             ga2.optimize(optimum1.chromosome, genPerIt);
             stats1 = ga1.getStatistics();
             stats2 = ga2.getStatistics();
+            onlinePerformance += 0.5*(ga1.getOnlinePerformance() + ga2.getOnlinePerformance());
+            offlinePerformance += 0.5*(ga1.getOfflinePerformance() + ga2.getOfflinePerformance());
             optimum1 = stats1.optimum;
             optimum2 = stats2.optimum;
         }
+        onlinePerformance /= iterations;
+        offlinePerformance /= iterations;
 //        ga1.optimize(optimum2.chromosome, 0);
 //        ga2.optimize(optimum1.chromosome, 0);
 //        stats1 = ga1.getStatistics();
@@ -65,11 +71,14 @@ public:
         string separator;
         for(int i = 0; i < 50; ++i) separator += "-";
         separator += '\n';
-        cout << separator << "Statistics Player 1:" << endl;
-        stats1.print();
+//        cout << separator << "Statistics Player 1:" << endl;
+//        stats1.print();
+//        cout << separator << endl;
+//        cout << separator << "Statistics Player 2:" << endl;
+//        stats2.print();
         cout << separator << endl;
-        cout << separator << "Statistics Player 2:" << endl;
-        stats2.print();
+        cout << "Online Performance: " << onlinePerformance << endl;
+        cout << "Offline Performance: " << offlinePerformance << endl;
         cout << separator << endl;
     }
 

@@ -79,6 +79,9 @@ private:
     size_t crossoverChoice = 0;
     size_t mutationChoice = 0;
 
+    double onlinePerformance = 0.0;
+    double offlinePerformance = 0.0;
+
 
 
     function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> tournamentSelection = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
@@ -470,7 +473,7 @@ private:
         {
             sim[omp_get_thread_num()].setPlayer1Chromosome(pop[i].chromosome);
             pop[i].fitness = sim[omp_get_thread_num()].run(true);
-            sleep(1);
+            //sleep(1);
         }
     }
 
@@ -573,6 +576,8 @@ public:
 
     void optimize(Chromosome const& goal, size_t const iterations)
     {
+        onlinePerformance = 0.0;
+        offlinePerformance = 0.0;
         mutationDist = std::move(std::bernoulli_distribution(mutationProbability));
         setGoal(goal);
         evaluate(pop);
@@ -657,26 +662,40 @@ public:
 
             computeStatistics();
             computeCDF();
+            onlinePerformance += stats.mean;
+            offlinePerformance += stats.max;
         }
+        onlinePerformance /= iterations;
+        offlinePerformance /= iterations;
 
     }
 
-    size_t getNumberOfSelectionOperators()
+    double getOnlinePerformance() const
+    {
+        return onlinePerformance;
+    }
+
+    double getOfflinePerformance() const
+    {
+        return offlinePerformance;
+    }
+
+    size_t getNumberOfSelectionOperators() const
     {
         return selectionFuncs.size();
     }
 
-    size_t getNumberOfCrossoverOperators()
+    size_t getNumberOfCrossoverOperators() const
     {
         return crossoverFuncs.size();
     }
 
-    size_t getNumberOfMutationOperators()
+    size_t getNumberOfMutationOperators() const
     {
         return mutationFuncs.size();
     }
 
-    Statistics getStatistics()
+    Statistics getStatistics() const
     {
         return stats;
     }
