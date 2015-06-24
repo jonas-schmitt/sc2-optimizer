@@ -65,7 +65,8 @@ private:
                     {
                         continue;
                     }
-                    if(computeDistance(*unit) < mMoveDist*multiplier + computeRange(*unit))
+                    double const tmp = mMoveDist*multiplier + computeRange(*unit);
+                    if(computeDistanceSquared(*unit) < tmp*tmp)
                     {
                         applyStimpack = true;
                         break;

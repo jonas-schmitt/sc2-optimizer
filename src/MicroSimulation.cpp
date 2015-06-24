@@ -63,8 +63,6 @@ void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
     Vec2D startPos = Vec2D(pl1.minPos.x + fieldSizeX/20., pl1.minPos.y);
     for(auto unit : pl1.unitList)
     {
-        unit->setMinPos(pl1.minPos);
-        unit->setMaxPos(pl1.maxPos);
         startPos.y += fieldSizeY/pl1.unitList.size();
         unit->setStartPos(startPos);
         unit->resetPos();
@@ -80,8 +78,6 @@ void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
     Vec2D startPos = Vec2D(pl2.maxPos.x - fieldSizeX/20., pl2.minPos.y);
     for(auto unit : pl2.unitList)
     {
-        unit->setMinPos(pl2.minPos);
-        unit->setMaxPos(pl2.maxPos);
         startPos.y += fieldSizeY/pl2.unitList.size();
         unit->setStartPos(startPos);
         unit->resetPos();

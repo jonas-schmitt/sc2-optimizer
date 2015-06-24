@@ -326,6 +326,15 @@ void BaseUnit::setMaxPos(Vec2D const pos)
     mMaxPos = pos;
 }
 
+void BaseUnit::setPosLimits(Vec2D const minPos, Vec2D const maxPos)
+{
+    mMinPos = minPos;
+    mMaxPos = maxPos;
+    double const x = this->mMaxPos.x-this->mMinPos.x;
+    double const y = this->mMaxPos.y-this->mMinPos.y;
+    mMaxDist = std::sqrt(x*x+y*y);
+}
+
 void BaseUnit::setFriendForce(function<Vec2D(BaseUnit &, BaseUnit &)> func)
 {
     mFriendFunc = func;
@@ -482,6 +491,11 @@ int BaseUnit::getMovementUpdate() const
     return mMovementUpdate;
 }
 
+double BaseUnit::getMovementUpdateDist() const
+{
+    return mMovementUpdateDist;
+}
+
 void BaseUnit::setMovementUpdate(int value)
 {
     mMovementUpdate = value;
@@ -594,14 +608,8 @@ bool BaseUnit::attackPossible(BaseUnit const& enemy)
     {
         return false;
     }
-    double const x = enemy.getX() - this->getX();
-    double const y = enemy.getY() - this->getY();
-    double dist = std::sqrt(x*x+y*y);
-    if(std::isnan(dist))
-    {
-        dist = 0.0;
-    }
-    return computeRange (enemy) > dist;
+    double const range = computeRange(enemy);
+    return range*range > computeDistanceSquared(enemy);
 
 }
 
@@ -638,9 +646,7 @@ bool BaseUnit::attack(BaseUnit& unit)
 
 double BaseUnit::getMaxDist() const
 {
-    double const x = this->mMaxPos.x-this->mMinPos.x;
-    double const y = this->mMaxPos.y-this->mMinPos.y;
-    return std::sqrt(x*x+y*y);
+    return mMaxDist;
 }
 
 
@@ -672,14 +678,14 @@ void BaseUnit::setChromosomeStartPosition(size_t const pos)
 void BaseUnit::setChromosome(Chromosome const& chromosome)
 {
 
-    computeTemporaryValues();
     mChromosome = chromosome.data();
     mPhenotype.reserve(mNGenes);
-    double constexpr max = 1.0/(std::pow(2, NBITS) - 1);
+    double constexpr max_inv = 1.0/(std::pow(2, NBITS) - 1);
     for(int i = 0; i < chromosome.size(); ++i)
     {
-        mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max);
+        mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max_inv);
     }
+    computeTemporaryValues();
 }
 
 void BaseUnit::setChromosome(Chromosome const& chromosome, size_t const startPos)
@@ -743,6 +749,16 @@ void BaseUnit::computeTemporaryValues()
 {
     mMoveDist = getSpeed()*mTimeSlice*1e-3;
     mMovementUpdateBackup = mMovementUpdate;
+    mMovementUpdateDist = getSpeed()*mMovementUpdate*1e-3;
+    tmp[0] = getMaxDist()*getPhenotype(0);
+    tmp[1] = 1e3*getPhenotype(1) + 1e1*getResources()*getPhenotype(2);
+    tmp[2] = 1e1*getPhenotype(4);
+    tmp[3] = 1e2*getPhenotype(6);
+    tmp[4] = 1e3*getPhenotype(7);
+    tmp[5] = -1e4*getPhenotype(9);
+    tmp[6] = 1e1*getPhenotype(11);
+    tmp[7] = 1e2*getPhenotype(13);
+    tmp[8] = 1e3*getPhenotype(14);
 }
 
 void BaseUnit::initUpgrades (vector<int> const& flags)
