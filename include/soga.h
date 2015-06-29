@@ -47,7 +47,7 @@ template <typename T, typename U>
 class SOGA final
 {
 private:
-    double mutationProbability = 0.05;
+    double mutationProbability = 0.01;
 
     Statistics stats;
 

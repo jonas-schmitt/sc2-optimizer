@@ -755,10 +755,9 @@ void BaseUnit::computeTemporaryValues()
     tmp[2] = 1e1*getPhenotype(4);
     tmp[3] = 1e2*getPhenotype(6);
     tmp[4] = 1e3*getPhenotype(7);
-    tmp[5] = -1e4*getPhenotype(9);
-    tmp[6] = 1e1*getPhenotype(11);
-    tmp[7] = 1e2*getPhenotype(13);
-    tmp[8] = 1e3*getPhenotype(14);
+    tmp[5] = 1e1*getPhenotype(9);
+    tmp[6] = 1e2*getPhenotype(11);
+    tmp[7] = 1e3*getPhenotype(12);
 }
 
 void BaseUnit::initUpgrades (vector<int> const& flags)

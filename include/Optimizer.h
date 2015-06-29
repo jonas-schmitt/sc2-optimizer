@@ -37,8 +37,8 @@ public:
         cout << "Selection Operator: " << getSelectionOperatorName() << endl;
         cout << "Crossover Operator: " << getCrossoverOperatorName() << endl;
         cout << "Mutation Operator: " << getMutationOperatorName() << endl;
-//        cout << "Number of Iterations: " << iterations << endl;
-//        cout << "Generations per Iteration: " << genPerIt << endl;
+        cout << "Number of Iterations: " << iterations << endl;
+        cout << "Generations per Iteration: " << genPerIt << endl;
 
         for(size_t i = 0; i < iterations; ++i)
         {

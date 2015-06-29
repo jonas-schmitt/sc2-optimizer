@@ -209,13 +209,6 @@ protected:
             res1.x *= val;
             res1.y *= val;
         }
-        else if(dist - enemyMovement - own.getMovementUpdateDist() < ownRange * own.getPhenotype(8))
-        {
-            res1 = distVec.getNormedVec(dist);
-            //tmp[5] = -1e4*own.getPhenotype(9)
-            res1.x *= own.tmp[5];
-            res1.y *= own.tmp[5];
-        }
 
         double const enemyRange = enemy.computeRange(own);
         int const ownId = own.getIdentifier();
@@ -225,17 +218,17 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < (enemyRange+enemyMovement-own.getMovementUpdateDist())*own.getPhenotype(10))
+        if(dist < own.getPhenotype (8)*(enemyRange+enemyMovement))
         {
 
             res2 = distVec.getNormedVec(dist);
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
             double const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-            // tmp[6] = 1e1*own.getPhenotype(11)
-            // tmp[7] = 1e2*own.getPhenotype(13)
-            // tmp[8] = 1e3*own.getPhenotype(14)
-            double const val = a*own.tmp[6] + b*own.getPhenotype(12) + enemyDamage.total*own.tmp[7] + own.tmp[8];
+            //tmp[5] = 1e1*getPhenotype(9);
+            //tmp[6] = 1e2*getPhenotype(11);
+            //tmp[7] = 1e3*getPhenotype(12);
+            double const val = a*own.tmp[5] + b*own.getPhenotype(10) + enemyDamage.total*own.tmp[6] + own.tmp[7];
             res2.x *= val;
             res2.y *= val;
         }
@@ -249,11 +242,11 @@ protected:
 
 public:
 
-    int const mNGenes = 16;
+    int const mNGenes = 14;
 
     Damage mPossibleDamage[18];
 
-    double tmp[9];
+    double tmp[8];
 
     int mMovementUpdateBackup;
 
@@ -521,7 +514,7 @@ public:
                 continue;
             }
 
-            bool const newKill = getPhenotype(15) * damage.total > enemy->getHealth() + enemy->getShield();
+            bool const newKill = getPhenotype(13) * damage.total > enemy->getHealth() + enemy->getShield();
             bool const higher = damage.total > maxDamage;
             if(newKill)
             {
