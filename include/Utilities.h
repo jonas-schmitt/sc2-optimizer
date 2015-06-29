@@ -14,6 +14,8 @@ static double const MIN = 0.0;
 static double const MAX = 1.0; //static_cast<int>(std::min(INTLIMIT,BOUND));
 static double const MAX_INV = 1.0/MAX;
 
+static double const INF = std::numeric_limits<double>::max();
+
 
 struct Vec2D final
 {

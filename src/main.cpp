@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
     size_t popSize = 100;
     size_t iterations = 100;
-    size_t genPerIt = 100;
+    size_t genPerIt = 10;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
