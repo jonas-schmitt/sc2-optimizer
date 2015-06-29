@@ -163,7 +163,7 @@ protected:
         if(dist < own.tmp[0])
         {
             Vec2D res = std::move(distVec.getNormedVec(dist));
-            // tmp[1] = 1e3*own.getPhenotype(1) + 1e2*own.getResources()*own.getPhenotype(2)
+            // tmp[1] = 1e3*own.getPhenotype(1) + 1e1*own.getResources()*own.getPhenotype(2)
             res.x *= own.tmp[1];
             res.y *= own.tmp[1];
             return res;
@@ -209,7 +209,7 @@ protected:
             res1.x *= val;
             res1.y *= val;
         }
-        else if(dist < (ownRange - enemyMovement)*own.getPhenotype(8))
+        else if(dist - enemyMovement - own.getMovementUpdateDist() < ownRange * own.getPhenotype(8))
         {
             res1 = distVec.getNormedVec(dist);
             //tmp[5] = -1e4*own.getPhenotype(9)
@@ -225,7 +225,7 @@ protected:
         }
         Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
 
-        if(dist < own.getPhenotype (10)*(enemyRange + enemyMovement))
+        if(dist < (enemyRange+enemyMovement-own.getMovementUpdateDist())*own.getPhenotype(10))
         {
 
             res2 = distVec.getNormedVec(dist);
