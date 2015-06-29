@@ -1,0 +1,407 @@
+Number of Threads used: 16
+Performing Optimization with the following parameters
+
+Selection Operator: Tournament Selection
+Crossover Operator: Single-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 7910.34
+Average: 79.1034
+Maximum: 87.6964
+Standard Deviation: 3.5081
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 6814.17
+Average: 68.1417
+Maximum: 90.8605
+Standard Deviation: 6.91233
+--------------------------------------------------
+
+Online Performance: 63.5688
+Offline Performance: 87.2327
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Roulette Wheel Selection
+Crossover Operator: Single-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 8062.41
+Average: 80.6241
+Maximum: 89.0652
+Standard Deviation: 4.79477
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 6014.64
+Average: 60.1464
+Maximum: 63.2543
+Standard Deviation: 2.76775
+--------------------------------------------------
+
+Online Performance: 61.0196
+Offline Performance: 75.6489
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Stochastic Universal Sampling
+Crossover Operator: Single-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 7784.23
+Average: 77.8423
+Maximum: 87.8337
+Standard Deviation: 7.16721
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 6493.57
+Average: 64.9357
+Maximum: 86.5723
+Standard Deviation: 12.7083
+--------------------------------------------------
+
+Online Performance: 59.3632
+Offline Performance: 87.2264
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Tournament Selection
+Crossover Operator: Two-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 6207.66
+Average: 62.0766
+Maximum: 87.2258
+Standard Deviation: 18.9845
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 7866.3
+Average: 78.663
+Maximum: 94.732
+Standard Deviation: 3.39623
+--------------------------------------------------
+
+Online Performance: 61.1838
+Offline Performance: 90.3959
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Roulette Wheel Selection
+Crossover Operator: Two-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 8240.24
+Average: 82.4024
+Maximum: 87.3374
+Standard Deviation: 2.05639
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 5037.06
+Average: 50.3706
+Maximum: 87.0582
+Standard Deviation: 3.68724
+--------------------------------------------------
+
+Online Performance: 60.9353
+Offline Performance: 77.7914
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Stochastic Universal Sampling
+Crossover Operator: Two-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 5000.45
+Average: 50.0045
+Maximum: 87.2847
+Standard Deviation: 18.6417
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 5995.04
+Average: 59.9504
+Maximum: 91.0601
+Standard Deviation: 10.258
+--------------------------------------------------
+
+Online Performance: 48.0269
+Offline Performance: 84.5768
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Tournament Selection
+Crossover Operator: N-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 7464.76
+Average: 74.6476
+Maximum: 87.9084
+Standard Deviation: 9.74647
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 5862.08
+Average: 58.6208
+Maximum: 84.3878
+Standard Deviation: 6.12304
+--------------------------------------------------
+
+Online Performance: 55.3673
+Offline Performance: 81.947
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Roulette Wheel Selection
+Crossover Operator: N-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 5908.26
+Average: 59.0826
+Maximum: 88.0592
+Standard Deviation: 15.0731
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 6091.99
+Average: 60.9199
+Maximum: 68.816
+Standard Deviation: 5.16143
+--------------------------------------------------
+
+Online Performance: 51.8539
+Offline Performance: 79.2939
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Stochastic Universal Sampling
+Crossover Operator: N-Point Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 7387.85
+Average: 73.8785
+Maximum: 86.9415
+Standard Deviation: 7.6339
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 8565.48
+Average: 85.6548
+Maximum: 89.5841
+Standard Deviation: 2.77403
+--------------------------------------------------
+
+Online Performance: 67.6497
+Offline Performance: 87.0934
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Tournament Selection
+Crossover Operator: Uniform Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 5340.96
+Average: 53.4096
+Maximum: 87.5101
+Standard Deviation: 22.3106
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 5760.67
+Average: 57.6067
+Maximum: 82.4837
+Standard Deviation: 6.41712
+--------------------------------------------------
+
+Online Performance: 49.0161
+Offline Performance: 84.996
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Roulette Wheel Selection
+Crossover Operator: Uniform Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 5857.56
+Average: 58.5756
+Maximum: 83.6133
+Standard Deviation: 13.8004
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 6695.4
+Average: 66.954
+Maximum: 84.3209
+Standard Deviation: 7.6305
+--------------------------------------------------
+
+Online Performance: 53.3235
+Offline Performance: 84.6464
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Stochastic Universal Sampling
+Crossover Operator: Uniform Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 5029.23
+Average: 50.2923
+Maximum: 85.0568
+Standard Deviation: 14.7722
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 6716.55
+Average: 67.1655
+Maximum: 79.517
+Standard Deviation: 2.27615
+--------------------------------------------------
+
+Online Performance: 54.321
+Offline Performance: 78.7889
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Tournament Selection
+Crossover Operator: Three Parent Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 5920.28
+Average: 59.2028
+Maximum: 86.8962
+Standard Deviation: 16.3606
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 5832.47
+Average: 58.3247
+Maximum: 86.7025
+Standard Deviation: 8.69392
+--------------------------------------------------
+
+Online Performance: 50.1897
+Offline Performance: 85.981
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Roulette Wheel Selection
+Crossover Operator: Three Parent Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 7267.28
+Average: 72.6728
+Maximum: 86.7921
+Standard Deviation: 7.26893
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 7226.21
+Average: 72.2621
+Maximum: 91.0254
+Standard Deviation: 6.66121
+--------------------------------------------------
+
+Online Performance: 60.1422
+Offline Performance: 87.444
+--------------------------------------------------
+
+
+
+Performing Optimization with the following parameters
+
+Selection Operator: Stochastic Universal Sampling
+Crossover Operator: Three Parent Crossover
+Mutation Operator: Interchanging Mutation
+Progress: 0%[2KProgress: 10%[2KProgress: 20%[2KProgress: 30%[2KProgress: 40%[2KProgress: 50%[2KProgress: 60%[2KProgress: 70%[2KProgress: 80%[2KProgress: 90%[2K--------------------------------------------------
+Statistics Player 1:
+Total: 8219.13
+Average: 82.1913
+Maximum: 88.7221
+Standard Deviation: 2.80296
+--------------------------------------------------
+
+--------------------------------------------------
+Statistics Player 2:
+Total: 7914.85
+Average: 79.1485
+Maximum: 86.8934
+Standard Deviation: 10.8245
+--------------------------------------------------
+
+Online Performance: 67.3113
+Offline Performance: 87.6686
+--------------------------------------------------
+
+
+
+Elapsed time: 14929619 milliseconds
