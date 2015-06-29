@@ -468,11 +468,16 @@ private:
 
     void evaluate(vector<Individual>& pop)
     {
+        #pragma omp parallel for schedule(static)
+        for(Individual& ind : pop)
+        {
+            ind.fitness = 0;
+        }
         #pragma omp parallel
         {
             vector<Fitness> results(pop.size());
 
-            #pragma omp parallel for schedule(dynamic, 1) nowait
+            #pragma omp for schedule(dynamic, 1) nowait
             for(size_t i = 0; i < sim.size(); ++i)
             {
                 for(size_t j = 0; j < pop.size(); ++j)
