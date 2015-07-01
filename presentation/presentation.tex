@@ -40,13 +40,13 @@
 %\usetheme{Ilmenau}
 %\usetheme{JuanLesPins}
 %\usetheme{Luebeck}
-%\usetheme{Madrid}
+\usetheme{Madrid}
 %\usetheme{Malmoe}
 %\usetheme{Marburg}
 %\usetheme{Montpellier}
 %\usetheme{PaloAlto}
 %\usetheme{Pittsburgh}
-\usetheme{Rochester}
+%\usetheme{Rochester}
 %\usetheme{Singapore}
 %\usetheme{Szeged}
 %\usetheme{Warsaw}
@@ -224,7 +224,7 @@ During a time step the following actions are performed by each unit:
 \end{frame}
 
 \begin{frame}{Optimization}
-\alert{General Procedure}
+\alert{Overview}
 \begin{itemize}
 \item Encode the parameters of both opponents
 \item Choose suitable starting values for the optimization objective (strategy used by the opponent) for both populations
@@ -233,18 +233,21 @@ During a time step the following actions are performed by each unit:
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Optimization}
+\begin{frame}{Single-Objective Genetic Algorithm}
 
-\alert{Single-Objective Genetic Algorithm}
 \begin{itemize}
 \item The fitness of each individual is approximated with a simple formula:  \\
-Fitness =  total applied damage + total remaining health +  value of killed units + value of remaining units 
+\begin{equation*}
+\begin{split}
+\text{Fitness} & = \text{total applied damage} + \text{total remaining health} 
+\\ & + \text{value of killed units} + \text{value of remaining units} 
+\end{split}
+\end{equation*}
 \item[$\Rightarrow$] Determine the \alert{optimal combination of genetic operators} for the computational costlier multi-objective optimization
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Optimization}
-\alert{Multi-Objective Genetic Algorithm} 
+\begin{frame}{Multi-Objective Genetic Algorithm}
 \begin{itemize}
 \item Considers all relevant objectives (applied damage, remaining health, value of units killed, value of units remaining etc.) independently to achieve a better spread of solutions
 \item Based on \alert{nondominated sorting} (NSGA-II)
