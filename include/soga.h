@@ -27,21 +27,6 @@ using std::function;
 using std::cout;
 using std::endl;
 
-struct Statistics
-{
-    double mean;
-    double max;
-    double sum;
-    double stdev;
-    Individual optimum;
-    void print()
-    {
-        cout << "Total: " << sum << endl;
-        cout << "Average: " << mean << endl;
-        cout << "Maximum: " << max << endl;
-        cout << "Standard Deviation: " << stdev << endl;
-    }
-};
 
 template <typename T, typename U>
 class SOGA final
@@ -69,6 +54,8 @@ private:
     vector<MicroSimulation<T,U>> sim;
 
     unordered_set<size_t> control;
+
+    Individual optimum;
 
 
     vector<string> selectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
@@ -397,7 +384,9 @@ private:
                 }
             }
         }
+        if(positions.size() == 0) return;
         std::shuffle(positions.begin(), positions.end(), generator);
+
         for(size_t i = 0; i < positions.size()-1; i += 2)
         {
             auto const& pos1 = positions[i];
@@ -522,7 +511,7 @@ private:
 
 public:
 
-    SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2)
+    SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const)
         :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), dist1(0.5), dist2(0,popSize-1), dist3(0,1.0)
     {
         sim.reserve(omp_get_max_threads());
@@ -574,12 +563,12 @@ public:
 
     }
 
-    void optimize(Chromosome const& goal, size_t const iterations)
+    void optimize(vector<Chromosome> const& goals, size_t const iterations)
     {
         onlinePerformance = 0.0;
         offlinePerformance = 0.0;
         mutationDist = std::move(std::bernoulli_distribution(mutationProbability));
-        setGoal(goal);
+        setGoal(goals.front());
         evaluate(pop);
         computeStatistics();
         computeCDF();
@@ -603,6 +592,7 @@ public:
             }
             for(size_t count = 0; count < 100; ++count)
             {
+                if(selected.size() == 0) break; // Just for safety
                 for(size_t i = 0; i < selected.size()-1 && newPop.size() < popSize; i += add)
                 {
                     pair<Individual, Individual> children;
@@ -653,7 +643,7 @@ public:
             };
 
             sort(pop.begin(), pop.end(), cmp);
-            stats.optimum = pop.front();
+            optimum = pop.front();
             do
             {
                 control.erase(pop.back().computeHash());
@@ -678,6 +668,11 @@ public:
     double getOfflinePerformance() const
     {
         return offlinePerformance;
+    }
+
+    Individual getOptimum() const
+    {
+        return optimum;
     }
 
     size_t getNumberOfSelectionOperators() const
@@ -726,6 +721,11 @@ public:
     string getMutationOperatorName()
     {
         return mutationFuncNames[mutationChoice];
+    }
+
+    vector<Chromosome> getBestChromosomes()
+    {
+        return vector<Chromosome>{pop.front().chromosome};
     }
 
 

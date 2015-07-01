@@ -92,16 +92,8 @@ private:
             {
                 if(!enemy->isDead())
                 {
-
-                    double const x = this->getX() - enemy->getX();
-                    double const y = this->getY() - enemy->getY();
-                    double dist = std::sqrt(x*x+y*y);
-                    if(std::isnan(dist))
-                    {
-                        dist = 0.0;
-                    }
-                    double const threshold = enemy->computeRange(*this);
-                    if(dist < threshold)
+                    double const threshold = 2.0 * getPhenotype(Zealot::mNGenes-1) * (enemy->computeRange(*this)+enemy->getMoveDist());
+                    if(computeDistanceSquared(*enemy) < threshold)
                     {
                         applyCharge = true;
                         break;

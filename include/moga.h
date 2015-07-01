@@ -27,21 +27,6 @@ using std::function;
 using std::cout;
 using std::endl;
 
-struct Statistics
-{
-    double mean;
-    double max;
-    double sum;
-    double stdev;
-    Individual optimum;
-    void print()
-    {
-        cout << "Total: " << sum << endl;
-        cout << "Average: " << mean << endl;
-        cout << "Maximum: " << max << endl;
-        cout << "Standard Deviation: " << stdev << endl;
-    }
-};
 
 template <typename T, typename U>
 class MOGA final
@@ -58,10 +43,10 @@ private:
     size_t NCrossoverPoints;
 
     mt19937 generator;
-    bernoulli_distribution dist1;
-    std::uniform_int_distribution<size_t> dist2;
-    std::uniform_real_distribution<double> dist3;
-    std::uniform_int_distribution<size_t> dist;
+    bernoulli_distribution flipCoin;
+    std::uniform_int_distribution<size_t> chooseIndividual;
+    std::uniform_real_distribution<double> spinWheel;
+    std::uniform_int_distribution<size_t> chooseBit;
     bernoulli_distribution mutationDist;
 
     vector<Individual> pop;
@@ -370,13 +355,13 @@ private:
         return std::make_pair(child, child);
     };
 
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> bitFlipMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
+    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> bitFlipMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
     {
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(dist(generator))
+                if(mutationDist(generator))
                 {
                     individual.chromosome[i].flip(j);
                 }
@@ -384,19 +369,20 @@ private:
         }
     };
 
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> interchangingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
+    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> interchangingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
     {
         vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(dist(generator))
+                if(mutationDist(generator))
                 {
                     positions.emplace_back(i,j);
                 }
             }
         }
+        if(positions.size() == 0) return;
         std::shuffle(positions.begin(), positions.end(), generator);
         for(size_t i = 0; i < positions.size()-1; i += 2)
         {
@@ -407,7 +393,7 @@ private:
             individual.chromosome[pos2.first][pos2.second] = tmp;
         }
     };
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> reversingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
+    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> reversingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
     {
         std::bernoulli_distribution coin(0.5);
         vector<pair<size_t, size_t>> positions;
@@ -415,7 +401,7 @@ private:
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(dist(generator))
+                if(mutationDist(generator))
                 {
                     positions.emplace_back(i,j);
                 }
@@ -469,10 +455,11 @@ private:
     void evaluate(vector<Individual>& pop)
     {
         #pragma omp parallel for schedule(static)
-        for(Individual& ind : pop)
+        for(size_t i = 0; i < pop.size(); ++i)
         {
-            ind.fitness = 0;
+            pop[i].fitness = 0;
         }
+
         #pragma omp parallel
         {
             vector<Fitness> results(pop.size());
@@ -493,13 +480,14 @@ private:
                     pop[j].fitness += results[j];
                 }
             }
+            #pragma omp barrier
         }
 
-        double const value = 1.0/pop.size();
+        double const value = 1.0/sim.size();
         #pragma omp parallel for schedule(static)
-        for(Individual& ind : pop)
+        for(size_t i = 0; i < pop.size(); ++i)
         {
-            ind.fitness *= value;
+            pop[i].fitness *= value;
         }
     }
 
@@ -511,7 +499,7 @@ private:
         }
         for(size_t i = 0; i < sim.size(); ++i)
         {
-            sim[i].setPlayer2Chromosome(goals[i])
+            sim[i].setPlayer2Chromosome(goals[i]);
         }
     }
 
@@ -550,11 +538,15 @@ private:
 
     void nondominatedSort()
     {
+        // nondominated fronts
         vector<vector<size_t>> fronts(1);
+        // clear the sets of dominated individuals
         for(Individual& ind : pop)
         {
             ind.dominationSet.clear();
         }
+
+        // determine the domination count and set of dominated individuals for all members of the population
         for(size_t i = 0; i < pop.size(); ++i)
         {
             pop[i].dominationCount = 0;
@@ -569,14 +561,18 @@ private:
                     pop[j].dominationSet.push_back(i);
                 }
             }
+            // if the individual is not dominated by any other individuals, include it in the first nondominated front
             if(pop[i].dominationCount == 0)
             {
                 fronts[0].push_back(i);
             }
         }
-        for(size_t i = 0; !fronts[i].empty(); ++i)
+
+        // determine the individuals in each subsequent front
+        size_t count = fronts[0].size();
+        for(size_t i = 0; count < popSize && !fronts[i].empty(); ++i)
         {
-            fronts.push_back();
+            fronts.emplace_back();
             for(size_t const p : fronts[i])
             {
                 for(size_t const q : pop[p].dominationSet)
@@ -588,36 +584,43 @@ private:
                     }
                 }
             }
+            count += fronts[i+1].size();
         }
+
+
         vector<Individual> newPop;
         newPop.reserve(popSize);
         fronts.pop_back();
+
+
+        auto cmp_damage = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.damage < pop[q].fitness.damage;
+        };
+        auto cmp_minerals_killed = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.minerals_killed < pop[q].fitness.minerals_killed;
+        };
+        auto cmp_gas_killed = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.gas_killed < pop[q].fitness.gas_killed;
+        };
+        auto cmp_health = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.health < pop[q].fitness.health;
+        };
+        auto cmp_minerals_alive = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.minerals_alive < pop[q].fitness.minerals_alive;
+        };
+        auto cmp_gas_alive = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.gas_alive < pop[q].fitness.gas_alive;
+        };
+
+        // diversity preservation
         for(vector<size_t>& front : fronts)
         {
-            auto cmp_damage = [&] (size_t const p, size_t const q)
-            {
-                return pop[p].fitness.damage < pop[q].fitness.damage;
-            };
-            auto cmp_minerals_killed = [&] (size_t const p, size_t const q)
-            {
-                return pop[p].fitness.minerals_killed < pop[q].minerals_killed;
-            };
-            auto cmp_gas_killed = [&] (size_t const p, size_t const q)
-            {
-                return pop[p].fitness.gas_killed < pop[q].fitness.gas_killed;
-            };
-            auto cmp_health = [&] (size_t const p, size_t const q)
-            {
-                return pop[p].fitness.health < pop[q].fitness.health;
-            };
-            auto cmp_minerals_alive = [&] (size_t const p, size_t const q)
-            {
-                return pop[p].fitness.minerals_alive < pop[q].minerals_alive;
-            };
-            auto cmp_gas_alive = [&] (size_t const p, size_t const q)
-            {
-                return pop[p].fitness.gas_alive < pop[q].fitness.gas_alive;
-            };
 
             // compute crowding distance for damage
             std::sort(front.begin(), front.end(), cmp_damage);
@@ -687,14 +690,17 @@ private:
                     pop[front[i]].distance += pop[front[i+1]].fitness.gas_alive - pop[front[i-1]].fitness.gas_alive;
                 }
             }
+            // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
             if(newPop.size() + front.size() > popSize)
             {
                 auto cmp_distance = [&] (size_t const p, size_t const q)
                 {
-                    return pop[p] > pop[q];
+                    return !(pop[p] < pop[q]);
                 };
                 sort(front.begin(), front.end(), cmp_distance);
             }
+
+            // consecutively include individuals from each front into the new population until it is filled
             for(size_t const p : front)
             {
                 if(newPop.size() == popSize) break;
@@ -702,14 +708,15 @@ private:
             }
 
         }
+        // replace the old population with the new one
         pop = std::move(newPop);
     }
 
 
 public:
 
-    SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
-        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), dist1(0.5), dist2(0,popSize-1), dist3(0,1.0)
+    MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), flipCoin(0.5), chooseIndividual(0,popSize-1), spinWheel(0,1.0)
     {
         sim.reserve(nGoals);
         for(int i = 0; i < nGoals; ++i)
@@ -718,14 +725,21 @@ public:
             sim.back().initBothPlayers(buildList1, buildList2);
         }
         NGenes = sim[0].getPlayer1ChromosomeLength();
-        NCrossoverPoints = NGenes;
-        dist = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
-        Chromosome initChrom(NGenes);
-        for(auto& gene : initChrom)
+        NCrossoverPoints = NGenes/2;
+        chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
+        vector<Chromosome> initChroms(nGoals);
+        for(auto& chrom : initChroms)
         {
-            gene.flip(gene.size()-1);
+            chrom.resize(NGenes);
+            for(auto& gene : chrom)
+            {
+                for(size_t i = 0; i < gene.size(); ++i)
+                {
+                    gene.set(i, flipCoin(generator));
+                }
+            }
         }
-        setGoals(initChrom);
+        setGoals(initChroms);
 
 
         pop.reserve(2*popSize);
@@ -746,7 +760,7 @@ public:
                 {
                     for(size_t j = 0; j < gene.size(); ++j)
                     {
-                        gene.set(j, dist1(generator));
+                        gene.set(j, flipCoin(generator));
                     }
                 }
                 hash = pop[i].computeHash();
@@ -783,6 +797,7 @@ public:
 
             for(size_t count = 0; count < 100; ++count)
             {
+                if(selected.size() == 0) break; // Just for safety
                 for(size_t i = 0; i < selected.size()-1 && newPop.size() < popSize; i += 2)
                 {
                     pair<Individual, Individual> children;
@@ -817,7 +832,6 @@ public:
             pop.insert(pop.begin(), newPop.begin(), newPop.end());
 
             nondominatedSort();
-            stats.optimum = pop.front();
             do
             {
                 control.erase(pop.back().computeHash());
@@ -891,6 +905,20 @@ public:
     {
         return mutationFuncNames[mutationChoice];
     }
+
+    vector<Chromosome> getBestChromosomes()
+    {
+        std::partial_sort(pop.begin(), pop.begin() + sim.size(), pop.end());
+        vector<Chromosome> res;
+        res.reserve(sim.size());
+        for(size_t i = 0; i < sim.size(); ++i)
+        {
+            res.push_back(pop[i].chromosome);
+        }
+        return res;
+    }
+
+
 
 
 

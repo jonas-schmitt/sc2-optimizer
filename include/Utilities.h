@@ -2,6 +2,10 @@
 #define UTILITIES_H
 #include <cmath>
 #include <cstddef>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 static double const LIMIT = 10000;
 static double const EPS = 1e-11;
@@ -162,6 +166,21 @@ struct Vec2Df final
     Vec2Df getNormedVec() const
     {
         return getNormedVec(computeLength ());
+    }
+};
+
+struct Statistics
+{
+    double mean;
+    double max;
+    double sum;
+    double stdev;
+    void print()
+    {
+        cout << "Total: " << sum << endl;
+        cout << "Average: " << mean << endl;
+        cout << "Maximum: " << max << endl;
+        cout << "Standard Deviation: " << stdev << endl;
     }
 };
 

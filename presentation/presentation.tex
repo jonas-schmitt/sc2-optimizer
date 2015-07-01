@@ -50,9 +50,7 @@
 %\usetheme{Singapore}
 %\usetheme{Szeged}
 %\usetheme{Warsaw}
-\usepackage{amsmath}
-\usepackage[ngerman]{babel}
-\usepackage{lmodern}
+
 
 % As well as themes, the Beamer class has a number of color themes
 % for any slide theme. Uncomment each of these in turn to see how it
@@ -77,11 +75,16 @@
 %\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
 
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+\setbeamertemplate{caption}[numbered]
 }
 
 \usepackage{graphicx} % Allows including images
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
 \usepackage{epstopdf,epsfig}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
 
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
@@ -92,13 +95,13 @@
 \author{Jonas Schmitt} % Your name
 \date{\today} % Date, can be changed to a custom date
 
-%\AtBeginSection[]
-%{
-% \begin{frame}
-% \frametitle{Overview}
-% \tableofcontents[currentsection]
-% \end{frame}
-%}
+\AtBeginSection[]
+{
+ \begin{frame}
+ \frametitle{Overview}
+ \tableofcontents[currentsection]
+ \end{frame}
+}
 
 \begin{document}
 
@@ -106,17 +109,18 @@
 \titlepage % Print the title page as the first slide
 \end{frame}
 
-%\begin{frame}
-%\frametitle{Outline} % Table of contents slide, comment this block out to remove it
-%\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
-%\end{frame}
+\begin{frame}
+\frametitle{Outline} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
 %------------------------------------------------
+\section{Motivation}
 \begin{frame}{Starcraft II}
 \begin{columns}[c] % the "c" option specifies center vertical alignment
     \column{.5\textwidth} % column designated by a command
     \begin{itemize}
 		\item Military science-fiction real-time strategy game
-		\item \alert{Goal:} Producing the right combination of units (\alert{Macromanagement}) to destroy the other player's units and structures in direct combat (\alert{Micromanagement})
+		\item \alert{Goal:} Producing the right combination of units (\alert{Macromanagement}) to destroy the other player's units and structures in combat (\alert{Micromanagement})
 	\end{itemize}
     \column{.5\textwidth}
     	\includegraphics[width=1.0\linewidth]{starcraft-2-screenshot.jpg}
@@ -130,7 +134,7 @@
 \begin{frame}{Balancing}
 \begin{itemize}
 \item \alert{Macromanagement:} Which units can be produced in a certain amount of time?
-\\ $\Rightarrow$ `` A Multi-objective Genetic Algorithm for Build Order Optimization in StarCraft II '' by Harald K"ostler and Bj"orn Gmeiner
+\\ $\Rightarrow$ `` A Multi-objective Genetic Algorithm for Build Order Optimization in StarCraft II '' by Harald Köstler and Björn Gmeiner
 \item \alert{Micromanagement:} Is it possible to predict which of two groups of units wins in combat?
 \\ $\Rightarrow$ No suitable approach for Starcraft II yet
 \end{itemize}
@@ -139,65 +143,116 @@
 \begin{frame}{Roadmap}
 \begin{itemize}
 \item \alert{Input:} Build Order, i.e. the list of units that have been produced until a certain point of time in the game
-\item \alert{Goal:} Simulate and optimize the behaviour (moving and attacking) of each single unit
+\item \alert{Goal:} Simulate and optimize the behavior (moving and attacking) of each single unit
 \\ $\Rightarrow$ It can be predicted which player would succeed in a combat assuming optimal control
 \end{itemize}
 \end{frame}
 
+\section{Forward Simulation}
 \begin{frame}{Forward Simulation}
     \begin{itemize}
 \item No freely available API for controlling units in the game directly
 \\ $\Rightarrow$ An efficient forward simulation is required that determines the winner of an encounter based on a finite set of parameters
-\item \alert{Idea:} Describe the behaviour of each unit by a number of parametrized \alert{Potential Fields}
+\item \alert{Idea:} Describe the behavior of each unit by a number of parametrized \alert{Potential Fields}
+\item[$\Rightarrow$] Units create multiple artificial potential fields around their position which are modeled as linear functions
 \end{itemize}
-\begin{center}
-  \includegraphics[width=0.45\linewidth]{friend-crop.pdf}
-\end{center}
 \end{frame}
 
-\begin{frame}{Forward Simulation}
+\begin{frame}{Potential Fields}
 \begin{columns}[c] % the "c" option specifies center vertical alignment
     \column{.5\textwidth} % column designated by a command
-  \includegraphics[width=1.0\linewidth]{enemy1-crop.pdf}
+\begin{figure}[h]
+	%\centering
+	\includegraphics[width=1.0\linewidth]{friend-crop.pdf}
+	\caption{Attractive potential of friendly units.}
+	\label{fig:graph_friend}
+\end{figure}
     \column{.5\textwidth}
-  \includegraphics[width=1.0\linewidth]{enemy2-crop.pdf}
+\begin{figure}[h]
+	%\centering
+	\includegraphics[width=1.0\linewidth]{enemy1-crop.pdf}
+	\caption{Repulsive potential of enemy units.}
+	\label{fig:graph_enemy1}
+\end{figure}
 \end{columns}
 \end{frame}
 
+\begin{frame}{Potential Fields}
+\begin{center}
+\begin{figure}[h]
+	%\centering
+	\includegraphics[width=0.5\linewidth]{enemy2-crop.pdf}
+	\caption{Attractive potential of enemy units.}
+	\label{fig:graph_enemy2}
+\end{figure}
+\end{center}
+\end{frame}
+\begin{frame}{Forward Simulation}
+During a time step the following actions are performed by each unit:
+\begin{itemize}
+\item If \alert{attacking} is possible, a target is chosen among all enemies within attack range by favoring units that can be defeated, prioritized by the amount of applicable damage
+\item Else, the unit \alert{moves} and its position at the next time step is computed with the following equation:
+	\begin{equation*}
+		\vec{p_{i+1}} = \vec{p_i} +\vec{F} \times s
+	\end{equation*}
+	where $\vec{p_i}$ is the position at time step $i$, $\vec{F}$ the current force and $s$ the movement range. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Forward Simulation}
+\begin{itemize}
+\item The \alert{force} of each unit is recomputed after a fixed number of time steps by accumulating the gradients of all potential fields applying to it:
+	\begin{equation*}
+		\vec{F} = \sum_{j=1}^n \vec{F}_j
+	\end{equation*}
+	where $n$ is the number of potential fields affecting the unit at the current time step and $\vec{F}_j$ the gradient of the $j$th potential field
+\item The forward simulation finishes when either all units of a player have been defeated or the simulation’s duration exceeds a certain limit.
+\end{itemize}
+\end{frame}
+
+\section{Optimization}
 \begin{frame}{Optimization}
 \begin{itemize}
 \item \alert{Goal:} Iteratively optimize the parameters for both opponents' units against each other
 \item \alert{Challenges:} 
 \begin{itemize}
-\item Large search space (at least 16 parameters for each different type of unit) 
+\item Large search space (at least 14 real valued parameters for each different type of unit) 
 \item No knowledge about the relationship between in- and output
 \end{itemize}
-$\Rightarrow$ \alert{Genetic Algorithms} are suitable search heuristics for problems of this type
+\item[$\Rightarrow$] \alert{Genetic Algorithms} are suitable search heuristics for problems of this type
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Optimization}
+\alert{General Procedure}
 \begin{itemize}
-\item Binary encode the parameters of both opponents
-\item Choose suitable starting values as optimization objective (strategy used by the opponent) for both populations
-\item Replace the objective every $n$ generation by the respective optimum and reevaluate the whole population
-\item The obtained optima can be used to evaluate the effectiveness of both build orders against the respective other one
+\item Encode the parameters of both opponents
+\item Choose suitable starting values for the optimization objective (strategy used by the opponent) for both populations
+\item Replace the objectives every $n$ generation by the respective optima and reevaluate both populations
+\item The obtained results can be used to evaluate the effectiveness of both build orders against the respective other one
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Optimization}
-\begin{enumerate}
-\item \alert{Single-Objective Genetic Algorithm:}
-The fitness of each individual is approximated with a simple formula: 
-\begin{equation*}
-		\text{Fitness}(x) =  \frac{\sum\limits_{i=1}^{n} \text{damage}(i) + \sum\limits_{j=1}^{m} \text{health}(j)}{2}
-\end{equation*}
-$\Rightarrow$ Determine the best combination of genetic operators
-\item \alert{Multi-Objective Genetic Algorithm:} Considers all relevant objectives (applied damage, remaining health, value of units killed, value of units remaining etc.)
-\\ $\Rightarrow$ Perform the actual optimization using NSGA-II
-\end{enumerate}
 
+\alert{Single-Objective Genetic Algorithm}
+\begin{itemize}
+\item The fitness of each individual is approximated with a simple formula:  \\
+Fitness =  total applied damage + total remaining health +  value of killed units + value of remaining units 
+\item[$\Rightarrow$] Determine the \alert{optimal combination of genetic operators} for the computational costlier multi-objective optimization
+\end{itemize}
 \end{frame}
+
+\begin{frame}{Optimization}
+\alert{Multi-Objective Genetic Algorithm} 
+\begin{itemize}
+\item Considers all relevant objectives (applied damage, remaining health, value of units killed, value of units remaining etc.) independently to achieve a better spread of solutions
+\item Based on \alert{nondominated sorting} (NSGA-II)
+\item[$\Rightarrow$] Perform the actual optimization with suitable operators to \alert{evaluate the effectiveness of certain build orders} compared to each other
+\end{itemize}
+\end{frame}
+
+\section{Results}
 
 
 
