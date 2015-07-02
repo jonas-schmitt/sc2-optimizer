@@ -257,6 +257,65 @@ During a time step the following actions are performed by each unit:
 
 \section{Results}
 
+\begin{frame}{Results}
+
+\begin{itemize}
+\item Measuring the Performance of different Combinations of common Genetic Operators (Selection, Crossover and Mutation Methods) for the single-objective genetic algorithm
+\item \alert{Online Performance:} Average fitness of all evaluations
+\item \alert{Offline Performance:} Average fitness of the optima of each generation
+\item Parameters used: 
+\end{itemize}
+\centering
+\begin{tabular}{c | c | c | c | c }
+Population & Iterations & Generations & Mutation\\
+Size & & per Iteration & Probability \\
+\hline \hline
+500 & 100 & 10 & 1 \%
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{Results}
+\begin{table}
+\begin{tabular}{c | c | c | c | c }
+Selection & Crossover & Mutation & Online Performance \\
+\hline \hline
+RWS & NPC & IM & 82.17 \\
+SUS & SPC & IM & 80.64 \\
+RWS & TPC & RM & 79.19 \\
+RWS & UC & RM & 79.12 \\
+SUS & SPC & BFM & 79.04
+\end{tabular}
+\caption{Online Performance}
+\end{table}
+
+SUS: Stochastic Universal Sampling, RWS: Roulette Wheel Selection, TS: Tournament Selection (Binary) \\
+SPC: Single-Point Crossover, TPC: Two-Point Crossover, NPC: N-Point-Crossover (with $n=\frac{1}{2}$ number of parameters), UC: Uniform Crossover \\
+BFM: Bit-Flip Mutation, IM: Interchanging Mutation, RM: Reversing Mutation
+
+\end{frame}
+
+
+\begin{frame}{Results}
+\begin{table}
+\begin{tabular}{c | c | c | c | c }
+Selection & Crossover & Mutation & Offline Performance \\
+\hline
+SUS & SPC & IM & 94.50 \\
+RWS & NPC & IM & 94.09 \\
+RWS & TPC & RM & 93.78 \\
+TS & TPC & IM & 93.52 \\
+RWS & TPC & IM & 93.48
+\end{tabular}
+\caption{Offline Performance}
+\end{table}
+
+
+SUS: Stochastic Universal Sampling, RWS: Roulette Wheel Selection, TS: Tournament Selection (Binary) \\
+SPC: Single-Point Crossover, TPC: Two-Point Crossover, NPC: N-Point-Crossover (with $N=\frac{1}{2}$ number of parameters), UC: Uniform Crossover \\
+BFM: Bit-Flip Mutation, IM: Interchanging Mutation, RM: Reversing Mutation
+
+\end{frame}
 
 
 
@@ -296,7 +355,7 @@ During a time step the following actions are performed by each unit:
 %------------------------------------------------
 
 \begin{frame}
-\Huge{\centerline{The End}}
+\Huge{\centerline{Thank you for the attention!}}
 \end{frame}
 
 %----------------------------------------------------------------------------------------
