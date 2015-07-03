@@ -8,7 +8,7 @@ using std::cout;
 using std::endl;
 
 static double const LIMIT = 10000;
-static double const EPS = 1e-11;
+static double const EPS = 1e-10;
 static double const GASTOMINERALS = 1.5;
 static double const STDLEN = 1./std::sqrt(2);
 //static long const INTLIMIT = std::numeric_limits<int>::max();

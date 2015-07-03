@@ -588,10 +588,13 @@ private:
             {
                 for(size_t const q : pop[p].dominationSet)
                 {
-                    if(--pop[q].dominationCount == 0)
+                    if(pop[q].dominationCount > 0)
                     {
-                        fronts[i+1].push_back(q);
-                        ++pop[q].rank;
+                        if(--pop[q].dominationCount == 0)
+                        {
+                            fronts[i+1].push_back(q);
+                            ++pop[q].rank;
+                        }
                     }
                 }
             }
@@ -609,26 +612,11 @@ private:
         {
             return pop[p].fitness.damage < pop[q].fitness.damage;
         };
-        auto cmp_minerals_killed = [&] (size_t const p, size_t const q)
-        {
-            return pop[p].fitness.minerals_killed < pop[q].fitness.minerals_killed;
-        };
-        auto cmp_gas_killed = [&] (size_t const p, size_t const q)
-        {
-            return pop[p].fitness.gas_killed < pop[q].fitness.gas_killed;
-        };
         auto cmp_health = [&] (size_t const p, size_t const q)
         {
             return pop[p].fitness.health < pop[q].fitness.health;
         };
-        auto cmp_minerals_alive = [&] (size_t const p, size_t const q)
-        {
-            return pop[p].fitness.minerals_alive < pop[q].fitness.minerals_alive;
-        };
-        auto cmp_gas_alive = [&] (size_t const p, size_t const q)
-        {
-            return pop[p].fitness.gas_alive < pop[q].fitness.gas_alive;
-        };
+
 
         // diversity preservation
         for(vector<size_t>& front : fronts)
@@ -638,70 +626,32 @@ private:
             std::sort(front.begin(), front.end(), cmp_damage);
             pop[front.front()].distance = INF;
             pop[front.back()].distance = INF;
-            for(size_t i = 1; i < front.size()-2; ++i)
+            if(front.size() > 2)
             {
-                pop[front[i]].distance += pop[front[i+1]].fitness.damage - pop[front[i-1]].fitness.damage;
-            }
-
-            // compute crowding distance for minerals killed
-            std::sort(front.begin(), front.end(), cmp_minerals_killed);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
-            for(size_t i = 1; i < front.size()-2; ++i)
-            {
-                if(pop[front[i]].distance < INF)
+                for(size_t i = 1; i < front.size()-2; ++i)
                 {
-                    pop[front[i]].distance += pop[front[i+1]].fitness.minerals_killed - pop[front[i-1]].fitness.minerals_killed;
+                    pop[front[i]].distance += pop[front[i+1]].fitness.damage - pop[front[i-1]].fitness.damage;
                 }
             }
 
-            // compute crowding distance for gas killed
-            std::sort(front.begin(), front.end(), cmp_gas_killed);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
-            for(size_t i = 1; i < front.size()-2; ++i)
-            {
-                if(pop[front[i]].distance < INF)
-                {
-                    pop[front[i]].distance += pop[front[i+1]].fitness.gas_killed - pop[front[i-1]].fitness.gas_killed;
-                }
-            }
+
 
             // compute crowding distance for health
             std::sort(front.begin(), front.end(), cmp_health);
             pop[front.front()].distance = INF;
             pop[front.back()].distance = INF;
-            for(size_t i = 1; i < front.size()-2; ++i)
+            if(front.size() > 2)
             {
-                if(pop[front[i]].distance < INF)
+                for(size_t i = 1; i < front.size()-2; ++i)
                 {
-                    pop[front[i]].distance += pop[front[i+1]].fitness.health - pop[front[i-1]].fitness.health;
+                    if(pop[front[i]].distance < INF)
+                    {
+                        pop[front[i]].distance += pop[front[i+1]].fitness.health - pop[front[i-1]].fitness.health;
+                    }
                 }
             }
 
-            // compute crowding distance for minerals alive
-            std::sort(front.begin(), front.end(), cmp_minerals_alive);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
-            for(size_t i = 1; i < front.size()-2; ++i)
-            {
-                if(pop[front[i]].distance < INF)
-                {
-                    pop[front[i]].distance += pop[front[i+1]].fitness.minerals_alive - pop[front[i-1]].fitness.minerals_alive;
-                }
-            }
 
-            // compute crowding distance for gas alive
-            std::sort(front.begin(), front.end(), cmp_gas_alive);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
-            for(size_t i = 1; i < front.size()-2; ++i)
-            {
-                if(pop[front[i]].distance < INF)
-                {
-                    pop[front[i]].distance += pop[front[i+1]].fitness.gas_alive - pop[front[i-1]].fitness.gas_alive;
-                }
-            }
             // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
             if(newPop.size() + front.size() > popSize)
             {

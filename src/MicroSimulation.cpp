@@ -239,46 +239,26 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
     }
     Fitness res;
     double maxHealth = 0;;
-    double maxMinerals_alive = 0;
-    double maxGas_alive = 0;
     for(auto unit : pl1.unitList)
     {
-        maxHealth += unit->getMaxHealth() + unit->getMaxShield();
-        maxMinerals_alive += unit->getMinerals();
-        maxGas_alive += unit->getGas();
-        res.health += unit->getHealth() + unit->getShield();
-        if(!unit->isDead())
-        {
-            res.minerals_alive += unit->getMinerals();
-            res.gas_alive += unit->getGas();
-        }
+        maxHealth += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+        res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
     }
     double maxDamage = 0;
-    double maxMinerals_killed = 0;
-    double maxGas_killed = 0;
+
     for(auto unit : pl2.unitList)
     {
-        maxDamage += unit->getMaxHealth() + unit->getMaxShield();
-        maxMinerals_killed += unit->getMinerals();
-        maxGas_killed += unit->getGas();
-        res.damage += unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield();
-        if(unit->isDead())
-        {
-            res.minerals_killed += unit->getMinerals();
-            res.gas_killed += unit->getGas();
-        }
+        maxDamage += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+
+        res.damage += (unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield())*(unit->getMinerals()+unit->getGas());;
     }
 
     res.damage /= maxDamage;
 
-    res.minerals_killed /= maxMinerals_killed;
-    res.gas_killed /= maxGas_killed;
 
     res.health /= maxHealth;
-    res.minerals_alive /= maxMinerals_alive;
-    res.gas_alive /= maxGas_alive;
 
-    res.score = (res.damage + res.minerals_killed + res.gas_killed + res.health + res.minerals_alive + res.gas_alive) * 100.0 / 6.0;
+    res.score = (res.damage + res.health) * 100.0 / 2.0;
 
     if(reset)
     {

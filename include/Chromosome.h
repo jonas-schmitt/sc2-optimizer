@@ -17,24 +17,16 @@ struct Fitness final
 {
 
     double score = 0.0;
-
     double damage = 0.0;
-    double minerals_killed = 0.0;
-    double gas_killed = 0.0;
-
     double health = 0.0;
-    double minerals_alive = 0.0;
-    double gas_alive = 0.0;
+
 
     Fitness& operator+=(Fitness const& rhs)
     {
         score += rhs.score;
         damage += rhs.damage;
-        minerals_killed += rhs.minerals_killed;
-        gas_killed += rhs.gas_killed;
         health += rhs.health;
-        minerals_alive += rhs.minerals_alive;
-        gas_alive += rhs.gas_alive;
+
         return *this;
     }
 
@@ -42,11 +34,7 @@ struct Fitness final
     {
         score = value;
         damage = value;
-        minerals_killed = value;
-        gas_killed = value;
         health = value;
-        minerals_alive = value;
-        gas_alive = value;
         return *this;
     }
 
@@ -54,11 +42,8 @@ struct Fitness final
     {
         score *= value;
         damage *= value;
-        minerals_killed *= value;
-        gas_killed *= value;
         health *= value;
-        minerals_alive *= value;
-        gas_alive *= value;
+
         return *this;
     }
 
@@ -94,8 +79,8 @@ struct Individual
 
     bool dominates(Individual const& ind) const
     {
-        if(fitness.damage > ind.fitness.damage && fitness.minerals_killed > ind.fitness.minerals_killed && fitness.gas_killed > ind.fitness.gas_killed
-                && fitness.health > ind.fitness.health && fitness.minerals_alive > ind.fitness.minerals_killed && fitness.gas_alive > ind.fitness.gas_alive)
+        if(ind.fitness.damage - fitness.damage < EPS
+                && ind.fitness.health - fitness.health < EPS)
         {
             return true;
         }
