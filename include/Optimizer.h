@@ -48,8 +48,8 @@ public:
         {
             std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
             printf("%c[2K", 27);
-            vector<Chromosome> optima1 = std::move(ga1.getBestChromosomes());
-            vector<Chromosome> optima2 = std::move(ga2.getBestChromosomes());
+            vector<Chromosome> optima1 = ga1.getBestChromosomes();
+            vector<Chromosome> optima2 = ga2.getBestChromosomes();
             ga1.optimize(optima2, genPerIt);
             ga2.optimize(optima1, genPerIt);
             stats1 = ga1.getStatistics();

@@ -94,28 +94,35 @@ struct Individual
 
     bool dominates(Individual const& ind) const
     {
-        return fitness.damage > ind.fitness.damage && fitness.minerals_killed > ind.fitness.minerals_killed && fitness.gas_killed > ind.fitness.gas_killed
-                && fitness.health > ind.fitness.health && fitness.minerals_alive > ind.fitness.minerals_killed && fitness.gas_alive > ind.fitness.gas_alive;
+        if(fitness.damage > ind.fitness.damage && fitness.minerals_killed > ind.fitness.minerals_killed && fitness.gas_killed > ind.fitness.gas_killed
+                && fitness.health > ind.fitness.health && fitness.minerals_alive > ind.fitness.minerals_killed && fitness.gas_alive > ind.fitness.gas_alive)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
 };
 
-inline bool operator< (Individual const& lhs, Individual const& rhs)
-{
-    if(lhs.rank < rhs.rank)
-    {
-        return true;
-    }
-    else if(lhs.rank == rhs.rank)
-    {
-        return lhs.distance > rhs.distance;
-    }
-    else
-    {
-        return false;
-    }
-}
+//inline bool operator< (Individual const& lhs, Individual const& rhs)
+//{
+//    if(lhs.rank < rhs.rank)
+//    {
+//        return true;
+//    }
+//    else if(lhs.rank == rhs.rank)
+//    {
+//        return lhs.distance > rhs.distance;
+//    }
+//    else
+//    {
+//        return false;
+//    }
+//}
 
 
 

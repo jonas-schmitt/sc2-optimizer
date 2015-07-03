@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = 500;
-    size_t iterations = 100;
+    size_t popSize = 10;
+    size_t iterations = 10;
     size_t genPerIt = 10;
     size_t nGoals = 10;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
@@ -158,17 +158,19 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Protoss")
     {
-        for(size_t i = 1; i < 3; ++i)
-        {
-            for(size_t j = 0; j < 5; ++j)
-            {
-                for(size_t k = 0; k < 3; ++k)
-                {
-                    Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
-                }
-            }
-        }
+        Optimizer<MOGA<Terran,Protoss>,MOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+        opt.optimize(0, 0, 0, iterations, genPerIt);
+//        for(size_t i = 0; i < 3; ++i)
+//        {
+//            for(size_t j = 0; j < 5; ++j)
+//            {
+//                for(size_t k = 0; k < 3; ++k)
+//                {
+//                    Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+//                    opt.optimize(k, j, i, iterations, genPerIt);
+//                }
+//            }
+//        }
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {

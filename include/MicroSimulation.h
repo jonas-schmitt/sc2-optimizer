@@ -49,7 +49,7 @@ private:
     PlayerState<T> pl1;
     PlayerState<U> pl2;
     bool mTracking = false;
-    int mTimeSteps = 30000;
+    int mTimeSteps = 18000;
     int mTimeSlice = 10;
 
 public:

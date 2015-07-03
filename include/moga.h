@@ -77,9 +77,20 @@ private:
             size_t const pos1 = dist(generator);
             size_t pos2 = dist(generator);
             while(pos2 == pos1) pos2 = dist(generator);
-            Individual const& ind1 = pop[pos1];
-            Individual const& ind2 = pop[pos2];
-            return ind1 < ind2 ? pos1 : pos2;
+            Individual const& lhs = pop[pos1];
+            Individual const& rhs = pop[pos2];
+            if(lhs.rank < rhs.rank)
+            {
+                return pos1;
+            }
+            else if(lhs.rank == rhs.rank && lhs.distance > rhs.distance)
+            {
+                return pos1;
+            }
+            else
+            {
+                return pos2;
+            }
         };
 
         vector<Individual *> res;
@@ -454,7 +465,7 @@ private:
 
     void evaluate(vector<Individual>& pop)
     {
-        #pragma omp parallel for schedule(static)
+        #pragma omp parallel for schedule(dynamic,1)
         for(size_t i = 0; i < pop.size(); ++i)
         {
             pop[i].fitness = 0;
@@ -464,7 +475,7 @@ private:
         {
             vector<Fitness> results(pop.size());
 
-            #pragma omp for schedule(dynamic, 1) nowait
+            #pragma omp for schedule(runtime) nowait
             for(size_t i = 0; i < sim.size(); ++i)
             {
                 for(size_t j = 0; j < pop.size(); ++j)
@@ -570,9 +581,9 @@ private:
 
         // determine the individuals in each subsequent front
         size_t count = fronts[0].size();
+        fronts.emplace_back();
         for(size_t i = 0; count < popSize && !fronts[i].empty(); ++i)
         {
-            fronts.emplace_back();
             for(size_t const p : fronts[i])
             {
                 for(size_t const q : pop[p].dominationSet)
@@ -585,6 +596,7 @@ private:
                 }
             }
             count += fronts[i+1].size();
+            fronts.emplace_back();
         }
 
 
@@ -695,7 +707,7 @@ private:
             {
                 auto cmp_distance = [&] (size_t const p, size_t const q)
                 {
-                    return !(pop[p] < pop[q]);
+                    return pop[p].distance > pop[q].distance;
                 };
                 sort(front.begin(), front.end(), cmp_distance);
             }
@@ -908,7 +920,23 @@ public:
 
     vector<Chromosome> getBestChromosomes()
     {
-        std::partial_sort(pop.begin(), pop.begin() + sim.size(), pop.end());
+        auto cmp = [&] (Individual const& lhs, Individual const& rhs)
+        {
+            if(lhs.rank < rhs.rank)
+            {
+                return true;
+            }
+            else if(lhs.rank == rhs.rank)
+            {
+                return lhs.distance > rhs.distance;
+            }
+            else
+            {
+                return false;
+            }
+        };
+
+        std::partial_sort(pop.begin(), pop.begin() + sim.size(), pop.end(), cmp);
         vector<Chromosome> res;
         res.reserve(sim.size());
         for(size_t i = 0; i < sim.size(); ++i)
