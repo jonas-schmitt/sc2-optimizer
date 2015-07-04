@@ -465,7 +465,7 @@ private:
 
     void evaluate(vector<Individual>& pop)
     {
-        #pragma omp parallel for schedule(dynamic,1)
+        #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < pop.size(); ++i)
         {
             pop[i].fitness = 0;
@@ -475,7 +475,7 @@ private:
         {
             vector<Fitness> results(pop.size());
 
-            #pragma omp for schedule(runtime) nowait
+            #pragma omp for schedule(dynamic, 1) nowait
             for(size_t i = 0; i < sim.size(); ++i)
             {
                 for(size_t j = 0; j < pop.size(); ++j)
@@ -551,35 +551,35 @@ private:
     {
         // nondominated fronts
         vector<vector<size_t>> fronts(1);
-        // clear the sets of dominated individuals
-        for(Individual& ind : pop)
-        {
-            ind.dominationSet.clear();
-        }
 
         // determine the domination count and set of dominated individuals for all members of the population
         for(size_t i = 0; i < pop.size(); ++i)
         {
             pop[i].dominationCount = 0;
-            pop[i].rank = 1;
-            pop[i].distance = 0;
+            pop[i].dominationSet.clear();
+            pop[i].distance = 0.0;
             for(size_t j = 0; j < pop.size(); ++j)
             {
                 if(i == j) continue;
-                if(pop[j].dominates(pop[i]))
+                if(pop[i].dominates(pop[j]))
+                {
+                    pop[i].dominationSet.push_back(j);
+                }
+                else if(pop[j].dominates(pop[i]))
                 {
                     ++pop[i].dominationCount;
-                    pop[j].dominationSet.push_back(i);
                 }
             }
             // if the individual is not dominated by any other individuals, include it in the first nondominated front
             if(pop[i].dominationCount == 0)
             {
                 fronts[0].push_back(i);
+                pop[i].rank = 1;
             }
         }
 
         // determine the individuals in each subsequent front
+        size_t r = 1;
         size_t count = fronts[0].size();
         fronts.emplace_back();
         for(size_t i = 0; count < popSize && !fronts[i].empty(); ++i)
@@ -593,13 +593,14 @@ private:
                         if(--pop[q].dominationCount == 0)
                         {
                             fronts[i+1].push_back(q);
-                            ++pop[q].rank;
+                            pop[q].rank = r + 1;
                         }
                     }
                 }
             }
             count += fronts[i+1].size();
             fronts.emplace_back();
+            ++r;
         }
 
 
@@ -615,6 +616,11 @@ private:
         auto cmp_health = [&] (size_t const p, size_t const q)
         {
             return pop[p].fitness.health < pop[q].fitness.health;
+        };
+
+        auto cmp_time = [&] (size_t const p, size_t const q)
+        {
+            return pop[p].fitness.timeSteps < pop[q].fitness.timeSteps;
         };
 
 
@@ -651,6 +657,21 @@ private:
                 }
             }
 
+            // compute crowding distance for health
+            std::sort(front.begin(), front.end(), cmp_time);
+            pop[front.front()].distance = INF;
+            pop[front.back()].distance = INF;
+            if(front.size() > 2)
+            {
+                for(size_t i = 1; i < front.size()-2; ++i)
+                {
+                    if(pop[front[i]].distance < INF)
+                    {
+                        pop[front[i]].distance += pop[front[i+1]].fitness.timeSteps - pop[front[i-1]].fitness.timeSteps;
+                    }
+                }
+            }
+
 
             // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
             if(newPop.size() + front.size() > popSize)
@@ -666,12 +687,12 @@ private:
             for(size_t const p : front)
             {
                 if(newPop.size() == popSize) break;
-                newPop.push_back(std::move(pop[p]));
+                newPop.push_back(pop[p]);
             }
 
         }
         // replace the old population with the new one
-        pop = std::move(newPop);
+        pop = newPop;
     }
 
 

@@ -19,6 +19,7 @@ struct Fitness final
     double score = 0.0;
     double damage = 0.0;
     double health = 0.0;
+    double timeSteps = 0.0;
 
 
     Fitness& operator+=(Fitness const& rhs)
@@ -26,6 +27,7 @@ struct Fitness final
         score += rhs.score;
         damage += rhs.damage;
         health += rhs.health;
+        timeSteps += rhs.timeSteps;
 
         return *this;
     }
@@ -35,6 +37,7 @@ struct Fitness final
         score = value;
         damage = value;
         health = value;
+        timeSteps = value;
         return *this;
     }
 
@@ -43,6 +46,7 @@ struct Fitness final
         score *= value;
         damage *= value;
         health *= value;
+        timeSteps *= value;
 
         return *this;
     }
@@ -57,9 +61,9 @@ struct Individual
     double cdf;
     double total;
 
-    size_t dominationCount;
+    int dominationCount;
     vector<size_t> dominationSet;
-    size_t rank;
+    int rank;
     double distance;
 
 
@@ -79,8 +83,10 @@ struct Individual
 
     bool dominates(Individual const& ind) const
     {
-        if(ind.fitness.damage - fitness.damage < EPS
-                && ind.fitness.health - fitness.health < EPS)
+        bool const faster = fitness.timeSteps < ind.fitness.timeSteps;
+        if((fitness.damage > ind.fitness.damage || (std::abs(ind.fitness.damage - fitness.damage) < EPS && faster))
+         && (fitness.health > ind.fitness.health || (std::abs(ind.fitness.health - fitness.health) < EPS && faster)))
+//        if(fitness.damage > ind.fitness.damage && fitness.health > ind.fitness.health && fitness.timeSteps < ind.fitness.timeSteps)
         {
             return true;
         }

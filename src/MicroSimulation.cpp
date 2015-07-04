@@ -260,6 +260,8 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
 
     res.score = (res.damage + res.health) * 100.0 / 2.0;
 
+    res.timeSteps = std::max(pl1.time / pl1.timeSlice, pl2.time / pl2.timeSlice);
+
     if(reset)
     {
         resetBothPlayers();

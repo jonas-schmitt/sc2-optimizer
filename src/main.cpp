@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = 25;
+    size_t popSize = 100;
     size_t iterations = 10;
     size_t genPerIt = 10;
     size_t nGoals = 10;
