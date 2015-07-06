@@ -51,10 +51,9 @@ private:
 
     vector<Individual> pop;
 
-    vector<MicroSimulation<T,U>> sim;
+    vector<vector<MicroSimulation<T,U>>> sim;
 
     unordered_set<size_t> control;
-
 
     vector<string> selectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
     vector<string> crossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover"};
@@ -66,6 +65,8 @@ private:
 
     double onlinePerformance = 0.0;
     double offlinePerformance = 0.0;
+
+    size_t NGoals;
 
 
 
@@ -465,52 +466,34 @@ private:
 
     void evaluate(vector<Individual>& pop)
     {
-        #pragma omp parallel for schedule(static)
+
+        #pragma omp parallel for schedule(runtime)
         for(size_t i = 0; i < pop.size(); ++i)
         {
+            double const value = 1.0/NGoals;
             pop[i].fitness = 0;
-        }
-
-        #pragma omp parallel
-        {
-            vector<Fitness> results(pop.size());
-
-            #pragma omp for schedule(dynamic, 1) nowait
-            for(size_t i = 0; i < sim.size(); ++i)
+            for(size_t j = 0; j < NGoals; ++j)
             {
-                for(size_t j = 0; j < pop.size(); ++j)
-                {
-                    sim[i].setPlayer1Chromosome(pop[j].chromosome);
-                    results[j] += sim[i].run(true);
-                }
+                sim[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
+                pop[i].fitness += sim[omp_get_thread_num()][j].run(true);
             }
-            #pragma omp critical
-            {
-                for(size_t j = 0; j < pop.size(); ++j)
-                {
-                    pop[j].fitness += results[j];
-                }
-            }
-            #pragma omp barrier
-        }
-
-        double const value = 1.0/sim.size();
-        #pragma omp parallel for schedule(static)
-        for(size_t i = 0; i < pop.size(); ++i)
-        {
             pop[i].fitness *= value;
         }
     }
 
     void setGoals(vector<Chromosome> const& goals)
     {
-        if(goals.size() != sim.size())
+        if(goals.size() != NGoals)
         {
             throw std::invalid_argument("MOGA::setGoals(): Invalid number of arguments");
         }
-        for(size_t i = 0; i < sim.size(); ++i)
+        #pragma omp parallel
         {
-            sim[i].setPlayer2Chromosome(goals[i]);
+            for(size_t j = 0; j < NGoals; ++j)
+            {
+                sim[omp_get_thread_num()][j].setPlayer2Chromosome(goals[j]);
+            }
+            #pragma omp barrier
         }
     }
 
@@ -698,19 +681,49 @@ private:
 
 public:
 
+    typedef T race1;
+    typedef U race2;
+
     MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
-        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), flipCoin(0.5), chooseIndividual(0,popSize-1), spinWheel(0,1.0)
+        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), flipCoin(0.5), chooseIndividual(0,popSize-1), spinWheel(0,1.0), NGoals(nGoals)
     {
-        sim.reserve(nGoals);
-        for(int i = 0; i < nGoals; ++i)
+//        sim.resize(omp_get_max_threads());
+//        for(int i = 0; i < omp_get_max_threads(); ++i)
+//        {
+//            sim[i].reserve(NGoals);
+//            for(size_t j = 0; j < NGoals; ++j)
+//            {
+//                sim[i].emplace_back(minPos, maxPos, filePath1, filePath2);
+//                sim[i].back().initBothPlayers(buildList1, buildList2);
+//            }
+
+//        }
+
+        sim.reserve(omp_get_max_threads());
+        #pragma omp parallel
         {
-            sim.emplace_back(minPos, maxPos, filePath1, filePath2);
-            sim.back().initBothPlayers(buildList1, buildList2);
+            for(size_t i = 0; i < omp_get_max_threads(); ++i)
+            {
+                #pragma omp critical
+                {
+                    if(i == omp_get_thread_num())
+                    {
+                        sim.emplace_back();
+                        sim[omp_get_thread_num()].reserve(NGoals);
+                        for(size_t j = 0; j < NGoals; ++j)
+                        {
+                            sim[omp_get_thread_num()].emplace_back(minPos, maxPos, filePath1, filePath2);
+                            sim[omp_get_thread_num()].back().initBothPlayers(buildList1, buildList2);
+                        }
+                    }
+                }
+                #pragma omp barrier
+            }
         }
-        NGenes = sim[0].getPlayer1ChromosomeLength();
-        NCrossoverPoints = NGenes/2;
+        NGenes = sim[0][0].getPlayer1ChromosomeLength();
+        NCrossoverPoints = buildList1.size();
         chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
-        vector<Chromosome> initChroms(nGoals);
+        vector<Chromosome> initChroms(NGoals);
         for(auto& chrom : initChroms)
         {
             chrom.resize(NGenes);
@@ -907,14 +920,19 @@ public:
             }
         };
 
-        std::partial_sort(pop.begin(), pop.begin() + sim.size(), pop.end(), cmp);
+        std::partial_sort(pop.begin(), pop.begin() + NGoals, pop.end(), cmp);
         vector<Chromosome> res;
-        res.reserve(sim.size());
-        for(size_t i = 0; i < sim.size(); ++i)
+        res.reserve(NGoals);
+        for(size_t i = 0; i < NGoals; ++i)
         {
             res.push_back(pop[i].chromosome);
         }
         return res;
+    }
+
+    vector<Individual> const& getPopulation() const
+    {
+        return pop;
     }
 
 

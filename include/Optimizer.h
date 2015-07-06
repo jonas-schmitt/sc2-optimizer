@@ -1,7 +1,9 @@
 #ifndef _OPTIMIZER_
 #define _OPTIMIZER_
 
+#include <ostream>
 #include <iostream>
+
 
 #include "soga.h"
 #include "moga.h"
@@ -22,13 +24,18 @@ private:
     double offlinePerformance = 0.0;
     double onlinePerformance = 0.0;
 
+    MicroSimulation<typename GA1::race1, typename GA2::race1> mSim;
+
 
 public:
     Optimizer(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
         : popSize(popSize),
           ga1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
-          ga2(minPos, maxPos, filePath2, filePath1, popSize, buildList2, buildList1, nGoals)
-    {}
+          ga2(minPos, maxPos, filePath2, filePath1, popSize, buildList2, buildList1, nGoals),
+          mSim(minPos, maxPos, filePath1, filePath2)
+    {
+        mSim.initBothPlayers(buildList1, buildList2);
+    }
 
     void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt)
     {
@@ -48,8 +55,8 @@ public:
         {
             std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
             printf("%c[2K", 27);
-            vector<Chromosome> optima1 = ga1.getBestChromosomes();
-            vector<Chromosome> optima2 = ga2.getBestChromosomes();
+            vector<Chromosome> optima1(ga1.getBestChromosomes());
+            vector<Chromosome> optima2(ga2.getBestChromosomes());
             ga1.optimize(optima2, genPerIt);
             ga2.optimize(optima1, genPerIt);
             stats1 = ga1.getStatistics();
@@ -137,6 +144,30 @@ public:
     string getMutationOperatorName()
     {
         return ga1.getMutationOperatorName();
+    }
+
+    bool determineWinner(std::ostream& stream)
+    {
+        vector<Individual> pop1(ga1.getPopulation());
+        vector<Individual> pop2(ga2.getPopulation());
+        size_t const minSize = std::min(pop1.size(), pop2.size());
+        pop1.resize(minSize);
+        pop2.resize(minSize);
+        Fitness res;
+
+        for(size_t i = 0; i < minSize; ++i)
+        {
+            for(size_t j = 0; j < minSize; ++j)
+            {
+                mSim.setPlayer1Chromosome(pop1[i].chromosome);
+                mSim.setPlayer2Chromosome(pop2[j].chromosome);
+                res += mSim.run(true);
+            }
+        }
+        stream << "Result" << std::endl;
+        stream << "Damage caused by Player 1: " << res.damage*100.0/(minSize * minSize) << " %" << std::endl;
+        stream << "Damage caused by Player 2: " << (1.0 - res.health) * 100.0 / (minSize * minSize) << " %" << std::endl;
+        return res.damage > res.health;
     }
 };
 

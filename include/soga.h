@@ -43,15 +43,17 @@ private:
     size_t NCrossoverPoints;
 
     mt19937 generator;
-    bernoulli_distribution dist1;
-    std::uniform_int_distribution<size_t> dist2;
-    std::uniform_real_distribution<double> dist3;
-    std::uniform_int_distribution<size_t> dist;
+    bernoulli_distribution flipCoin;
+    std::uniform_int_distribution<size_t> chooseIndividual;
+    std::uniform_real_distribution<double> spinWheel;
+    std::uniform_int_distribution<size_t> chooseBit;
     bernoulli_distribution mutationDist;
 
     vector<Individual> pop;
 
-    vector<MicroSimulation<T,U>> sim;
+    vector<vector<MicroSimulation<T,U>>> sim;
+
+    size_t NGoals;
 
     unordered_set<size_t> control;
 
@@ -92,7 +94,6 @@ private:
         }
         return res;
     };
-
 
     function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> rouletteWheelSelection = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
     {
@@ -357,13 +358,13 @@ private:
         return std::make_pair(child, child);
     };
 
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> bitFlipMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
+    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> bitFlipMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
     {
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(dist(generator))
+                if(mutationDist(generator))
                 {
                     individual.chromosome[i].flip(j);
                 }
@@ -371,14 +372,14 @@ private:
         }
     };
 
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> interchangingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
+    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> interchangingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
     {
         vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(dist(generator))
+                if(mutationDist(generator))
                 {
                     positions.emplace_back(i,j);
                 }
@@ -386,7 +387,6 @@ private:
         }
         if(positions.size() == 0) return;
         std::shuffle(positions.begin(), positions.end(), generator);
-
         for(size_t i = 0; i < positions.size()-1; i += 2)
         {
             auto const& pos1 = positions[i];
@@ -396,7 +396,7 @@ private:
             individual.chromosome[pos2.first][pos2.second] = tmp;
         }
     };
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> reversingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& dist, size_t const NGenes, size_t const NBits)
+    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> reversingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
     {
         std::bernoulli_distribution coin(0.5);
         vector<pair<size_t, size_t>> positions;
@@ -404,7 +404,7 @@ private:
         {
             for(size_t j = 0; j < NBits; ++j)
             {
-                if(dist(generator))
+                if(mutationDist(generator))
                 {
                     positions.emplace_back(i,j);
                 }
@@ -457,20 +457,33 @@ private:
 
     void evaluate(vector<Individual>& pop)
     {
-        #pragma omp parallel for schedule(static)
+
+        #pragma omp parallel for schedule(runtime)
         for(size_t i = 0; i < pop.size(); ++i)
         {
-            sim[omp_get_thread_num()].setPlayer1Chromosome(pop[i].chromosome);
-            pop[i].fitness = sim[omp_get_thread_num()].run(true);
-            //sleep(1);
+            double const value = 1.0/NGoals;
+            pop[i].fitness = 0;
+            for(size_t j = 0; j < NGoals; ++j)
+            {
+                sim[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
+                pop[i].fitness += sim[omp_get_thread_num()][j].run(true);
+            }
+            pop[i].fitness *= value;
         }
     }
 
-    void setGoal(Chromosome const& goal)
+    void setGoals(vector<Chromosome> const& goals)
     {
+        if(goals.size() != NGoals)
+        {
+            throw std::invalid_argument("MOGA::setGoals(): Invalid number of arguments");
+        }
         #pragma omp parallel
         {
-            sim[omp_get_thread_num()].setPlayer2Chromosome(goal);
+            for(size_t j = 0; j < NGoals; ++j)
+            {
+                sim[omp_get_thread_num()][j].setPlayer2Chromosome(goals[j]);
+            }
             #pragma omp barrier
         }
     }
@@ -511,24 +524,49 @@ private:
 
 public:
 
-    SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const)
-        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), dist1(0.5), dist2(0,popSize-1), dist3(0,1.0)
+    typedef T race1;
+    typedef U race2;
+
+    SOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), flipCoin(0.5), chooseIndividual(0,popSize-1), spinWheel(0,1.0), NGoals(nGoals)
     {
         sim.reserve(omp_get_max_threads());
-        for(int i = 0; i < omp_get_max_threads(); ++i)
+        #pragma omp parallel
         {
-            sim.emplace_back(minPos, maxPos, filePath1, filePath2);
-            sim.back().initBothPlayers(buildList1, buildList2);
+            for(size_t i = 0; i < omp_get_max_threads(); ++i)
+            {
+                #pragma omp critical
+                {
+                    if(i == omp_get_thread_num())
+                    {
+                        sim.emplace_back();
+                        sim[omp_get_thread_num()].reserve(NGoals);
+                        for(size_t j = 0; j < NGoals; ++j)
+                        {
+                            sim[omp_get_thread_num()].emplace_back(minPos, maxPos, filePath1, filePath2);
+                            sim[omp_get_thread_num()].back().initBothPlayers(buildList1, buildList2);
+                        }
+                    }
+                }
+                #pragma omp barrier
+            }
         }
-        NGenes = sim[0].getPlayer1ChromosomeLength();
-        NCrossoverPoints = NGenes;
-        dist = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
-        Chromosome initChrom(NGenes);
-        for(auto& gene : initChrom)
+        NGenes = sim[0][0].getPlayer1ChromosomeLength();
+        NCrossoverPoints = buildList1.size();
+        chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
+        vector<Chromosome> initChroms(NGoals);
+        for(auto& chrom : initChroms)
         {
-            gene.flip(gene.size()-1);
+            chrom.resize(NGenes);
+            for(auto& gene : chrom)
+            {
+                for(size_t i = 0; i < gene.size(); ++i)
+                {
+                    gene.set(i, flipCoin(generator));
+                }
+            }
         }
-        setGoal(initChrom);
+        setGoals(initChroms);
 
 
         pop.reserve(2*popSize);
@@ -549,7 +587,7 @@ public:
                 {
                     for(size_t j = 0; j < gene.size(); ++j)
                     {
-                        gene.set(j, dist1(generator));
+                        gene.set(j, flipCoin(generator));
                     }
                 }
                 hash = pop[i].computeHash();
@@ -568,7 +606,7 @@ public:
         onlinePerformance = 0.0;
         offlinePerformance = 0.0;
         mutationDist = std::move(std::bernoulli_distribution(mutationProbability));
-        setGoal(goals.front());
+        setGoals(goals);
         evaluate(pop);
         computeStatistics();
         computeCDF();
@@ -725,7 +763,18 @@ public:
 
     vector<Chromosome> getBestChromosomes()
     {
-        return vector<Chromosome>{pop.front().chromosome};
+        vector<Chromosome> res;
+        res.reserve(NGoals);
+        for(size_t i = 0; i < NGoals; ++i)
+        {
+            res.push_back(pop[i].chromosome);
+        }
+        return res;
+    }
+
+    vector<Individual> const& getPopulation() const
+    {
+        return pop;
     }
 
 
