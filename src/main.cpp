@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <fstream>
 #include <thread>
+#include <mpi.h>
 #include <omp.h>
 
 #include "../include/TemplateInit.h"
@@ -29,9 +30,13 @@ int main(int argc, char *argv[])
         std::cout << "Usage: opt buildOrder1 buildOrder2" << std::endl;
         return -1;
     }
+    int rank, procs;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &procs);
 
     omp_set_num_threads(omp_get_max_threads());
-    cout << "Number of Threads used: " << omp_get_max_threads() << std::endl;
+    //cout << "Number of Threads used: " << omp_get_max_threads() << std::endl;
 
     Terran terran;
     Zerg zerg;
@@ -265,6 +270,7 @@ int main(int argc, char *argv[])
     end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
+    MPI_Finalize();
 
 
 }

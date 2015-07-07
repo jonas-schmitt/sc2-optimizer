@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <thread>
 #include <unistd.h>
+#include <mpi.h>
 #include <omp.h>
 
 #include "Chromosome.h"
@@ -979,6 +980,33 @@ public:
     size_t getNumberOfGenes() const
     {
         return NGenes;
+    }
+
+    void includeDecodedChromosomes(vector<unsigned long> const& data, int const rank)
+    {
+        size_t const sz = data.size()/NGenes;
+        vector<Individual> newPop;
+        newPop.reserve(sz);
+        for(size_t i = 0; i < sz; ++i)
+        {
+            if(static_cast<size_t>(rank) != i)
+            {
+                newPop.push_back();
+                for(size_t j = 0; j < NGenes; ++j)
+                {
+                    newPop.back().chromosome.emplace_back(data[i*NGenes + j]);
+                }
+            }
+        }
+        evaluate(newPop);
+        pop.insert(pop.begin(), newPop.begin(), newPop.end());
+
+        nondominatedSort();
+        do
+        {
+            control.erase(pop.back().computeHash());
+            pop.pop_back();
+        } while(pop.size() > popSize);
     }
 
 
