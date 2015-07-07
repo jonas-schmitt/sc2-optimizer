@@ -225,7 +225,7 @@ void MicroSimulation<T, U>::timestep()
 }
 
 template <class T, class U>
-Fitness MicroSimulation<T, U>::run(bool const reset)
+Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 {
 
     for(int i = 0; i < mTimeSteps; ++i)
@@ -237,24 +237,43 @@ Fitness MicroSimulation<T, U>::run(bool const reset)
         timestep();
 
     }
+
     Fitness res;
-    double maxHealth = 0;;
-    for(auto unit : pl1.unitList)
-    {
-        maxHealth += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
-        res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
-    }
     double maxDamage = 0;
+    double maxHealth = 0;
 
-    for(auto unit : pl2.unitList)
+    if(player == Player::first)
     {
-        maxDamage += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+        for(auto unit : pl1.unitList)
+        {
+            maxHealth += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+            res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
+        }
 
-        res.damage += (unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield())*(unit->getMinerals()+unit->getGas());;
+        for(auto unit : pl2.unitList)
+        {
+            maxDamage += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+            res.damage += (unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield())*(unit->getMinerals()+unit->getGas());;
+        }
+
+
+    }
+    else
+    {
+        for(auto unit : pl2.unitList)
+        {
+            maxHealth += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+            res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
+        }
+
+        for(auto unit : pl1.unitList)
+        {
+            maxDamage += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
+            res.damage += (unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield())*(unit->getMinerals()+unit->getGas());;
+        }
     }
 
     res.damage /= maxDamage;
-
 
     res.health /= maxHealth;
 

@@ -184,5 +184,10 @@ struct Statistics
     }
 };
 
+enum class Player
+{
+    first, second
+};
+
 
 #endif // UTILITIES_H

@@ -28,7 +28,7 @@ using std::cout;
 using std::endl;
 
 
-template <typename T, typename U>
+template <typename T, typename U, Player const player>
 class MOGA final
 {
 private:
@@ -474,8 +474,17 @@ private:
             pop[i].fitness = 0;
             for(size_t j = 0; j < NGoals; ++j)
             {
-                sim[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
-                pop[i].fitness += sim[omp_get_thread_num()][j].run(true);
+                if(player == Player::first)
+                {
+                    sim[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
+                    pop[i].fitness += sim[omp_get_thread_num()][j].run(true, Player::first);
+                }
+                else
+                {
+                    sim[omp_get_thread_num()][j].setPlayer2Chromosome(pop[i].chromosome);
+                    pop[i].fitness += sim[omp_get_thread_num()][j].run(true, Player::second);
+                }
+
             }
             pop[i].fitness *= value;
         }
@@ -491,7 +500,14 @@ private:
         {
             for(size_t j = 0; j < NGoals; ++j)
             {
-                sim[omp_get_thread_num()][j].setPlayer2Chromosome(goals[j]);
+                if(player == Player::first)
+                {
+                    sim[omp_get_thread_num()][j].setPlayer2Chromosome(goals[j]);
+                }
+                else
+                {
+                    sim[omp_get_thread_num()][j].setPlayer1Chromosome(goals[j]);
+                }
             }
             #pragma omp barrier
         }
@@ -720,8 +736,17 @@ public:
                 #pragma omp barrier
             }
         }
-        NGenes = sim[0][0].getPlayer1ChromosomeLength();
-        NCrossoverPoints = buildList1.size();
+
+        if(player == Player::first)
+        {
+            NGenes = sim[0][0].getPlayer1ChromosomeLength();
+            NCrossoverPoints = buildList1.size();
+        }
+        else
+        {
+            NGenes = sim[0][0].getPlayer2ChromosomeLength();
+            NCrossoverPoints = buildList2.size();
+        }
         chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
         vector<Chromosome> initChroms(NGoals);
         for(auto& chrom : initChroms)
@@ -902,7 +927,7 @@ public:
         return mutationFuncNames[mutationChoice];
     }
 
-    vector<Chromosome> getBestChromosomes()
+    vector<Chromosome> getBestChromosomes(size_t const n)
     {
         auto cmp = [&] (Individual const& lhs, Individual const& rhs)
         {
@@ -920,10 +945,11 @@ public:
             }
         };
 
-        std::partial_sort(pop.begin(), pop.begin() + NGoals, pop.end(), cmp);
+        size_t const sz = std::min(n, pop.size());
+        std::partial_sort(pop.begin(), pop.begin() + sz, pop.end(), cmp);
         vector<Chromosome> res;
-        res.reserve(NGoals);
-        for(size_t i = 0; i < NGoals; ++i)
+        res.reserve(sz);
+        for(size_t i = 0; i < sz; ++i)
         {
             res.push_back(pop[i].chromosome);
         }
@@ -935,7 +961,25 @@ public:
         return pop;
     }
 
+    vector<unsigned long> getDecodedChromosomes(size_t const n)
+    {
+        vector<unsigned long> res;
+        size_t const sz = std::min(n, pop.size());
+        res.reserve(sz*NGenes);
+        for(size_t i = 0; i < sz; ++i)
+        {
+            for(size_t j = 0; j < NGenes; ++j)
+            {
+                res.push_back(pop[i].chromosome[j].to_ulong());
+            }
+        }
+        return res;
+    }
 
+    size_t getNumberOfGenes() const
+    {
+        return NGenes;
+    }
 
 
 

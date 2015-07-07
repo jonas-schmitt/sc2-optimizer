@@ -129,15 +129,13 @@ int main(int argc, char *argv[])
 
     if(race1 == "Terran" && race2 == "Terran")
     {
-//        Optimizer<MOGA<Terran,Terran>,SOGA<Terran,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-//        opt.optimize(0, 0, 0, iterations, genPerIt);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 5; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Terran,Terran>,SOGA<Terran,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Terran,Terran, Player::first>,MOGA<Terran,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -153,7 +151,7 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Terran,Zerg>,SOGA<Zerg,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Terran,Zerg, Player::first>,MOGA<Zerg,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -161,19 +159,18 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Protoss")
     {
-        Optimizer<MOGA<Terran,Protoss>,MOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        opt.optimize(0, 0, 0, iterations, genPerIt);
-//        for(size_t i = 0; i < 3; ++i)
-//        {
-//            for(size_t j = 0; j < 5; ++j)
-//            {
-//                for(size_t k = 0; k < 3; ++k)
-//                {
-//                    Optimizer<SOGA<Terran,Protoss>,SOGA<Protoss,Terran> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-//                    opt.optimize(k, j, i, iterations, genPerIt);
-//                }
-//            }
-//        }
+
+        for(size_t i = 0; i < 3; ++i)
+        {
+            for(size_t j = 0; j < 5; ++j)
+            {
+                for(size_t k = 0; k < 3; ++k)
+                {
+                    Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Protoss,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    opt.optimize(k, j, i, iterations, genPerIt);
+                }
+            }
+        }
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {
@@ -183,7 +180,7 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Zerg,Terran>,SOGA<Terran,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Zerg,Terran, Player::first>,MOGA<Terran,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -197,7 +194,7 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Zerg,Zerg>,SOGA<Zerg,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Zerg,Zerg, Player::first>,MOGA<Zerg,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -211,7 +208,7 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Zerg,Protoss>,SOGA<Protoss,Zerg> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Zerg,Protoss, Player::first>,MOGA<Protoss,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -226,7 +223,7 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Protoss,Terran>,SOGA<Terran,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Protoss,Terran, Player::first>,MOGA<Terran,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -240,7 +237,7 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<SOGA<Protoss,Zerg>,SOGA<Zerg,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    Optimizer<MOGA<Protoss,Zerg, Player::first>,MOGA<Zerg,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt);
                 }
             }
@@ -248,20 +245,21 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Protoss")
     {
-        Optimizer<SOGA<Protoss,Protoss>,MOGA<Protoss,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+        Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
         opt.optimize(0, 0, 0, iterations, genPerIt);
+        opt.determineWinner(std::cout);
 //        for(size_t i = 0; i < 3; ++i)
 //        {
 //            for(size_t j = 0; j < 5; ++j)
 //            {
 //                for(size_t k = 0; k < 3; ++k)
 //                {
-//                    Optimizer<SOGA<Protoss,Protoss>,SOGA<Protoss,Protoss> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+//                    Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
 //                    opt.optimize(k, j, i, iterations, genPerIt);
+//                    opt.determineWinner(std::cout);
 //                }
 //            }
 //        }
-        opt.determineWinner(std::cout);
     }
 
     end = std::chrono::system_clock::now();

@@ -76,7 +76,7 @@ public:
     string getFilePath1() const;
     string getFilePath2() const;
     bool run(int const steps);
-    Fitness run(bool const reset);
+    Fitness run(bool const reset, Player const player);
     void setTimeSteps(size_t timeSteps);
     void setTimeSlice(int timeSlice);
 

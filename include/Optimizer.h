@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <iostream>
+#include <mpi.h>
 
 
 #include "soga.h"
@@ -23,6 +24,7 @@ private:
     Statistics stats1, stats2;
     double offlinePerformance = 0.0;
     double onlinePerformance = 0.0;
+    size_t NGoals;
 
     MicroSimulation<typename GA1::race1, typename GA2::race1> mSim;
 
@@ -31,10 +33,12 @@ public:
     Optimizer(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
         : popSize(popSize),
           ga1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
-          ga2(minPos, maxPos, filePath2, filePath1, popSize, buildList2, buildList1, nGoals),
+          ga2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
+          NGoals(nGoals),
           mSim(minPos, maxPos, filePath1, filePath2)
     {
         mSim.initBothPlayers(buildList1, buildList2);
+        //MPI_Init(NULL, NULL);
     }
 
     void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt)
@@ -55,8 +59,8 @@ public:
         {
 //            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
 //            printf("%c[2K", 27);
-            vector<Chromosome> optima1(ga1.getBestChromosomes());
-            vector<Chromosome> optima2(ga2.getBestChromosomes());
+            vector<Chromosome> optima1(ga1.getBestChromosomes(NGoals));
+            vector<Chromosome> optima2(ga2.getBestChromosomes(NGoals));
             ga1.optimize(optima2, genPerIt);
             ga2.optimize(optima1, genPerIt);
             stats1 = ga1.getStatistics();
@@ -153,8 +157,8 @@ public:
         size_t const minSize = std::min(pop1.size(), pop2.size());
         pop1.resize(minSize);
         pop2.resize(minSize);
-        Fitness res1;
-        Fitness res2;
+        Fitness res;
+
 
         for(size_t i = 0; i < minSize; ++i)
         {
@@ -162,16 +166,17 @@ public:
             {
                 mSim.setPlayer1Chromosome(pop1[i].chromosome);
                 mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                res1 += mSim.run(true);
-                mSim.setPlayer1Chromosome(pop2[j].chromosome);
-                mSim.setPlayer2Chromosome(pop1[i].chromosome);
-                res2 += mSim.run(true);
+                res += mSim.run(true, Player::first);
             }
         }
-        stream << "Result" << std::endl;
-        stream << "Damage caused by Player 1: " << res1.damage*100.0/(minSize * minSize) << " %" << std::endl;
-        stream << "Damage caused by Player 2: " << res2.damage*100.0/(minSize * minSize) << " %" << std::endl;
-        return res1.damage > res2.damage;
+        double const damage1 = (res.damage/(minSize * minSize));
+        double const damage2 = (1.0-(res.health/(minSize * minSize)));
+        stream << "Comparison of the final populations" << std::endl;
+        stream << "Damage caused by Player 1: " << damage1*100 << " %" << std::endl;
+        stream << "Remaining health for Player 1: " << (1.0-damage2)*100 << " %" << std::endl;
+        stream << "Damage caused by Player 2: " << damage2*100 << " %" << std::endl;
+        stream << "Remaining health of Player 2: " << (1.0-damage1)*100 << " %" << std::endl;
+        return damage1 > damage2;
     }
 };
 
