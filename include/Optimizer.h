@@ -53,8 +53,8 @@ public:
 
         for(size_t i = 0; i < iterations; ++i)
         {
-            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
-            printf("%c[2K", 27);
+//            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
+//            printf("%c[2K", 27);
             vector<Chromosome> optima1(ga1.getBestChromosomes());
             vector<Chromosome> optima2(ga2.getBestChromosomes());
             ga1.optimize(optima2, genPerIt);
@@ -153,7 +153,8 @@ public:
         size_t const minSize = std::min(pop1.size(), pop2.size());
         pop1.resize(minSize);
         pop2.resize(minSize);
-        Fitness res;
+        Fitness res1;
+        Fitness res2;
 
         for(size_t i = 0; i < minSize; ++i)
         {
@@ -161,13 +162,16 @@ public:
             {
                 mSim.setPlayer1Chromosome(pop1[i].chromosome);
                 mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                res += mSim.run(true);
+                res1 += mSim.run(true);
+                mSim.setPlayer1Chromosome(pop2[j].chromosome);
+                mSim.setPlayer2Chromosome(pop1[i].chromosome);
+                res2 += mSim.run(true);
             }
         }
         stream << "Result" << std::endl;
-        stream << "Damage caused by Player 1: " << res.damage*100.0/(minSize * minSize) << " %" << std::endl;
-        stream << "Damage caused by Player 2: " << (1.0 - res.health) * 100.0 / (minSize * minSize) << " %" << std::endl;
-        return res.damage > res.health;
+        stream << "Damage caused by Player 1: " << res1.damage*100.0/(minSize * minSize) << " %" << std::endl;
+        stream << "Damage caused by Player 2: " << res2.damage*100.0/(minSize * minSize) << " %" << std::endl;
+        return res1.damage > res2.damage;
     }
 };
 
