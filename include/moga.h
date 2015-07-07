@@ -991,7 +991,7 @@ public:
         {
             if(static_cast<size_t>(rank) != i)
             {
-                newPop.push_back();
+                newPop.emplace_back();
                 for(size_t j = 0; j < NGenes; ++j)
                 {
                     newPop.back().chromosome.emplace_back(data[i*NGenes + j]);

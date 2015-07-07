@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
     size_t iterations = 100;
     size_t genPerIt = 10;
     size_t nGoals = 10;
+    size_t migrants = popSize / 2;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
@@ -141,7 +142,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Terran,Terran, Player::first>,MOGA<Terran,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -157,7 +158,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Terran,Zerg, Player::first>,MOGA<Zerg,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -172,7 +173,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Protoss,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -186,7 +187,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Zerg,Terran, Player::first>,MOGA<Terran,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -200,7 +201,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Zerg,Zerg, Player::first>,MOGA<Zerg,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -214,7 +215,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Zerg,Protoss, Player::first>,MOGA<Protoss,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -229,7 +230,7 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Protoss,Terran, Player::first>,MOGA<Terran,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
@@ -243,28 +244,26 @@ int main(int argc, char *argv[])
                 for(size_t k = 0; k < 3; ++k)
                 {
                     Optimizer<MOGA<Protoss,Zerg, Player::first>,MOGA<Zerg,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    opt.optimize(k, j, i, iterations, genPerIt);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
         }
     }
     else if(race1 == "Protoss" && race2 == "Protoss")
     {
-        Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        opt.optimize(0, 0, 0, iterations, genPerIt);
-        opt.determineWinner(std::cout);
-//        for(size_t i = 0; i < 3; ++i)
-//        {
-//            for(size_t j = 0; j < 5; ++j)
-//            {
-//                for(size_t k = 0; k < 3; ++k)
-//                {
-//                    Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-//                    opt.optimize(k, j, i, iterations, genPerIt);
-//                    opt.determineWinner(std::cout);
-//                }
-//            }
-//        }
+
+        for(size_t i = 0; i < 3; ++i)
+        {
+            for(size_t j = 0; j < 5; ++j)
+            {
+                for(size_t k = 0; k < 3; ++k)
+                {
+                    Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
+                }
+            }
+        }
     }
 
     end = std::chrono::system_clock::now();
