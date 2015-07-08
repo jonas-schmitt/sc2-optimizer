@@ -1,1 +1,1 @@
-OMP_NUM_THREADS=1 mpirun --npersocket 1 -mca orte_num_sockets 1 -mca orte_num_cores 1 ./opt lists/ProtossTest.txt lists/ProtossTest.txt
+#!/bin/bashOMP_NUM_THREADS=1 mpirun --npersocket 1 -mca orte_num_sockets 1 -mca orte_num_cores 1 ./opt lists/ProtossTest.txt lists/ProtossTest.txt
