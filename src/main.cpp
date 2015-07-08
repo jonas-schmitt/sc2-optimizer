@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include <iostream>
 #include <string>
 #include <future>
@@ -7,7 +8,6 @@
 #include <algorithm>
 #include <fstream>
 #include <thread>
-#include <mpi.h>
 #include <omp.h>
 
 #include "../include/TemplateInit.h"
@@ -24,16 +24,17 @@ int main(int argc, char *argv[])
 {
 
 
-
-    if(argc < 3)
-    {
-        std::cout << "Usage: opt buildOrder1 buildOrder2" << std::endl;
-        return -1;
-    }
     int rank, procs;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &procs);
+
+    if(argc < 3)
+    {
+        if(rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2" << std::endl;
+        MPI_Finalize();
+        return -1;
+    }
 
     //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
@@ -73,7 +74,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        cout << "Error: Couldn't determine first Race" << std::endl;
+        if(rank == 0) cout << "Error: Couldn't determine first Race" << std::endl;
+        MPI_Finalize();
         return -1;
     }
 
@@ -92,7 +94,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        cout << "Error: Couldn't determine second Race" << std::endl;
+        if(rank == 0) cout << "Error: Couldn't determine first Race" << std::endl;
+        MPI_Finalize();
         return -1;
     }
     filePath1 = "./data/"+race1;
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
     size_t iterations = 100;
     size_t genPerIt = 10;
     size_t nGoals = 10;
-    size_t migrants = popSize / 2;
+    size_t migrants = popSize / 4;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
@@ -165,7 +168,10 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        for(size_t i = 0; i < 3; ++i)
+        Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Protoss,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
+        opt.determineWinner(std::cout, rank, procs);
+        /*for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 5; ++j)
             {
@@ -175,7 +181,7 @@ int main(int argc, char *argv[])
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                 }
             }
-        }
+        }*/
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {
@@ -251,6 +257,10 @@ int main(int argc, char *argv[])
     else if(race1 == "Protoss" && race2 == "Protoss")
     {
 
+        Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
+        opt.determineWinner(std::cout, rank, procs);
+        /*
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 5; ++j)
@@ -262,12 +272,12 @@ int main(int argc, char *argv[])
                     opt.determineWinner(std::cout, rank, procs);
                 }
             }
-        }
+        }*/
     }
 
     end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
+    if(rank == 0) std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
     MPI_Finalize();
 
 
