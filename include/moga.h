@@ -704,22 +704,11 @@ public:
     MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
         :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), flipCoin(0.5), chooseIndividual(0,popSize-1), spinWheel(0,1.0), NGoals(nGoals)
     {
-//        sim.resize(omp_get_max_threads());
-//        for(int i = 0; i < omp_get_max_threads(); ++i)
-//        {
-//            sim[i].reserve(NGoals);
-//            for(size_t j = 0; j < NGoals; ++j)
-//            {
-//                sim[i].emplace_back(minPos, maxPos, filePath1, filePath2);
-//                sim[i].back().initBothPlayers(buildList1, buildList2);
-//            }
 
-//        }
-
-        sim.reserve(omp_get_max_threads());
+        sim.reserve(omp_get_num_threads());
         #pragma omp parallel
         {
-            for(size_t i = 0; i < omp_get_max_threads(); ++i)
+            for(size_t i = 0; i < omp_get_num_threads(); ++i)
             {
                 #pragma omp critical
                 {
@@ -962,12 +951,16 @@ public:
         return pop;
     }
 
-    vector<unsigned long> getDecodedChromosomes(size_t const n)
+    size_t getPopulationSize() const
+    {
+        return pop.size();
+    }
+
+    vector<unsigned long> getDecodedChromosomes(size_t const migrants)
     {
         vector<unsigned long> res;
-        size_t const sz = std::min(n, pop.size());
-        res.reserve(sz*NGenes);
-        for(size_t i = 0; i < sz; ++i)
+        res.reserve(migrants*NGenes);
+        for(size_t i = 0; i < migrants; ++i)
         {
             for(size_t j = 0; j < NGenes; ++j)
             {
@@ -982,20 +975,21 @@ public:
         return NGenes;
     }
 
-    void includeDecodedChromosomes(vector<unsigned long> const& data, int const rank)
+    void includeDecodedChromosomes(vector<unsigned long> const& data, size_t const migrants, int const rank, int const procs)
     {
-        size_t const sz = data.size()/NGenes;
         vector<Individual> newPop;
-        newPop.reserve(sz);
-        for(size_t i = 0; i < sz; ++i)
+        newPop.reserve((procs-1)*migrants);
+        for(int i = 0; i < procs; ++i)
         {
-            if(static_cast<size_t>(rank) != i)
+            if(rank == i) continue;
+            for(size_t j = 0; j < migrants; ++j)
             {
                 newPop.emplace_back();
-                for(size_t j = 0; j < NGenes; ++j)
+                for(size_t k = 0; k < NGenes; ++k)
                 {
-                    newPop.back().chromosome.emplace_back(data[i*NGenes + j]);
+                    newPop.back().chromosome.emplace_back(data[i*migrants*NGenes + j*NGenes + k]);
                 }
+
             }
         }
         evaluate(newPop);

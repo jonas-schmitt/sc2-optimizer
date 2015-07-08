@@ -35,8 +35,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &procs);
 
-    omp_set_num_threads(omp_get_max_threads());
-    //cout << "Number of Threads used: " << omp_get_max_threads() << std::endl;
+    //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
     Terran terran;
     Zerg zerg;

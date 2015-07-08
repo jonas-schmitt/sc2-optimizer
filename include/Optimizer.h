@@ -40,11 +40,13 @@ public:
         mSim.initBothPlayers(buildList1, buildList2);
     }
 
-    void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t const migrants)
+    void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
     {
         setSelection(sel);
         setCrossover(co);
         setMutation(mut);
+
+        migrants = std::min(migrants, popSize);
 
         if(rank == 0)
         {
@@ -64,17 +66,21 @@ public:
         {
 //            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
 //            printf("%c[2K", 27);
+
+            migrate(buf1, migrants, ga1, rank, procs);
+            migrate(buf2, migrants, ga2, rank, procs);
+
             vector<Chromosome> optima1(ga1.getBestChromosomes(NGoals));
             vector<Chromosome> optima2(ga2.getBestChromosomes(NGoals));
+
             ga1.optimize(optima2, genPerIt);
             ga2.optimize(optima1, genPerIt);
+
             stats1 = ga1.getStatistics();
             stats2 = ga2.getStatistics();
+
             onlinePerformance += 0.5*(ga1.getOnlinePerformance() + ga2.getOnlinePerformance());
             offlinePerformance += 0.5*(ga1.getOfflinePerformance() + ga2.getOfflinePerformance());
-
-            migrate(migrants, buf1, ga1, rank);
-            migrate(migrants, buf2, ga2, rank);
         }
         onlinePerformance /= iterations;
         offlinePerformance /= iterations;
@@ -174,15 +180,18 @@ public:
     {
         gatherPopulation(ga1, rank, procs);
         gatherPopulation(ga2, rank, procs);
+
         if(rank == 0)
         {
             vector<Individual> pop1(ga1.getPopulation());
             vector<Individual> pop2(ga2.getPopulation());
+
             size_t const minSize = std::min(pop1.size(), pop2.size());
+
             pop1.resize(minSize);
             pop2.resize(minSize);
-            Fitness res;
 
+            Fitness res;
 
             for(size_t i = 0; i < minSize; ++i)
             {
@@ -205,11 +214,11 @@ public:
     }
 
     template<typename GA>
-    void migrate(size_t const n, vector<unsigned long>& buf, GA& ga, int const rank)
+    void migrate(vector<unsigned long>& buf, size_t const migrants, GA& ga, int const rank, int const procs)
     {
-        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(n));
+        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(migrants));
         MPI_Allgather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
-        ga.includeDecodedChromosomes(buf, rank);
+        ga.includeDecodedChromosomes(buf, migrants, rank, procs);
     }
 
     void computeGlobalStatistics(Statistics& stats, int const rank, int const procs)
@@ -241,7 +250,7 @@ public:
         MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
         if(rank == 0)
         {
-            ga.includeDecodedChromosomes(buf, 0);
+            ga.includeDecodedChromosomes(buf, popSize, 0, procs);
         }
     }
 };
