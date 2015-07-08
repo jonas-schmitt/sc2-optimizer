@@ -25,6 +25,7 @@ private:
     double offlinePerformance = 0.0;
     double onlinePerformance = 0.0;
     size_t NGoals;
+    bool cluster;
 
     MicroSimulation<typename GA1::race1, typename GA2::race1> mSim;
 
@@ -42,6 +43,7 @@ public:
 
     void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
     {
+        cluster = procs > 1;
         setSelection(sel);
         setCrossover(co);
         setMutation(mut);
@@ -67,8 +69,11 @@ public:
 //            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
 //            printf("%c[2K", 27);
 
-            migrate(buf1, migrants, ga1, rank, procs);
-            migrate(buf2, migrants, ga2, rank, procs);
+            if(cluster)
+            {
+                migrate(buf1, migrants, ga1, rank, procs);
+                migrate(buf2, migrants, ga2, rank, procs);
+            }
 
             vector<Chromosome> optima1(ga1.getBestChromosomes(NGoals));
             vector<Chromosome> optima2(ga2.getBestChromosomes(NGoals));
@@ -84,19 +89,24 @@ public:
         }
         onlinePerformance /= iterations;
         offlinePerformance /= iterations;
-
         double onlinePerformance_tmp, offlinePerformance_tmp;
+        if(cluster)
+        {
 
-        MPI_Reduce (&onlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-        MPI_Reduce (&offlinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+            MPI_Reduce (&onlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+            MPI_Reduce (&offlinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-        computeGlobalStatistics(stats1, rank, procs);
-        computeGlobalStatistics(stats2, rank, procs);
+            computeGlobalStatistics(stats1, rank, procs);
+            computeGlobalStatistics(stats2, rank, procs);
+        }
 
         if(rank == 0)
         {
-            onlinePerformance = onlinePerformance_tmp/procs;
-            offlinePerformance = offlinePerformance_tmp/procs;
+            if(cluster)
+            {
+                onlinePerformance = onlinePerformance_tmp/procs;
+                offlinePerformance = offlinePerformance_tmp/procs;
+            }
 
             printStatistics();
             cout << "\n" << endl;
@@ -178,8 +188,11 @@ public:
 
     bool determineWinner(std::ostream& stream, int const rank, int const procs)
     {
-        gatherPopulation(ga1, rank, procs);
-        gatherPopulation(ga2, rank, procs);
+        if(cluster)
+        {
+            gatherPopulation(ga1, rank, procs);
+            gatherPopulation(ga2, rank, procs);
+        }
 
         if(rank == 0)
         {
@@ -247,10 +260,15 @@ public:
             buf.resize(procs*popSize*ga.getNumberOfGenes());
         }
         vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(popSize));
-        MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+
         if(rank == 0)
         {
+            MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
             ga.includeDecodedChromosomes(buf, popSize, 0, procs);
+        }
+        else
+        {
+            MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, NULL, sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
         }
     }
 };
