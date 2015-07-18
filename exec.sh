@@ -1,1 +1,0 @@
-#!/bin/bashexport OMP_NUM_THREADS=20mpirun --npersocket 1 -mca orte_num_sockets 2 -mca orte_num_cores 20 ./opt lists/ProtossTest.txt lists/ProtossTest.txt

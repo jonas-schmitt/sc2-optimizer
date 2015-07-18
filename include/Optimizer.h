@@ -56,7 +56,7 @@ public:
             cout << "Selection Operator: " << getSelectionOperatorName() << endl;
             cout << "Crossover Operator: " << getCrossoverOperatorName() << endl;
             cout << "Mutation Operator: " << getMutationOperatorName() << endl;
-            cout << "Population Size: " << popSize << endl;
+            cout << "Population Size: " << popSize*procs << endl;
             cout << "Number of Iterations: " << iterations << endl;
             cout << "Generations per Iteration: " << genPerIt << endl;
         }
