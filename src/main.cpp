@@ -29,15 +29,12 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &procs);
 
-    if(argc < 4)
+    if(argc < 3)
     {
-        if(rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 num_threads" << std::endl;
+        if(rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 [-nthreads n]" << std::endl;
         MPI_Finalize();
         return -1;
     }
-
-    omp_set_num_threads(atoi(argv[3]));
-    //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
     Terran terran;
     Zerg zerg;
@@ -108,7 +105,14 @@ int main(int argc, char *argv[])
     size_t genPerIt = 10;
     size_t nGoals = 10;
     size_t migrants = 2*popSize / procs;
+    int threads = omp_get_max_threads();
+    if(argc == 5 && strncmp(argv[3], "-nthreads",9) == 0)
+    {
+        threads = std::min(threads, atoi(argv[4]));
+    }
     Vec2D minPos(0.0), maxPos(200.0,200.0);
+    omp_set_num_threads(threads);
+    cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
 //    sim.initBothPlayers(buildOrder1, buildOrder2);
