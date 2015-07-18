@@ -100,11 +100,11 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = 50;
+    size_t popSize = 160 / procs;
     size_t iterations = 10;
-    size_t genPerIt = 10;
-    size_t nGoals = 10;
-    size_t migrants = 2*popSize / procs;
+    size_t genPerIt = 5;
+    size_t nGoals = 2;
+    size_t migrants = 2*popSize;
     int threads = omp_get_max_threads();
     if(argc == 5 && strncmp(argv[3], "-nthreads",9) == 0)
     {
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     }
     Vec2D minPos(0.0), maxPos(200.0,200.0);
     omp_set_num_threads(threads);
-    cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
+    //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);
 //    sim.initBothPlayers(buildOrder1, buildOrder2);
