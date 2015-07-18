@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 
 
 
-    if(argc < 3)
+    if(argc < 7)
     {
-        std::cout << "Usage: opt buildOrder1 buildOrder2" << std::endl;
+        std::cout << "Usage: opt buildOrder1 buildOrder2 populationSize iterations generationsPerIteration goals" << std::endl;
         return -1;
     }
 
@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = 100;
-    size_t iterations = 100;
-    size_t genPerIt = 10;
-    size_t nGoals = 10;
+    size_t popSize = atoi(argv[3]);
+    size_t iterations = atoi(argv[4]);
+    size_t genPerIt = atoi(argv[5]);
+    size_t nGoals = atoi(argv[6]);
     Vec2D minPos(0.0), maxPos(200.0,200.0);
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);

@@ -142,6 +142,8 @@ protected:
 
     BaseUnit *mTarget = nullptr;
 
+    std::mt19937 generator;
+
 
 
 

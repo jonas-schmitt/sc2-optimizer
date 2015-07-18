@@ -472,7 +472,30 @@ void BaseUnit::setStartPos(const Vec2D &value)
 
 void BaseUnit::resetPos()
 {
-    mPos = mStartPos;
+    double const fieldSizeX = mMaxPos.x-mMinPos.x;
+    double const fieldSizeY = mMaxPos.y-mMinPos.y;
+    generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_real_distribution<double>dist_x(1e-100*fieldSizeX,5e-10*fieldSizeX);
+    std::uniform_real_distribution<double>dist_y(1e-100*fieldSizeY,5e-10*fieldSizeY);
+    std::bernoulli_distribution coin(0.5);
+    double x_off, y_off;
+    if(coin(generator))
+    {
+        x_off = dist_x(generator);
+    }
+    else
+    {
+        x_off = -dist_x(generator);
+    }
+    if(coin(generator))
+    {
+        y_off = dist_y(generator);
+    }
+    else
+    {
+        y_off = -dist_y(generator);
+    }
+    mPos = std::move(Vec2D(mStartPos.x+x_off,mStartPos.y+y_off));
 }
 
 
