@@ -29,9 +29,9 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &procs);
 
-    if(argc < 3)
+    if(argc < 7)
     {
-        if(rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 [-nthreads n]" << std::endl;
+        if(rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals" << std::endl;
         MPI_Finalize();
         return -1;
     }
@@ -100,10 +100,11 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = 160/procs;
-    size_t iterations = 5;
-    size_t genPerIt = 5;
-    size_t nGoals = 2;
+    int tmp = atoi(argv[3]);
+    size_t popSize = tmp/procs + tmp % procs;
+    size_t iterations = atoi(argv[4]);
+    size_t genPerIt = atoi(argv[5]);
+    size_t nGoals = atoi(argv[6]);
     size_t migrants = 2*popSize;
     Vec2D minPos(0.0), maxPos(200.0,200.0);
     //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
@@ -167,7 +168,7 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Protoss,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+        Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Terran,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
         opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
         opt.determineWinner(std::cout, rank, procs);
         /*for(size_t i = 0; i < 3; ++i)

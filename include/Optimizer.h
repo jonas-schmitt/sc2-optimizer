@@ -27,7 +27,7 @@ private:
     size_t NGoals;
     bool cluster;
 
-    MicroSimulation<typename GA1::race1, typename GA2::race1> mSim;
+    MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
 
 
 public:
