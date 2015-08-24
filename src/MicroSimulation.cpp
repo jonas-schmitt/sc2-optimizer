@@ -10,15 +10,17 @@
 #include<cmath>
 #include<random>
 
+
 using std::string;
 using std::vector;
 using std::shared_ptr;
 using std::list;
 using std::pair;
+using std::ios;
 
 template <class T, class U>
 MicroSimulation<T, U>::MicroSimulation(const Vec2D minPos, const Vec2D maxPos, const string& filePath1, const string& filePath2)
-    : mMinPos(minPos), mMaxPos(maxPos), mFilePath1(filePath1), mFilePath2(filePath2), init1(filePath1), init2(filePath2)
+    : mMinPos(minPos), mMaxPos(maxPos), mInfoDirName1(filePath1), mInfoDirName2(filePath2), init1(filePath1), init2(filePath2)
 {
     pl1.minPos = minPos;
     pl1.maxPos = maxPos;
@@ -45,19 +47,19 @@ Vec2D MicroSimulation<T, U>::getMaxPos() const
 template <class T, class U>
 string MicroSimulation<T, U>::getFilePath1() const
 {
-    return mFilePath1;
+    return mInfoDirName1;
 }
 
 template <class T, class U>
 string MicroSimulation<T, U>::getFilePath2() const
 {
-    return mFilePath2;
+    return mInfoDirName2;
 }
 
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
-    init1.init(unitList, mFilePath1, pl1);
+    init1.init(unitList, mInfoDirName1, pl1);
     double const fieldSizeX = pl1.maxPos.x-pl1.minPos.x;
     double const fieldSizeY = pl1.maxPos.y-pl1.minPos.y;
     Vec2D startPos = Vec2D(pl1.minPos.x + fieldSizeX/20., pl1.minPos.y);
@@ -72,7 +74,7 @@ void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 {
-    init2.init(unitList, mFilePath2, pl2);
+    init2.init(unitList, mInfoDirName2, pl2);
     double const fieldSizeX = pl2.maxPos.x-pl2.minPos.x;
     double const fieldSizeY = pl2.maxPos.y-pl2.minPos.y;
     Vec2D startPos = Vec2D(pl2.maxPos.x - fieldSizeX/20., pl2.minPos.y);
@@ -228,6 +230,26 @@ template <class T, class U>
 Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 {
 
+    if(mTracking)
+    {
+        mFile1.open(mTrackingFileName1);
+        for(auto const unitPtr : pl1.unitList)
+        {
+            mFile1 << unitPtr->getName() << "\t\t\t";
+        }
+        mFile1 << std::endl;
+        mFile2.open(mTrackingFileName2);
+        for(auto const unitPtr : pl2.unitList)
+        {
+            mFile2 << unitPtr->getName() << "\t\t\t";
+        }
+        mFile2 << std::endl;
+        mFile1.setf(ios::fixed,ios::floatfield);
+        mFile1.precision(2);
+        mFile2.setf(ios::fixed,ios::floatfield);
+        mFile2.precision(2);
+    }
+
     for(int i = 0; i < mTimeSteps; ++i)
     {
         if(pl1.unitCount == 0 || pl2.unitCount == 0)
@@ -235,7 +257,39 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
+        if(mTracking)
+        {
+            for(auto const unitPtr : pl1.unitList)
+            {
+                if(unitPtr->isDead())
+                {
+                    mFile1 << "-" << "\t\t\t";
+                }
+                else
+                {
+                    mFile1 << unitPtr->getX() << "," << unitPtr->getY() << "\t\t\t";
+                }
+            }
+            mFile1 << std::endl;
 
+            for(auto const unitPtr : pl2.unitList)
+            {
+                if(unitPtr->isDead())
+                {
+                    mFile2 << "-" << "\t\t\t";
+                }
+                else
+                {
+                    mFile2 << unitPtr->getX() << "," << unitPtr->getY() << "\t\t\t";
+                }
+            }
+            mFile2 << std::endl;
+        }
+    }
+    if(mTracking)
+    {
+        mFile1.close();
+        mFile2.close();
     }
 
     Fitness res;
@@ -292,41 +346,6 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 
 
 
-
-template<class T, class U>
-void MicroSimulation<T,U>::setTracking(bool const tracking)
-{
-    if(tracking != mTracking)
-    {
-        for(auto unit : pl1.unitList)
-        {
-            unit->setTracking(tracking);
-        }
-        for(auto unit : pl2.unitList)
-        {
-            unit->setTracking(tracking);
-        }
-    }
-}
-
-template<class T, class U>
-void MicroSimulation<T,U>::setTracking(bool const tracking, size_t const steps)
-{
-    setTracking(tracking);
-    if(tracking)
-    {
-        for(auto unit : pl1.unitList)
-        {
-            unit->reservePathStorage(steps);
-        }
-        for(auto unit : pl2.unitList)
-        {
-            unit->reservePathStorage(steps);
-        }
-    }
-
-}
-
 template<class T, class U>
 void MicroSimulation<T,U>::clearUnitPaths()
 {
@@ -351,4 +370,20 @@ size_t MicroSimulation<T,U>::getPlayer2ChromosomeLength() const
 {
     return pl2.NGenes;
 }
+
+template<class T, class U>
+void MicroSimulation<T,U>::enableTracking(string const& fileName1, string const& fileName2)
+{
+    mTracking = true;
+    mTrackingFileName1 = fileName1;
+    mTrackingFileName2 = fileName2;
+}
+
+template<class T, class U>
+void MicroSimulation<T,U>::disableTracking()
+{
+    mTracking = false;
+}
+
+
 

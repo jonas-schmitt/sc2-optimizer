@@ -27,6 +27,7 @@ private:
     size_t NGoals;
     bool cluster;
 
+
     MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
 
 
@@ -206,6 +207,11 @@ public:
 
             Fitness res;
 
+            mSim.setPlayer1Chromosome(pop1[0].chromosome);
+            mSim.setPlayer2Chromosome(pop2[0].chromosome);
+            mSim.enableTracking("./paths1.txt", "./paths2.txt");
+            mSim.run(true, Player::first);
+            mSim.disableTracking();
             for(size_t i = 0; i < minSize; ++i)
             {
                 for(size_t j = 0; j < minSize; ++j)

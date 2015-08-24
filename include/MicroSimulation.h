@@ -7,6 +7,7 @@
 #include<list>
 #include<utility>
 #include<functional>
+#include<fstream>
 
 #include "PlayerState.h"
 #include "Unit.h"
@@ -18,6 +19,7 @@ using std::string;
 using std::vector;
 using std::list;
 using std::pair;
+using std::ofstream;
 
 struct PlayerStats final
 {
@@ -40,10 +42,8 @@ template<class T, class U>
 private:
 
 
-    Vec2D mMinPos;
-    Vec2D mMaxPos;
-    string mFilePath1;
-    string mFilePath2;
+    Vec2D mMinPos, mMaxPos;
+    string mInfoDirName1, mInfoDirName2;
     InitPlayerUnits<T> init1;
     InitPlayerUnits<U> init2;
     PlayerState<T> pl1;
@@ -51,6 +51,10 @@ private:
     bool mTracking = false;
     long mTimeSteps = 30000;
     int mTimeSlice = 10;
+
+    string mTrackingFileName1, mTrackingFileName2;
+
+    ofstream mFile1, mFile2;
 
 public:
     MicroSimulation(MicroSimulation const& microSim);
@@ -86,8 +90,9 @@ public:
 
 
 
-    void setTracking(bool const tracking);
-    void setTracking(bool const tracking, size_t const steps);
+    void enableTracking(string const& fileName1, string const& fileName2);
+    void disableTracking();
+
     void clearUnitPaths();
 
     size_t getPlayer1ChromosomeLength() const;

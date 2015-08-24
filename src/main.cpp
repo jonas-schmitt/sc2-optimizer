@@ -100,8 +100,7 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    int tmp = atoi(argv[3]);
-    size_t popSize = tmp/procs + tmp % procs;
+    size_t popSize = atoi(argv[3]);
     size_t iterations = atoi(argv[4]);
     size_t genPerIt = atoi(argv[5]);
     size_t nGoals = atoi(argv[6]);
