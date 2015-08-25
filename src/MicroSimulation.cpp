@@ -244,6 +244,18 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             mFile2 << unitPtr->getName() << "\t\t\t";
         }
         mFile2 << std::endl;
+
+        for(auto const unitPtr : pl1.unitList)
+        {
+            mFile1 << unitPtr->getSize() << "\t\t\t";
+        }
+        mFile1 << std::endl;
+        for(auto const unitPtr : pl2.unitList)
+        {
+            mFile2 << unitPtr->getSize() << "\t\t\t";
+        }
+        mFile2 << std::endl;
+
         mFile1.setf(ios::fixed,ios::floatfield);
         mFile1.precision(2);
         mFile2.setf(ios::fixed,ios::floatfield);
