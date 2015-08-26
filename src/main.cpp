@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     size_t genPerIt = atoi(argv[5]);
     size_t nGoals = atoi(argv[6]);
     size_t migrants = 2*popSize;
-    Vec2D minPos(0.0), maxPos(200.0,200.0);
+    Vec2D minPos(0.0), maxPos(100.0,100.0);
     //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
 //    MicroSimulation<Terran, Protoss> sim(minPos, maxPos, filePath1, filePath2);

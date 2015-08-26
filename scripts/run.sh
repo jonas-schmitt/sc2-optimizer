@@ -6,5 +6,7 @@ cmake . -DCMAKE_CXX_COMPILER=g++
 make -j4
 cd ..
 export OMP_NUM_THREADS=8
-export OMP_SCHEDULE="static"
-nice -n 19 nohup ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 10 10 10 > opt.out 2> opt.err < /dev/null &
+export OMP_SCHEDULE="dynamic,2"
+./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 10 10 10 > opt.out
+#python ./scripts/animation.py
+

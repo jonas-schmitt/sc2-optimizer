@@ -206,19 +206,16 @@ public:
             pop2.resize(minSize);
 
             Fitness res;
-
-            mSim.setPlayer1Chromosome(pop1[0].chromosome);
-            mSim.setPlayer2Chromosome(pop2[0].chromosome);
-            mSim.enableTracking("./paths1.txt", "./paths2.txt");
-            mSim.run(true, Player::first);
-            mSim.disableTracking();
             for(size_t i = 0; i < minSize; ++i)
             {
                 for(size_t j = 0; j < minSize; ++j)
                 {
                     mSim.setPlayer1Chromosome(pop1[i].chromosome);
                     mSim.setPlayer2Chromosome(pop2[j].chromosome);
+                    if(i < 5 && j < 5) mSim.enableTracking("./results/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt",
+                                                           "./results/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt");
                     res += mSim.run(true, Player::first);
+                    if(i < 5 && j < 5) mSim.disableTracking();
                 }
             }
             double const damage1 = (res.damage/(minSize * minSize));

@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 import scipy.integrate as integrate
 import matplotlib.animation as animation
 import math
+import sys
 
 
 class Unit:
     def __init__(self, name, size):
         self.name = name
         self.size = size
-        
+
 def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
@@ -25,10 +26,14 @@ def getData(f):
     data_x = []
     data_y = []
     for str in str_list:
-        if str and str != "-":
-            tmp = str.split(",")
-            data_x.append(float(tmp[0]))
-            data_y.append(float(tmp[1]))
+        if str:
+            if str != "-":
+                tmp = str.split(",")
+                data_x.append(float(tmp[0]))
+                data_y.append(float(tmp[1]))
+            else:
+                data_x.append(-100)
+                data_y.append(-100)
     return data_x, data_y
 
 def getUnitStats(f):
@@ -45,7 +50,7 @@ def getUnitStats(f):
         if str:
             units.append(float(str))
     return units
-    
+
 
 
 
@@ -58,16 +63,17 @@ def getUnitStats(f):
 fig = plt.figure()
 fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                     xlim=(0, 200), ylim=(0, 200))
+                     xlim=(0, 100), ylim=(0, 100))
+
+paths = [str(sys.argv[1]), str(sys.argv[2])]
+
+len = (file_len(paths[0])-2)#/10
 
 
 
-len = (file_len('./paths1.txt')-2)#/10
 
-
-
-file1 = open('./paths1.txt', 'r')
-file2 = open('./paths2.txt', 'r')
+file1 = open(paths[0], 'r')
+file2 = open(paths[1], 'r')
 
 #units1 = getUnitStats(file1)
 #units2 = getUnitStats(file2)
@@ -84,22 +90,25 @@ positions1 = []
 positions2 = []
 
 
-
-for s in sizes1:
-    tmp, = ax.plot([],[],'ro', ms=s*3)
-    positions1.append(tmp)
-for s in sizes2:
-    tmp, = ax.plot([],[],'bo', ms=s*3)
-    positions2.append(tmp)
-    
-
-
 # rect is the box edge
-bounds = [0,200*5,0,200*5]
+bounds = [0,100,0,100]
 rect = plt.Rectangle(bounds[::2],
                      bounds[1] - bounds[0],
                      bounds[3] - bounds[2],
                      ec='none', lw=2, fc='none')
+
+size = fig.get_size_inches()*fig.dpi
+print size
+
+for s in sizes1:
+    tmp, = ax.plot([],[],'ro', ms=s*size[1]/100)
+    positions1.append(tmp)
+for s in sizes2:
+    tmp, = ax.plot([],[],'bo', ms=s*size[1]/100)
+    positions2.append(tmp)
+
+
+
 ax.add_patch(rect)
 
 def init():
@@ -109,7 +118,7 @@ def init():
         pos.set_data([],[])
     for pos in positions2:
         pos.set_data([],[])
-    
+
     rect.set_edgecolor('none')
     return positions1, positions2, rect
 
@@ -119,23 +128,29 @@ def animate(i):
 
     # update pieces of the animation
     rect.set_edgecolor('k')
-    
-        
+
+
 #    for i in xrange(0,9):
 #        file1.readline()
 #        file2.readline()
 
     a,b = getData(file1)
     for pos, data in zip(positions1, zip(a,b)):
-        pos.set_data(data[0],data[1])
+#        if not data[0] or not data[1]:
+#            pos.set_data([-100],[-100])
+#        else:
+            pos.set_data(data[0],data[1])
     a,b = getData(file2)
     for pos, data in zip(positions2, zip(a,b)):
-        pos.set_data(data[0],data[1])
-        
+#        if not data[0] or not data[1]:
+#            pos.set_data([-100],[-100])
+#        else:
+            pos.set_data(data[0],data[1])
+
     return positions1, positions2, rect
 
 ani = animation.FuncAnimation(fig, animate, frames=len,
-                              interval=10, blit=True, init_func=init)
+                              interval=100, blit=True, init_func=init)
 
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be

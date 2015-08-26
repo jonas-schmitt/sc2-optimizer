@@ -56,18 +56,28 @@ string MicroSimulation<T, U>::getFilePath2() const
     return mInfoDirName2;
 }
 
+
+
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
     init1.init(unitList, mInfoDirName1, pl1);
     double const fieldSizeX = pl1.maxPos.x-pl1.minPos.x;
     double const fieldSizeY = pl1.maxPos.y-pl1.minPos.y;
-    Vec2D startPos = Vec2D(pl1.minPos.x + fieldSizeX/20., pl1.minPos.y);
+    Vec2D startPos = Vec2D(pl1.minPos.x + 10, pl1.minPos.y + 0.5*fieldSizeY);
+    int i = 0;
     for(auto unit : pl1.unitList)
     {
-        startPos.y += fieldSizeY/pl1.unitList.size();
-        unit->setStartPos(startPos);
+        if(i % 2 == 1)
+        {
+            unit->setStartPos(Vec2D(startPos.x, startPos.y + i*5));
+        }
+        else
+        {
+            unit->setStartPos(Vec2D(startPos.x, startPos.y - i*5));
+        }
         unit->resetPos();
+        ++i;
     }
 }
 
@@ -77,12 +87,20 @@ void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
     init2.init(unitList, mInfoDirName2, pl2);
     double const fieldSizeX = pl2.maxPos.x-pl2.minPos.x;
     double const fieldSizeY = pl2.maxPos.y-pl2.minPos.y;
-    Vec2D startPos = Vec2D(pl2.maxPos.x - fieldSizeX/20., pl2.minPos.y);
+    Vec2D startPos = Vec2D(pl2.maxPos.x - 10, pl2.minPos.y + 0.5*fieldSizeY);
+    int i = 0;
     for(auto unit : pl2.unitList)
     {
-        startPos.y += fieldSizeY/pl2.unitList.size();
-        unit->setStartPos(startPos);
+        if(i % 2 == 1)
+        {
+            unit->setStartPos(Vec2D(startPos.x, startPos.y + i*5));
+        }
+        else
+        {
+            unit->setStartPos(Vec2D(startPos.x, startPos.y - i*5));
+        }
         unit->resetPos();
+        ++i;
     }
 }
 
@@ -269,7 +287,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking)
+        if(mTracking && i % 10 == 0)
         {
             for(auto const unitPtr : pl1.unitList)
             {
