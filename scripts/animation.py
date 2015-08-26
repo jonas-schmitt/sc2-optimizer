@@ -97,8 +97,6 @@ rect = plt.Rectangle(bounds[::2],
                      bounds[3] - bounds[2],
                      ec='none', lw=2, fc='none')
 
-size = fig.get_size_inches()*fig.dpi
-print size
 
 for s in sizes1:
     circle = plt.Circle((0,0),s,color='r',fill=True, clip_on = False)
