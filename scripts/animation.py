@@ -86,8 +86,8 @@ sizes2 = getUnitStats(file2)
 #for unit in units2:
 #    sizes2.append(math.sqrt(unit.size))
 
-positions1 = []
-positions2 = []
+circles1 = []
+circles2 = []
 
 
 # rect is the box edge
@@ -101,11 +101,13 @@ size = fig.get_size_inches()*fig.dpi
 print size
 
 for s in sizes1:
-    tmp, = ax.plot([],[],'ro', ms=s*size[1]/100)
-    positions1.append(tmp)
+    circle = plt.Circle((0,0),s,color='r',fill=True, clip_on = False)
+    circles1.append(circle)
+    ax.add_artist(circle)
 for s in sizes2:
-    tmp, = ax.plot([],[],'bo', ms=s*size[1]/100)
-    positions2.append(tmp)
+    circle = plt.Circle((0,0),s,color='b',fill=True, clip_on = False)
+    circles2.append(circle)
+    ax.add_artist(circle)
 
 
 
@@ -114,13 +116,13 @@ ax.add_patch(rect)
 def init():
     """initialize animation"""
     global rect
-    for pos in positions1:
-        pos.set_data([],[])
-    for pos in positions2:
-        pos.set_data([],[])
+#    for circle in circles1:
+#        circle.center = 0,0
+#    for circle in circles2:
+#        circle.center = 0,0
 
     rect.set_edgecolor('none')
-    return positions1, positions2, rect
+    return circles1, circles2, rect
 
 def animate(i):
     """perform animation step"""
@@ -135,19 +137,19 @@ def animate(i):
 #        file2.readline()
 
     a,b = getData(file1)
-    for pos, data in zip(positions1, zip(a,b)):
+    for circle, data in zip(circles1, zip(a,b)):
 #        if not data[0] or not data[1]:
 #            pos.set_data([-100],[-100])
 #        else:
-            pos.set_data(data[0],data[1])
+	    circle.center = data[0],data[1]
     a,b = getData(file2)
-    for pos, data in zip(positions2, zip(a,b)):
+    for circle, data in zip(circles2, zip(a,b)):
 #        if not data[0] or not data[1]:
 #            pos.set_data([-100],[-100])
 #        else:
-            pos.set_data(data[0],data[1])
+            circle.center = data[0],data[1]
 
-    return positions1, positions2, rect
+    return circles1, circles2, rect
 
 ani = animation.FuncAnimation(fig, animate, frames=len,
                               interval=100, blit=True, init_func=init)
