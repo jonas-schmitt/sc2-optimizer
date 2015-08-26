@@ -28,6 +28,37 @@ using std::function;
 using std::cout;
 using std::endl;
 
+struct SelectionParameter
+{
+    SelectionParameter(size_t N_, mt19937& generator_, vector<Individual>& pop_, size_t tournamentSize_)
+        : N(N_), generator(&generator_), pop(&pop_),  tournamentSize(tournamentSize_){}
+    size_t N;
+    mt19937 *generator;
+    vector<Individual> *pop;
+    size_t tournamentSize;
+
+};
+
+struct CrossoverParameter
+{
+    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t NGenes_, size_t NBits_)
+        : parents(&parents_), generator(&generator_), NGenes(NGenes_), NBits(NBits_) {}
+    vector<Individual> const * parents;
+    mt19937 *generator;
+    size_t NGenes;
+    size_t NBits;
+};
+
+struct MutationParameter
+{
+    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution& mutationDist_, size_t NGenes_, size_t NBits_)
+        : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_), NBits(NBits_) {}
+    Individual* individual;
+    mt19937* generator;
+    std::bernoulli_distribution * mutationDist;
+    size_t NGenes;
+    size_t NBits;
+};
 
 template <typename T, typename U, Player const player>
 class MOGA final
@@ -71,28 +102,38 @@ private:
 
 
 
-    function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> tournamentSelection = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
+    function<vector<Individual *>(SelectionParameter)> tournamentSelection = [&](SelectionParameter params)
     {
+
+        size_t const N = params.N;
+        mt19937& generator = *params.generator;
+        vector<Individual>& pop = *params.pop;
+        size_t tournamentSize = params.tournamentSize;
         std::uniform_int_distribution<size_t> dist(0,pop.size()-1);
         auto func = [&] (std::uniform_int_distribution<size_t>& dist, mt19937& generator)
         {
-            size_t const pos1 = dist(generator);
-            size_t pos2 = dist(generator);
-            while(pos2 == pos1) pos2 = dist(generator);
-            Individual const& lhs = pop[pos1];
-            Individual const& rhs = pop[pos2];
-            if(lhs.rank < rhs.rank)
+            vector<size_t> positions;
+            positions.reserve(tournamentSize);
+            while(positions.size() < tournamentSize)
             {
-                return pos1;
+                positions.push_back(dist(generator));
             }
-            else if(lhs.rank == rhs.rank && lhs.distance > rhs.distance)
+            while(positions.size() > 1)
             {
-                return pos1;
+                Individual const& ind1 = pop[positions.back()];
+                Individual const& ind2 = pop[positions[positions.size()-2]];
+                if(ind1.rank < ind2.rank)
+                {
+                    positions[positions.size()-2] = positions.back();
+                }
+                else if(ind1.rank == ind2.rank && ind1.distance > ind2.distance)
+                {
+                    positions[positions.size()-2] = positions.back();
+                }
+                positions.pop_back();
             }
-            else
-            {
-                return pos2;
-            }
+            return positions.front();
+
         };
 
         vector<Individual *> res;
@@ -105,8 +146,11 @@ private:
     };
 
 
-    function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> rouletteWheelSelection = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
+    function<vector<Individual *>(SelectionParameter)> rouletteWheelSelection = [&](SelectionParameter params)
     {
+        size_t const N = params.N;
+        mt19937& generator = *params.generator;
+        vector<Individual>& pop = *params.pop;
         std::uniform_real_distribution<double> dist(0,1.0);
         auto func = [&] (double const p)
         {
@@ -129,8 +173,11 @@ private:
         return res;
     };
 
-    function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&)> stochasticUniversalSampling = [&](size_t const N, mt19937& generator, vector<Individual>& pop)
+    function<vector<Individual *>(SelectionParameter)> stochasticUniversalSampling = [&](SelectionParameter params)
     {
+        size_t const N = params.N;
+        mt19937& generator = *params.generator;
+        vector<Individual>& pop = *params.pop;
         auto func = [&] (double const p)
         {
             auto cmp = [] (Individual const& ind, double val)
@@ -164,8 +211,13 @@ private:
 
     // Crossover methods
 
-    function<pair<Individual, Individual>(vector<Individual> const&, mt19937&, size_t const, size_t const)> singlePointCrossover = [&] (vector<Individual> const& parents, mt19937& generator, size_t const NGenes, size_t const NBits)
+    function<pair<Individual, Individual>(CrossoverParameter)> singlePointCrossover = [&] (CrossoverParameter params)
     {
+
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
         std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
@@ -196,8 +248,12 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(vector<Individual> const&, mt19937&, size_t const, size_t const)> twoPointCrossover = [&] (vector<Individual> const& parents, mt19937& generator, size_t const NGenes, size_t const NBits)
+    function<pair<Individual, Individual>(CrossoverParameter)> twoPointCrossover = [&] (CrossoverParameter params)
     {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
         std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
@@ -260,8 +316,12 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(vector<Individual> const&, mt19937&, size_t const, size_t const)> nPointCrossover = [&] (vector<Individual> const& parents, mt19937& generator, size_t const NGenes, size_t const NBits)
+    function<pair<Individual, Individual>(CrossoverParameter)> nPointCrossover = [&] (CrossoverParameter params)
     {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
         std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
@@ -317,8 +377,12 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(vector<Individual> const&, mt19937&, size_t const, size_t const)> uniformCrossover = [&] (vector<Individual> const& parents, mt19937& generator, size_t const NGenes, size_t const NBits)
+    function<pair<Individual, Individual>(CrossoverParameter)> uniformCrossover = [&] (CrossoverParameter params)
     {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -343,8 +407,12 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(vector<Individual> const&, mt19937&, size_t const, size_t const)> threeParentCrossover = [&] (vector<Individual> const& parents, mt19937& generator, size_t const NGenes, size_t const NBits)
+    function<pair<Individual, Individual>(CrossoverParameter)> threeParentCrossover = [&] (CrossoverParameter params)
     {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
         Individual const& parent3 = parents.at(2);
@@ -368,8 +436,13 @@ private:
         return std::make_pair(child, child);
     };
 
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> bitFlipMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
+    function<void(MutationParameter)> bitFlipMutation = [&] (MutationParameter params)
     {
+        Individual& individual = *params.individual;
+        mt19937& generator = *params.generator;
+        std::bernoulli_distribution& mutationDist = *params.mutationDist;
+        size_t NGenes = params.NGenes;
+        size_t NBits = params.NBits;
         for(size_t i = 0; i < NGenes; ++i)
         {
             for(size_t j = 0; j < NBits; ++j)
@@ -382,8 +455,13 @@ private:
         }
     };
 
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> interchangingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
+    function<void(MutationParameter)> interchangingMutation = [&] (MutationParameter params)
     {
+        Individual& individual = *params.individual;
+        mt19937& generator = *params.generator;
+        std::bernoulli_distribution& mutationDist = *params.mutationDist;
+        size_t NGenes = params.NGenes;
+        size_t NBits = params.NBits;
         vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
         {
@@ -406,8 +484,13 @@ private:
             individual.chromosome[pos2.first][pos2.second] = tmp;
         }
     };
-    function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const)> reversingMutation = [&] (Individual& individual, mt19937& generator, std::bernoulli_distribution& mutationDist, size_t const NGenes, size_t const NBits)
+    function<void(MutationParameter)> reversingMutation = [&] (MutationParameter params)
     {
+        Individual& individual = *params.individual;
+        mt19937& generator = *params.generator;
+        std::bernoulli_distribution& mutationDist = *params.mutationDist;
+        size_t NGenes = params.NGenes;
+        size_t NBits = params.NBits;
         std::bernoulli_distribution coin(0.5);
         vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
@@ -457,9 +540,9 @@ private:
     };
 
 
-    vector<function<vector<Individual *>(size_t const, mt19937&, vector<Individual>&) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
-    vector<function<pair<Individual, Individual>(vector<Individual> const&, mt19937&, size_t const, size_t const)> > crossoverFuncs = {singlePointCrossover, twoPointCrossover, nPointCrossover, uniformCrossover};
-    vector<function<void(Individual&, mt19937&, std::bernoulli_distribution&, size_t const, size_t const) > > mutationFuncs = {bitFlipMutation, interchangingMutation, reversingMutation};
+    vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
+    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {singlePointCrossover, twoPointCrossover, nPointCrossover, uniformCrossover};
+    vector<function<void(MutationParameter) > > mutationFuncs = {bitFlipMutation, interchangingMutation, reversingMutation};
 
 
 
@@ -804,7 +887,7 @@ public:
             newPop.reserve(popSize);
             vector<Individual *> selected;
 
-            selected = selectionFuncs[selectionChoice](popSize, generator, pop);
+            selected = selectionFuncs[selectionChoice](SelectionParameter(popSize, generator, pop, 2));
 
             for(size_t count = 0; count < 100; ++count)
             {
@@ -813,10 +896,10 @@ public:
                 {
                     pair<Individual, Individual> children;
 
-                    children = crossoverFuncs[crossoverChoice]({*selected[i], *selected[i+1]}, generator, NGenes, NBITS);
-                    mutationFuncs[mutationChoice](children.first, generator, mutationDist, NGenes, NBITS);
+                    children = crossoverFuncs[crossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, generator, NGenes, NBITS));
+                    mutationFuncs[mutationChoice](MutationParameter(children.first, generator, mutationDist, NGenes, NBITS));
 
-                    mutationFuncs[mutationChoice](children.second, generator, mutationDist, NGenes, NBITS);
+                    mutationFuncs[mutationChoice](MutationParameter(children.second, generator, mutationDist, NGenes, NBITS));
 
                     size_t hash = children.first.computeHash ();
                     if(control.count(hash) == 0)
