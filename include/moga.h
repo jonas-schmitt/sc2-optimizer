@@ -826,13 +826,14 @@ public:
         if(player == Player::first)
         {
             NGenes = sim[0][0].getPlayer1ChromosomeLength();
-            crossoverPoints = countUnitTypes(buildList1)-1;
+            crossoverPoints = countUnitTypes(buildList1);
         }
         else
         {
             NGenes = sim[0][0].getPlayer2ChromosomeLength();
-            crossoverPoints = countUnitTypes(buildList2)-1;
+            crossoverPoints = countUnitTypes(buildList2);
         }
+        if(crossoverPoints > 1) --crossoverPoints;
         chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
         vector<Chromosome> initChroms(NGoals);
         for(auto& chrom : initChroms)
