@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     size_t genPerIt = atoi(argv[5]);
     size_t nGoals = atoi(argv[6]);
     size_t migrants = 2*popSize;
-    size_t fieldSize = 20 * std::max(buildOrder1.size(), buildOrder2.size());
+    size_t fieldSize = 10 * std::max(buildOrder1.size(), buildOrder2.size());
     Vec2D minPos(0.0), maxPos(fieldSize,fieldSize);
     //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 

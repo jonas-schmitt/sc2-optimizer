@@ -2,11 +2,11 @@
 cd ~/Repos/sc2-optimizer/build
 rm -r CMakeCache.txt CMakeFiles
 cmake . -DCMAKE_CXX_COMPILER=g++
-#make clean
+make clean
 make -j4
 cd ..
 export OMP_NUM_THREADS=8
-export OMP_SCHEDULE="dynamic,2"
-./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 10 10 10 > opt.out
+export OMP_SCHEDULE="dynamic,1"
+./build/opt lists/TerranAttack.txt lists/ProtossAttack.txt 32 2 2 2
 #python ./scripts/animation.py
 

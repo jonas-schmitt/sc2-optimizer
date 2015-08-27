@@ -57,41 +57,32 @@ def getUnitStats(f):
 #------------------------------------------------------------
 # set up initial state
 
+paths = [str(sys.argv[1]), str(sys.argv[2])]
+
+file1 = open(paths[0], 'r')
+file2 = open(paths[1], 'r')
+
+sizes1 = getUnitStats(file1)
+sizes2 = getUnitStats(file2)
+
+fieldSize = max(len(sizes1), len(sizes2))*10
+
+len = (file_len(paths[0])-2)#/10
+
 
 #------------------------------------------------------------
 # set up figure and animation
 fig = plt.figure()
 fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                     xlim=(0, 100), ylim=(0, 100))
-
-paths = [str(sys.argv[1]), str(sys.argv[2])]
-
-len = (file_len(paths[0])-2)#/10
-
-
-
-
-file1 = open(paths[0], 'r')
-file2 = open(paths[1], 'r')
-
-#units1 = getUnitStats(file1)
-#units2 = getUnitStats(file2)
-
-sizes1 = getUnitStats(file1)
-sizes2 = getUnitStats(file2)
-
-#for unit in units1:
-#    sizes1.append(math.sqrt(unit.size))
-#for unit in units2:
-#    sizes2.append(math.sqrt(unit.size))
+                     xlim=(0, fieldSize), ylim=(0, fieldSize))
 
 circles1 = []
 circles2 = []
 
 
 # rect is the box edge
-bounds = [0,100,0,100]
+bounds = [0,fieldSize,0,fieldSize]
 rect = plt.Rectangle(bounds[::2],
                      bounds[1] - bounds[0],
                      bounds[3] - bounds[2],
@@ -150,7 +141,7 @@ def animate(i):
     return circles1, circles2, rect
 
 ani = animation.FuncAnimation(fig, animate, frames=len,
-                              interval=100, blit=True, init_func=init)
+                              interval=10, blit=True, init_func=init)
 
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
