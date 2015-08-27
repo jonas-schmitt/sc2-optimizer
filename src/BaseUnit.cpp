@@ -681,7 +681,7 @@ void BaseUnit::setChromosome(Chromosome const& chromosome)
     mChromosome = chromosome.data();
     mPhenotype.reserve(mNGenes);
     double constexpr max_inv = 1.0/(std::pow(2, NBITS) - 1);
-    for(int i = 0; i < chromosome.size(); ++i)
+    for(int i = 0; i < mNGenes; ++i)
     {
         mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max_inv);
     }

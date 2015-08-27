@@ -181,11 +181,11 @@ int main(int argc, char *argv[])
         //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
         //        end = std::chrono::system_clock::now();
         //        opt.determineWinner(std::cout, rank, procs);
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 1; j <= 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 2; k <= 10; ++k)
                 {
                     Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Terran,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);

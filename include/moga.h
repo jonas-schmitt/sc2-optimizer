@@ -11,8 +11,10 @@
 #include <unordered_set>
 #include <thread>
 #include <unistd.h>
+#include <set>
 #include <mpi.h>
 #include <omp.h>
+
 
 #include "Chromosome.h"
 #include "MicroSimulation.h"
@@ -24,6 +26,7 @@ using std::bernoulli_distribution;
 using std::string;
 using std::pair;
 using std::unordered_set;
+using std::set;
 using std::function;
 using std::cout;
 using std::endl;
@@ -41,12 +44,13 @@ struct SelectionParameter
 
 struct CrossoverParameter
 {
-    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t NGenes_, size_t NBits_)
-        : parents(&parents_), generator(&generator_), NGenes(NGenes_), NBits(NBits_) {}
+    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t NGenes_, size_t NBits_, size_t crossoverPoints_)
+        : parents(&parents_), generator(&generator_), NGenes(NGenes_), NBits(NBits_), crossoverPoints(crossoverPoints_) {}
     vector<Individual> const * parents;
     mt19937 *generator;
     size_t NGenes;
     size_t NBits;
+    size_t crossoverPoints;
 };
 
 struct MutationParameter
@@ -72,8 +76,6 @@ private:
 
     size_t NGenes;
 
-    size_t NCrossoverPoints;
-
     mt19937 generator;
     bernoulli_distribution flipCoin;
     std::uniform_int_distribution<size_t> chooseIndividual;
@@ -92,13 +94,16 @@ private:
     vector<string> mutationFuncNames = {"Bit Flipping Mutation", "Interchanging Mutation", "Reversing Mutation"};
 
     size_t selectionChoice = 0;
-    size_t crossoverChoice = 0;
+    size_t crossoverChoice = 2;
     size_t mutationChoice = 0;
 
     double onlinePerformance = 0.0;
     double offlinePerformance = 0.0;
 
     size_t NGoals;
+
+    size_t tournamentSize = 4;
+    size_t crossoverPoints;
 
 
 
@@ -322,11 +327,13 @@ private:
         mt19937 &generator = *params.generator;
         size_t const NGenes = params.NGenes;
         size_t const NBits = params.NBits;
+        size_t const crossoverPoints = params.crossoverPoints;
+
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
         std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
 
-        vector<size_t> bitPosArray((NGenes -1) / 2);
+        vector<size_t> bitPosArray(crossoverPoints);
         unordered_set<size_t> positions;
         for(size_t& bitPos : bitPosArray)
         {
@@ -778,6 +785,12 @@ private:
         pop = newPop;
     }
 
+    size_t countUnitTypes(vector<string> buildOrder)
+    {
+        set<string> strSet(buildOrder.begin(), buildOrder.end());
+        return strSet.size();
+    }
+
 
 public:
 
@@ -813,12 +826,12 @@ public:
         if(player == Player::first)
         {
             NGenes = sim[0][0].getPlayer1ChromosomeLength();
-            NCrossoverPoints = buildList1.size();
+            crossoverPoints = countUnitTypes(buildList1)-1;
         }
         else
         {
             NGenes = sim[0][0].getPlayer2ChromosomeLength();
-            NCrossoverPoints = buildList2.size();
+            crossoverPoints = countUnitTypes(buildList2)-1;
         }
         chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
         vector<Chromosome> initChroms(NGoals);
@@ -887,7 +900,7 @@ public:
             newPop.reserve(popSize);
             vector<Individual *> selected;
 
-            selected = selectionFuncs[selectionChoice](SelectionParameter(popSize, generator, pop, 2));
+            selected = selectionFuncs[selectionChoice](SelectionParameter(popSize, generator, pop, tournamentSize));
 
             for(size_t count = 0; count < 100; ++count)
             {
@@ -896,7 +909,7 @@ public:
                 {
                     pair<Individual, Individual> children;
 
-                    children = crossoverFuncs[crossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, generator, NGenes, NBITS));
+                    children = crossoverFuncs[crossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, generator, NGenes, NBITS, crossoverPoints));
                     mutationFuncs[mutationChoice](MutationParameter(children.first, generator, mutationDist, NGenes, NBITS));
 
                     mutationFuncs[mutationChoice](MutationParameter(children.second, generator, mutationDist, NGenes, NBITS));
