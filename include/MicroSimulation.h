@@ -98,6 +98,9 @@ public:
     size_t getPlayer1ChromosomeLength() const;
     size_t getPlayer2ChromosomeLength() const;
 
+    template<class W>
+    void choosePlayerStartPosition(PlayerState<W>& pl, double const x_start);
+
 };
 
 #endif

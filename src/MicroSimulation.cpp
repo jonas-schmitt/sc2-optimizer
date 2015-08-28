@@ -9,6 +9,7 @@
 #include<future>
 #include<cmath>
 #include<random>
+#include<chrono>
 
 
 using std::string;
@@ -17,6 +18,7 @@ using std::shared_ptr;
 using std::list;
 using std::pair;
 using std::ios;
+using std::mt19937;
 
 template <class T, class U>
 MicroSimulation<T, U>::MicroSimulation(const Vec2D minPos, const Vec2D maxPos, const string& filePath1, const string& filePath2)
@@ -62,45 +64,31 @@ template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
     init1.init(unitList, mInfoDirName1, pl1);
-    double const fieldSizeX = pl1.maxPos.x-pl1.minPos.x;
-    double const fieldSizeY = pl1.maxPos.y-pl1.minPos.y;
-    Vec2D startPos = Vec2D(pl1.minPos.x + 10, pl1.minPos.y + 0.5*fieldSizeY);
-    int i = 0;
-    for(auto unit : pl1.unitList)
-    {
-        if(i % 2 == 1)
-        {
-            unit->setStartPos(Vec2D(startPos.x, startPos.y + i*5));
-        }
-        else
-        {
-            unit->setStartPos(Vec2D(startPos.x, startPos.y - i*5));
-        }
-        unit->resetPos();
-        ++i;
-    }
 }
 
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 {
     init2.init(unitList, mInfoDirName2, pl2);
-    double const fieldSizeX = pl2.maxPos.x-pl2.minPos.x;
-    double const fieldSizeY = pl2.maxPos.y-pl2.minPos.y;
-    Vec2D startPos = Vec2D(pl2.maxPos.x - 10, pl2.minPos.y + 0.5*fieldSizeY);
+}
+
+template<class T, class U>
+template<class W>
+void MicroSimulation<T, U>::choosePlayerStartPosition(PlayerState<W>& pl, double const x_start)
+{
+
+    double const fieldSizeY = pl.maxPos.y-pl.minPos.y;
+    Vec2D startPos = Vec2D(x_start, pl.minPos.y + 0.5*fieldSizeY);
     int i = 0;
-    for(auto unit : pl2.unitList)
+    mt19937 generator (std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_real_distribution<double> distribution_x(-15,15);
+    std::bernoulli_distribution coin(0.5);
+    for(auto unit : pl.unitList)
     {
-        if(i % 2 == 1)
-        {
-            unit->setStartPos(Vec2D(startPos.x, startPos.y + i*5));
-        }
-        else
-        {
-            unit->setStartPos(Vec2D(startPos.x, startPos.y - i*5));
-        }
+        double const x = distribution_x(generator);
+        std::uniform_real_distribution<double> distribution_y(0, coin(generator) ? 15 - std::abs(x) : std::abs(x) - 15);
+        unit->setStartPos(Vec2D(startPos.x + distribution_x(generator), startPos.y + distribution_y(generator)));
         unit->resetPos();
-        ++i;
     }
 }
 
@@ -248,6 +236,9 @@ template <class T, class U>
 Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 {
 
+    choosePlayerStartPosition(pl1, pl1.minPos.x + 20);
+    choosePlayerStartPosition(pl2, pl2.maxPos.x - 20);
+
     if(mTracking)
     {
         mFile1.open(mTrackingFileName1);
@@ -287,7 +278,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking)
+        if(mTracking && i % 10 == 0)
         {
             for(auto const unitPtr : pl1.unitList)
             {

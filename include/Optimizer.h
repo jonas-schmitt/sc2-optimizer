@@ -67,8 +67,12 @@ public:
 
         for(size_t i = 0; i < iterations; ++i)
         {
-            std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
-            printf("%c[2K", 27);
+            if(rank == 0)
+            {
+                std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << endl;
+                //std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
+                //printf("%c[2K", 27);
+            }
 
             if(mMPI)
             {
@@ -204,6 +208,14 @@ public:
 
             pop1.resize(minSize);
             pop2.resize(minSize);
+
+            auto cmp = [] (Individual const& lhs, Individual const& rhs)
+            {
+                return lhs.fitness.score > rhs.fitness.score;
+            };
+
+            std::sort(pop1.begin(), pop1.end(), cmp);
+            std::sort(pop2.begin(), pop2.end(), cmp);
 
             Fitness res;
             for(size_t i = 0; i < minSize; ++i)

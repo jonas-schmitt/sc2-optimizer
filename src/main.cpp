@@ -136,11 +136,11 @@ int main(int argc, char *argv[])
     if(race1 == "Terran" && race2 == "Terran")
     {
 
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Terran, Terran> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -154,11 +154,11 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Zerg")
     {
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Terran, Zerg> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -187,11 +187,11 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Zerg, Terran> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -203,11 +203,11 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Zerg")
     {
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Zerg, Zerg> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -219,11 +219,11 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Protoss")
     {
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Zerg, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -236,11 +236,11 @@ int main(int argc, char *argv[])
     else if(race1 == "Protoss" && race2 == "Terran")
     {
 
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Protoss, Terran> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -252,11 +252,11 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Zerg")
     {
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Protoss, Zerg> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
@@ -269,11 +269,11 @@ int main(int argc, char *argv[])
     else if(race1 == "Protoss" && race2 == "Protoss")
     {
 
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 4; ++j)
+            for(size_t j = 0; j < 1; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     OptimizerInterface<Protoss, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
