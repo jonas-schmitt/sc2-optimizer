@@ -17,15 +17,15 @@ template <typename GA1, typename GA2>
 class Optimizer
 {
 private:
-    size_t popSize;
-    GA1 ga1;
-    GA2 ga2;
-    Individual optimum1, optimum2;
-    Statistics stats1, stats2;
-    double offlinePerformance = 0.0;
-    double onlinePerformance = 0.0;
-    size_t NGoals;
-    bool cluster;
+    size_t mPopSize;
+    GA1 mGa1;
+    GA2 mGa2;
+    Individual mOptimum1, mOptimum2;
+    Statistics mStats1, mStats2;
+    double mOfflinePerformance = 0.0;
+    double mOnlinePerformance = 0.0;
+    size_t mNGoals;
+    bool mMPI;
 
 
     MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
@@ -33,10 +33,10 @@ private:
 
 public:
     Optimizer(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
-        : popSize(popSize),
-          ga1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
-          ga2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
-          NGoals(nGoals),
+        : mPopSize(popSize),
+          mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
+          mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
+          mNGoals(nGoals),
           mSim(minPos, maxPos, filePath1, filePath2)
     {
         mSim.initBothPlayers(buildList1, buildList2);
@@ -44,12 +44,12 @@ public:
 
     void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
     {
-        cluster = procs > 1;
+        mMPI = procs > 1;
         setSelection(sel);
         setCrossover(co);
         setMutation(mut);
 
-        migrants = std::min(migrants, popSize);
+        migrants = std::min(migrants, mPopSize);
 
         if(rank == 0)
         {
@@ -57,56 +57,56 @@ public:
             cout << "Selection Operator: " << getSelectionOperatorName() << endl;
             cout << "Crossover Operator: " << getCrossoverOperatorName() << endl;
             cout << "Mutation Operator: " << getMutationOperatorName() << endl;
-            cout << "Population Size: " << popSize*procs << endl;
+            cout << "Population Size: " << mPopSize*procs << endl;
             cout << "Number of Iterations: " << iterations << endl;
             cout << "Generations per Iteration: " << genPerIt << endl;
         }
 
-        vector<unsigned long> buf1(procs*migrants*ga1.getNumberOfGenes());
-        vector<unsigned long> buf2(procs*migrants*ga2.getNumberOfGenes());
+        vector<unsigned long> buf1(procs*migrants*mGa1.getNumberOfGenes());
+        vector<unsigned long> buf2(procs*migrants*mGa2.getNumberOfGenes());
 
         for(size_t i = 0; i < iterations; ++i)
         {
             std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
             printf("%c[2K", 27);
 
-            if(cluster)
+            if(mMPI)
             {
-                migrate(buf1, migrants, ga1, rank, procs);
-                migrate(buf2, migrants, ga2, rank, procs);
+                migrate(buf1, migrants, mGa1, rank, procs);
+                migrate(buf2, migrants, mGa2, rank, procs);
             }
 
-            vector<Chromosome> optima1(ga1.getBestChromosomes(NGoals));
-            vector<Chromosome> optima2(ga2.getBestChromosomes(NGoals));
+            vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
+            vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
-            ga1.optimize(optima2, genPerIt);
-            ga2.optimize(optima1, genPerIt);
+            mGa1.optimize(optima2, genPerIt);
+            mGa2.optimize(optima1, genPerIt);
 
-            stats1 = ga1.getStatistics();
-            stats2 = ga2.getStatistics();
+            mStats1 = mGa1.getStatistics();
+            mStats2 = mGa2.getStatistics();
 
-            onlinePerformance += 0.5*(ga1.getOnlinePerformance() + ga2.getOnlinePerformance());
-            offlinePerformance += 0.5*(ga1.getOfflinePerformance() + ga2.getOfflinePerformance());
+            mOnlinePerformance += 0.5*(mGa1.getOnlinePerformance() + mGa2.getOnlinePerformance());
+            mOfflinePerformance += 0.5*(mGa1.getOfflinePerformance() + mGa2.getOfflinePerformance());
         }
-        onlinePerformance /= iterations;
-        offlinePerformance /= iterations;
+        mOnlinePerformance /= iterations;
+        mOfflinePerformance /= iterations;
         double onlinePerformance_tmp, offlinePerformance_tmp;
-        if(cluster)
+        if(mMPI)
         {
 
-            MPI_Reduce (&onlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-            MPI_Reduce (&offlinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+            MPI_Reduce (&mOnlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+            MPI_Reduce (&mOfflinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-            computeGlobalStatistics(stats1, rank, procs);
-            computeGlobalStatistics(stats2, rank, procs);
+            computeGlobalStatistics(mStats1, rank, procs);
+            computeGlobalStatistics(mStats2, rank, procs);
         }
 
         if(rank == 0)
         {
-            if(cluster)
+            if(mMPI)
             {
-                onlinePerformance = onlinePerformance_tmp/procs;
-                offlinePerformance = offlinePerformance_tmp/procs;
+                mOnlinePerformance = onlinePerformance_tmp/procs;
+                mOfflinePerformance = offlinePerformance_tmp/procs;
             }
 
             printStatistics();
@@ -120,85 +120,85 @@ public:
         for(int i = 0; i < 50; ++i) separator += "-";
         separator += '\n';
         cout << separator << "Statistics Player 1:" << endl;
-        stats1.print();
+        mStats1.print();
         cout << separator << endl;
         cout << separator << "Statistics Player 2:" << endl;
-        stats2.print();
+        mStats2.print();
         cout << separator << endl;
-        cout << "Online Performance: " << onlinePerformance << endl;
-        cout << "Offline Performance: " << offlinePerformance << endl;
+        cout << "Online Performance: " << mOnlinePerformance << endl;
+        cout << "Offline Performance: " << mOfflinePerformance << endl;
         cout << separator << endl;
     }
 
     GA1 const& getGA1() const
     {
-        return ga1;
+        return mGa1;
     }
     GA2 const& getGA2() const
     {
-        return ga2;
+        return mGa2;
     }
 
     size_t getNumberOfSelectionOperators()
     {
-        ga1.getNumberOfSelectionOperators();
+        mGa1.getNumberOfSelectionOperators();
     }
 
     size_t getNumberOfCrossoverOperators()
     {
-        return ga1.getNumberOfCrossoverOperators();
+        return mGa1.getNumberOfCrossoverOperators();
     }
 
     size_t getNumberOfMutationOperators()
     {
-        return ga1.getNumberOfMutationOperators();
+        return mGa1.getNumberOfMutationOperators();
     }
 
 
 
     void setSelection(size_t const value)
     {
-        ga1.setSelection(value);
-        ga2.setSelection(value);
+        mGa1.setSelection(value);
+        mGa2.setSelection(value);
     }
 
     void setCrossover(size_t const value)
     {
-        ga1.setCrossover(value);
-        ga2.setCrossover(value);
+        mGa1.setCrossover(value);
+        mGa2.setCrossover(value);
     }
 
     void setMutation(size_t const value)
     {
-        ga1.setMutation(value);
-        ga2.setMutation(value);
+        mGa1.setMutation(value);
+        mGa2.setMutation(value);
     }
 
     string getSelectionOperatorName()
     {
-        return ga1.getSelectionOperatorName();
+        return mGa1.getSelectionOperatorName();
     }
     string getCrossoverOperatorName()
     {
-        return ga1.getCrossoverOperatorName();
+        return mGa1.getCrossoverOperatorName();
     }
     string getMutationOperatorName()
     {
-        return ga1.getMutationOperatorName();
+        return mGa1.getMutationOperatorName();
     }
 
     bool determineWinner(std::ostream& stream, int const rank, int const procs)
     {
-        if(cluster)
+        if(mMPI)
         {
-            gatherPopulation(ga1, rank, procs);
-            gatherPopulation(ga2, rank, procs);
+            gatherPopulation(mGa1, rank, procs);
+            gatherPopulation(mGa2, rank, procs);
         }
 
         if(rank == 0)
         {
-            vector<Individual> pop1(ga1.getPopulation());
-            vector<Individual> pop2(ga2.getPopulation());
+            vector<Individual> pop1(mGa1.getPopulation());
+            vector<Individual> pop2(mGa2.getPopulation());
 
             size_t const minSize = std::min(pop1.size(), pop2.size());
 
@@ -260,14 +260,14 @@ public:
         vector<unsigned long> buf;
         if(rank == 0)
         {
-            buf.resize(procs*popSize*ga.getNumberOfGenes());
+            buf.resize(procs*mPopSize*ga.getNumberOfGenes());
         }
-        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(popSize));
+        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(mPopSize));
 
         if(rank == 0)
         {
             MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
-            ga.includeDecodedChromosomes(buf, popSize, 0, procs);
+            ga.includeDecodedChromosomes(buf, mPopSize, 0, procs);
         }
         else
         {

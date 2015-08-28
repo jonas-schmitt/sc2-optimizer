@@ -68,42 +68,42 @@ template <typename T, typename U, Player const player>
 class MOGA final
 {
 private:
-    double mutationProbability = 0.01;
+    double mMutationProbability = 0.01;
 
-    Statistics stats;
+    Statistics mStats;
 
-    size_t popSize;
+    size_t mPopSize;
 
-    size_t NGenes;
+    size_t mNGenes;
 
-    mt19937 generator;
-    bernoulli_distribution flipCoin;
-    std::uniform_int_distribution<size_t> chooseIndividual;
-    std::uniform_real_distribution<double> spinWheel;
-    std::uniform_int_distribution<size_t> chooseBit;
-    bernoulli_distribution mutationDist;
+    mt19937 mGenerator;
+    bernoulli_distribution mFlipCoin;
+    std::uniform_int_distribution<size_t> mChooseIndividual;
+    std::uniform_real_distribution<double> mSpinWheel;
+    std::uniform_int_distribution<size_t> mChooseBit;
+    bernoulli_distribution mMutationDist;
 
-    vector<Individual> pop;
+    vector<Individual> mPop;
 
-    vector<vector<MicroSimulation<T,U>>> sim;
+    vector<vector<MicroSimulation<T,U>>> mSims;
 
-    unordered_set<size_t> control;
+    unordered_set<size_t> mPopControl;
 
-    vector<string> selectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> crossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover"};
-    vector<string> mutationFuncNames = {"Bit Flipping Mutation", "Interchanging Mutation", "Reversing Mutation"};
+    vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
+    vector<string> mCrossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover"};
+    vector<string> mMutationFuncNames = {"Bit Flipping Mutation", "Interchanging Mutation", "Reversing Mutation"};
 
-    size_t selectionChoice = 0;
-    size_t crossoverChoice = 2;
-    size_t mutationChoice = 0;
+    size_t mSelectionChoice = 0;
+    size_t mCrossoverChoice = 2;
+    size_t mMutationChoice = 0;
 
-    double onlinePerformance = 0.0;
-    double offlinePerformance = 0.0;
+    double mOnlinePerformance = 0.0;
+    double mOfflinePerformance = 0.0;
 
-    size_t NGoals;
+    size_t mNGoals;
 
-    size_t tournamentSize = 4;
-    size_t crossoverPoints;
+    size_t mTournamentSize = 4;
+    size_t mNCrossoverPoints;
 
 
 
@@ -119,10 +119,10 @@ private:
         {
             vector<size_t> positions;
             positions.reserve(tournamentSize);
-            while(positions.size() < tournamentSize)
+            do
             {
                 positions.push_back(dist(generator));
-            }
+            } while(positions.size() < tournamentSize);
             while(positions.size() > 1)
             {
                 Individual const& ind1 = pop[positions.back()];
@@ -561,19 +561,19 @@ private:
         #pragma omp parallel for schedule(runtime)
         for(size_t i = 0; i < pop.size(); ++i)
         {
-            double const value = 1.0/NGoals;
+            double const value = 1.0/mNGoals;
             pop[i].fitness = 0;
-            for(size_t j = 0; j < NGoals; ++j)
+            for(size_t j = 0; j < mNGoals; ++j)
             {
                 if(player == Player::first)
                 {
-                    sim[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
-                    pop[i].fitness += sim[omp_get_thread_num()][j].run(true, Player::first);
+                    mSims[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
+                    pop[i].fitness += mSims[omp_get_thread_num()][j].run(true, Player::first);
                 }
                 else
                 {
-                    sim[omp_get_thread_num()][j].setPlayer2Chromosome(pop[i].chromosome);
-                    pop[i].fitness += sim[omp_get_thread_num()][j].run(true, Player::second);
+                    mSims[omp_get_thread_num()][j].setPlayer2Chromosome(pop[i].chromosome);
+                    pop[i].fitness += mSims[omp_get_thread_num()][j].run(true, Player::second);
                 }
 
             }
@@ -583,21 +583,21 @@ private:
 
     void setGoals(vector<Chromosome> const& goals)
     {
-        if(goals.size() != NGoals)
+        if(goals.size() != mNGoals)
         {
             throw std::invalid_argument("MOGA::setGoals(): Invalid number of arguments");
         }
         #pragma omp parallel
         {
-            for(size_t j = 0; j < NGoals; ++j)
+            for(size_t j = 0; j < mNGoals; ++j)
             {
                 if(player == Player::first)
                 {
-                    sim[omp_get_thread_num()][j].setPlayer2Chromosome(goals[j]);
+                    mSims[omp_get_thread_num()][j].setPlayer2Chromosome(goals[j]);
                 }
                 else
                 {
-                    sim[omp_get_thread_num()][j].setPlayer1Chromosome(goals[j]);
+                    mSims[omp_get_thread_num()][j].setPlayer1Chromosome(goals[j]);
                 }
             }
             #pragma omp barrier
@@ -606,22 +606,22 @@ private:
 
     void computeCDF()
     {
-        double const inv_sum = 1.0/stats.sum;
+        double const inv_sum = 1.0/mStats.sum;
         double tmp = 0.0;
-        for(Individual& ind : pop)
+        for(Individual& ind : mPop)
         {
             tmp += ind.fitness.score * inv_sum;
             ind.cdf = tmp;
-            ind.total = stats.sum;
+            ind.total = mStats.sum;
         }
     }
 
     void computeStatistics()
     {
-        vector<double> v(pop.size());
+        vector<double> v(mPop.size());
         for(size_t i = 0; i < v.size(); ++i)
         {
-            v[i] = pop[i].fitness.score;
+            v[i] = mPop[i].fitness.score;
         }
         double sum = std::accumulate(v.begin(), v.end(), 0.0);
         double mean = sum / v.size();
@@ -630,10 +630,10 @@ private:
                        std::bind2nd(std::minus<double>(), mean));
         double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
         double stdev = std::sqrt(sq_sum / v.size());
-        stats.sum = sum;
-        stats.mean = mean;
-        stats.max = *std::max_element(v.begin(), v.end());
-        stats.stdev = stdev;
+        mStats.sum = sum;
+        mStats.mean = mean;
+        mStats.max = *std::max_element(v.begin(), v.end());
+        mStats.stdev = stdev;
 
     }
 
@@ -643,28 +643,28 @@ private:
         vector<vector<size_t>> fronts(1);
 
         // determine the domination count and set of dominated individuals for all members of the population
-        for(size_t i = 0; i < pop.size(); ++i)
+        for(size_t i = 0; i < mPop.size(); ++i)
         {
-            pop[i].dominationCount = 0;
-            pop[i].dominationSet.clear();
-            pop[i].distance = 0.0;
-            for(size_t j = 0; j < pop.size(); ++j)
+            mPop[i].dominationCount = 0;
+            mPop[i].dominationSet.clear();
+            mPop[i].distance = 0.0;
+            for(size_t j = 0; j < mPop.size(); ++j)
             {
                 if(i == j) continue;
-                if(pop[i].dominates(pop[j]))
+                if(mPop[i].dominates(mPop[j]))
                 {
-                    pop[i].dominationSet.push_back(j);
+                    mPop[i].dominationSet.push_back(j);
                 }
-                else if(pop[j].dominates(pop[i]))
+                else if(mPop[j].dominates(mPop[i]))
                 {
-                    ++pop[i].dominationCount;
+                    ++mPop[i].dominationCount;
                 }
             }
             // if the individual is not dominated by any other individuals, include it in the first nondominated front
-            if(pop[i].dominationCount == 0)
+            if(mPop[i].dominationCount == 0)
             {
                 fronts[0].push_back(i);
-                pop[i].rank = 1;
+                mPop[i].rank = 1;
             }
         }
 
@@ -672,18 +672,18 @@ private:
         size_t r = 1;
         size_t count = fronts[0].size();
         fronts.emplace_back();
-        for(size_t i = 0; count < popSize && !fronts[i].empty(); ++i)
+        for(size_t i = 0; count < mPopSize && !fronts[i].empty(); ++i)
         {
             for(size_t const p : fronts[i])
             {
-                for(size_t const q : pop[p].dominationSet)
+                for(size_t const q : mPop[p].dominationSet)
                 {
-                    if(pop[q].dominationCount > 0)
+                    if(mPop[q].dominationCount > 0)
                     {
-                        if(--pop[q].dominationCount == 0)
+                        if(--mPop[q].dominationCount == 0)
                         {
                             fronts[i+1].push_back(q);
-                            pop[q].rank = r + 1;
+                            mPop[q].rank = r + 1;
                         }
                     }
                 }
@@ -695,22 +695,22 @@ private:
 
 
         vector<Individual> newPop;
-        newPop.reserve(popSize);
+        newPop.reserve(mPopSize);
         fronts.pop_back();
 
 
         auto cmp_damage = [&] (size_t const p, size_t const q)
         {
-            return pop[p].fitness.damage < pop[q].fitness.damage;
+            return mPop[p].fitness.damage < mPop[q].fitness.damage;
         };
         auto cmp_health = [&] (size_t const p, size_t const q)
         {
-            return pop[p].fitness.health < pop[q].fitness.health;
+            return mPop[p].fitness.health < mPop[q].fitness.health;
         };
 
         auto cmp_time = [&] (size_t const p, size_t const q)
         {
-            return pop[p].fitness.timeSteps < pop[q].fitness.timeSteps;
+            return mPop[p].fitness.timeSteps < mPop[q].fitness.timeSteps;
         };
 
 
@@ -720,13 +720,13 @@ private:
 
             // compute crowding distance for damage
             std::sort(front.begin(), front.end(), cmp_damage);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
+            mPop[front.front()].distance = INF;
+            mPop[front.back()].distance = INF;
             if(front.size() > 2)
             {
                 for(size_t i = 1; i < front.size()-2; ++i)
                 {
-                    pop[front[i]].distance += pop[front[i+1]].fitness.damage - pop[front[i-1]].fitness.damage;
+                    mPop[front[i]].distance += mPop[front[i+1]].fitness.damage - mPop[front[i-1]].fitness.damage;
                 }
             }
 
@@ -734,41 +734,41 @@ private:
 
             // compute crowding distance for health
             std::sort(front.begin(), front.end(), cmp_health);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
+            mPop[front.front()].distance = INF;
+            mPop[front.back()].distance = INF;
             if(front.size() > 2)
             {
                 for(size_t i = 1; i < front.size()-2; ++i)
                 {
-                    if(pop[front[i]].distance < INF)
+                    if(mPop[front[i]].distance < INF)
                     {
-                        pop[front[i]].distance += pop[front[i+1]].fitness.health - pop[front[i-1]].fitness.health;
+                        mPop[front[i]].distance += mPop[front[i+1]].fitness.health - mPop[front[i-1]].fitness.health;
                     }
                 }
             }
 
             // compute crowding distance for health
             std::sort(front.begin(), front.end(), cmp_time);
-            pop[front.front()].distance = INF;
-            pop[front.back()].distance = INF;
+            mPop[front.front()].distance = INF;
+            mPop[front.back()].distance = INF;
             if(front.size() > 2)
             {
                 for(size_t i = 1; i < front.size()-2; ++i)
                 {
-                    if(pop[front[i]].distance < INF)
+                    if(mPop[front[i]].distance < INF)
                     {
-                        pop[front[i]].distance += pop[front[i+1]].fitness.timeSteps - pop[front[i-1]].fitness.timeSteps;
+                        mPop[front[i]].distance += mPop[front[i+1]].fitness.timeSteps - mPop[front[i-1]].fitness.timeSteps;
                     }
                 }
             }
 
 
             // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
-            if(newPop.size() + front.size() > popSize)
+            if(newPop.size() + front.size() > mPopSize)
             {
                 auto cmp_distance = [&] (size_t const p, size_t const q)
                 {
-                    return pop[p].distance > pop[q].distance;
+                    return mPop[p].distance > mPop[q].distance;
                 };
                 sort(front.begin(), front.end(), cmp_distance);
             }
@@ -776,13 +776,13 @@ private:
             // consecutively include individuals from each front into the new population until it is filled
             for(size_t const p : front)
             {
-                if(newPop.size() == popSize) break;
-                newPop.push_back(pop[p]);
+                if(newPop.size() == mPopSize) break;
+                newPop.push_back(mPop[p]);
             }
 
         }
         // replace the old population with the new one
-        pop = newPop;
+        mPop = newPop;
     }
 
     size_t countUnitTypes(vector<string> buildOrder)
@@ -798,10 +798,10 @@ public:
     typedef U race2;
 
     MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
-        :  popSize(popSize), generator(std::chrono::system_clock::now().time_since_epoch().count()), flipCoin(0.5), chooseIndividual(0,popSize-1), spinWheel(0,1.0), NGoals(nGoals)
+        :  mPopSize(popSize), mGenerator(std::chrono::system_clock::now().time_since_epoch().count()), mFlipCoin(0.5), mChooseIndividual(0,popSize-1), mSpinWheel(0,1.0), mNGoals(nGoals)
     {
 
-        sim.reserve(omp_get_num_threads());
+        mSims.reserve(omp_get_num_threads());
         #pragma omp parallel
         {
             for(size_t i = 0; i < omp_get_num_threads(); ++i)
@@ -810,12 +810,12 @@ public:
                 {
                     if(i == omp_get_thread_num())
                     {
-                        sim.emplace_back();
-                        sim[omp_get_thread_num()].reserve(NGoals);
-                        for(size_t j = 0; j < NGoals; ++j)
+                        mSims.emplace_back();
+                        mSims[omp_get_thread_num()].reserve(mNGoals);
+                        for(size_t j = 0; j < mNGoals; ++j)
                         {
-                            sim[omp_get_thread_num()].emplace_back(minPos, maxPos, filePath1, filePath2);
-                            sim[omp_get_thread_num()].back().initBothPlayers(buildList1, buildList2);
+                            mSims[omp_get_thread_num()].emplace_back(minPos, maxPos, filePath1, filePath2);
+                            mSims[omp_get_thread_num()].back().initBothPlayers(buildList1, buildList2);
                         }
                     }
                 }
@@ -825,42 +825,42 @@ public:
 
         if(player == Player::first)
         {
-            NGenes = sim[0][0].getPlayer1ChromosomeLength();
-            crossoverPoints = countUnitTypes(buildList1);
+            mNGenes = mSims[0][0].getPlayer1ChromosomeLength();
+            mNCrossoverPoints = countUnitTypes(buildList1);
         }
         else
         {
-            NGenes = sim[0][0].getPlayer2ChromosomeLength();
-            crossoverPoints = countUnitTypes(buildList2);
+            mNGenes = mSims[0][0].getPlayer2ChromosomeLength();
+            mNCrossoverPoints = countUnitTypes(buildList2);
         }
-        if(crossoverPoints > 1) --crossoverPoints;
-        chooseBit = std::uniform_int_distribution<size_t>(1, NGenes*NBITS - 1);
-        vector<Chromosome> initChroms(NGoals);
+        if(mNCrossoverPoints > 1) --mNCrossoverPoints;
+        mChooseBit = std::uniform_int_distribution<size_t>(1, mNGenes*NBITS - 1);
+        vector<Chromosome> initChroms(mNGoals);
         for(auto& chrom : initChroms)
         {
-            chrom.resize(NGenes);
+            chrom.resize(mNGenes);
             for(auto& gene : chrom)
             {
                 for(size_t i = 0; i < gene.size(); ++i)
                 {
-                    gene.set(i, flipCoin(generator));
+                    gene.set(i, mFlipCoin(mGenerator));
                 }
             }
         }
         setGoals(initChroms);
 
 
-        pop.reserve(2*popSize);
-        pop.resize(popSize);
+        mPop.reserve(2*popSize);
+        mPop.resize(popSize);
 
 
-        stats.sum = 0.0;
-        stats.max = 0.0;
+        mStats.sum = 0.0;
+        mStats.max = 0.0;
 
         for(size_t i = 0; i < popSize; ++i)
         {
-            Chromosome& chrom = pop[i].chromosome;
-            chrom.resize(NGenes);
+            Chromosome& chrom = mPop[i].chromosome;
+            chrom.resize(mNGenes);
             double hash;
             do
             {
@@ -868,15 +868,15 @@ public:
                 {
                     for(size_t j = 0; j < gene.size(); ++j)
                     {
-                        gene.set(j, flipCoin(generator));
+                        gene.set(j, mFlipCoin(mGenerator));
                     }
                 }
-                hash = pop[i].computeHash();
+                hash = mPop[i].computeHash();
             }
-            while(control.count(hash) == 1);
-            control.insert(hash);
+            while(mPopControl.count(hash) == 1);
+            mPopControl.insert(hash);
         }
-        evaluate(pop);
+        evaluate(mPop);
         computeStatistics();
         computeCDF();
 
@@ -884,12 +884,12 @@ public:
 
     void optimize(vector<Chromosome> const& goals, size_t const iterations)
     {
-        onlinePerformance = 0.0;
-        offlinePerformance = 0.0;
+        mOnlinePerformance = 0.0;
+        mOfflinePerformance = 0.0;
 
-        mutationDist = std::move(std::bernoulli_distribution(mutationProbability));
+        mMutationDist = std::move(std::bernoulli_distribution(mMutationProbability));
         setGoals(goals);
-        evaluate(pop);
+        evaluate(mPop);
 
         computeStatistics();
         computeCDF();
@@ -898,72 +898,72 @@ public:
             // apply genetic algorithm
 
             vector<Individual> newPop;
-            newPop.reserve(popSize);
+            newPop.reserve(mPopSize);
             vector<Individual *> selected;
 
-            selected = selectionFuncs[selectionChoice](SelectionParameter(popSize, generator, pop, tournamentSize));
+            selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mPop, mTournamentSize));
 
             for(size_t count = 0; count < 100; ++count)
             {
                 if(selected.size() == 0) break; // Just for safety
-                for(size_t i = 0; i < selected.size()-1 && newPop.size() < popSize; i += 2)
+                for(size_t i = 0; i < selected.size()-1 && newPop.size() < mPopSize; i += 2)
                 {
                     pair<Individual, Individual> children;
 
-                    children = crossoverFuncs[crossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, generator, NGenes, NBITS, crossoverPoints));
-                    mutationFuncs[mutationChoice](MutationParameter(children.first, generator, mutationDist, NGenes, NBITS));
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, mGenerator, mNGenes, NBITS, mNCrossoverPoints));
+                    mutationFuncs[mMutationChoice](MutationParameter(children.first, mGenerator, mMutationDist, mNGenes, NBITS));
 
-                    mutationFuncs[mutationChoice](MutationParameter(children.second, generator, mutationDist, NGenes, NBITS));
+                    mutationFuncs[mMutationChoice](MutationParameter(children.second, mGenerator, mMutationDist, mNGenes, NBITS));
 
                     size_t hash = children.first.computeHash ();
-                    if(control.count(hash) == 0)
+                    if(mPopControl.count(hash) == 0)
                     {
                         newPop.push_back(children.first);
-                        control.insert(hash);
+                        mPopControl.insert(hash);
                     }
                     hash = children.second.computeHash();
-                    if(control.count(hash) == 0)
+                    if(mPopControl.count(hash) == 0)
                     {
                         newPop.push_back(children.second);
-                        control.insert(hash);
+                        mPopControl.insert(hash);
                     }
 
                 }
-                if(newPop.size () >= popSize)
+                if(newPop.size () >= mPopSize)
                 {
                     break;
                 }
-                std::shuffle(selected.begin (), selected.end(), generator);
+                std::shuffle(selected.begin (), selected.end(), mGenerator);
             }
 
             evaluate(newPop);
-            pop.insert(pop.begin(), newPop.begin(), newPop.end());
+            mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
             nondominatedSort();
             do
             {
-                control.erase(pop.back().computeHash());
-                pop.pop_back();
-            } while(pop.size() > popSize);
+                mPopControl.erase(mPop.back().computeHash());
+                mPop.pop_back();
+            } while(mPop.size() > mPopSize);
 
             computeStatistics();
             computeCDF();
-            onlinePerformance += stats.mean;
-            offlinePerformance += stats.max;
+            mOnlinePerformance += mStats.mean;
+            mOfflinePerformance += mStats.max;
         }
-        onlinePerformance /= iterations;
-        offlinePerformance /= iterations;
+        mOnlinePerformance /= iterations;
+        mOfflinePerformance /= iterations;
 
     }
 
     double getOnlinePerformance() const
     {
-        return onlinePerformance;
+        return mOnlinePerformance;
     }
 
     double getOfflinePerformance() const
     {
-        return offlinePerformance;
+        return mOfflinePerformance;
     }
 
     size_t getNumberOfSelectionOperators() const
@@ -983,35 +983,35 @@ public:
 
     Statistics getStatistics() const
     {
-        return stats;
+        return mStats;
     }
 
     void setSelection(size_t const value)
     {
-        selectionChoice = value < selectionFuncs.size() ? value : selectionChoice;
+        mSelectionChoice = value < selectionFuncs.size() ? value : mSelectionChoice;
     }
 
     void setCrossover(size_t const value)
     {
-        crossoverChoice = value < crossoverFuncs.size() ? value : crossoverChoice;
+        mCrossoverChoice = value < crossoverFuncs.size() ? value : mCrossoverChoice;
     }
 
     void setMutation(size_t const value)
     {
-        mutationChoice = value < mutationFuncs.size() ? value : mutationChoice;
+        mMutationChoice = value < mutationFuncs.size() ? value : mMutationChoice;
     }
 
     string getSelectionOperatorName()
     {
-        return selectionFuncNames[selectionChoice];
+        return mSelectionFuncNames[mSelectionChoice];
     }
     string getCrossoverOperatorName()
     {
-        return crossoverFuncNames[crossoverChoice];
+        return mCrossoverFuncNames[mCrossoverChoice];
     }
     string getMutationOperatorName()
     {
-        return mutationFuncNames[mutationChoice];
+        return mMutationFuncNames[mMutationChoice];
     }
 
     vector<Chromosome> getBestChromosomes(size_t const n)
@@ -1032,36 +1032,36 @@ public:
             }
         };
 
-        size_t const sz = std::min(n, pop.size());
-        std::partial_sort(pop.begin(), pop.begin() + sz, pop.end(), cmp);
+        size_t const sz = std::min(n, mPop.size());
+        std::partial_sort(mPop.begin(), mPop.begin() + sz, mPop.end(), cmp);
         vector<Chromosome> res;
         res.reserve(sz);
         for(size_t i = 0; i < sz; ++i)
         {
-            res.push_back(pop[i].chromosome);
+            res.push_back(mPop[i].chromosome);
         }
         return res;
     }
 
     vector<Individual> const& getPopulation() const
     {
-        return pop;
+        return mPop;
     }
 
     size_t getPopulationSize() const
     {
-        return pop.size();
+        return mPop.size();
     }
 
     vector<unsigned long> getDecodedChromosomes(size_t const migrants)
     {
         vector<unsigned long> res;
-        res.reserve(migrants*NGenes);
+        res.reserve(migrants*mNGenes);
         for(size_t i = 0; i < migrants; ++i)
         {
-            for(size_t j = 0; j < NGenes; ++j)
+            for(size_t j = 0; j < mNGenes; ++j)
             {
-                res.push_back(pop[i].chromosome[j].to_ulong());
+                res.push_back(mPop[i].chromosome[j].to_ulong());
             }
         }
         return res;
@@ -1069,7 +1069,7 @@ public:
 
     size_t getNumberOfGenes() const
     {
-        return NGenes;
+        return mNGenes;
     }
 
     void includeDecodedChromosomes(vector<unsigned long> const& data, size_t const migrants, int const rank, int const procs)
@@ -1082,22 +1082,22 @@ public:
             for(size_t j = 0; j < migrants; ++j)
             {
                 newPop.emplace_back();
-                for(size_t k = 0; k < NGenes; ++k)
+                for(size_t k = 0; k < mNGenes; ++k)
                 {
-                    newPop.back().chromosome.emplace_back(data[i*migrants*NGenes + j*NGenes + k]);
+                    newPop.back().chromosome.emplace_back(data[i*migrants*mNGenes + j*mNGenes + k]);
                 }
 
             }
         }
         evaluate(newPop);
-        pop.insert(pop.begin(), newPop.begin(), newPop.end());
+        mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
         nondominatedSort();
         do
         {
-            control.erase(pop.back().computeHash());
-            pop.pop_back();
-        } while(pop.size() > popSize);
+            mPopControl.erase(mPop.back().computeHash());
+            mPop.pop_back();
+        } while(mPop.size() > mPopSize);
     }
 
 

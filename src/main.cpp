@@ -11,9 +11,7 @@
 #include <omp.h>
 
 #include "../include/TemplateInit.h"
-#include "../include/MicroSimulation.h"
-#include "../include/soga.h"
-#include "../include/Optimizer.h"
+#include "../include/OptimizerInterface.h"
 #include "../include/Race.h"
 
 using std::cout;
@@ -137,18 +135,16 @@ int main(int argc, char *argv[])
 
     if(race1 == "Terran" && race2 == "Terran")
     {
-        //        Optimizer<MOGA<Terran,Terran, Player::first>,MOGA<Terran,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
+
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Terran,Terran, Player::first>,MOGA<Terran,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Terran, Terran> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -158,18 +154,15 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Terran" && race2 == "Zerg")
     {
-        //        Optimizer<MOGA<Terran,Zerg, Player::first>,MOGA<Terran,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Terran,Zerg, Player::first>,MOGA<Terran,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Terran, Zerg> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -178,37 +171,31 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Terran,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        opt.optimize(0, 2, 0, iterations, genPerIt, rank, procs, migrants);
-        end = std::chrono::system_clock::now();
-        opt.determineWinner(std::cout, rank, procs);
-//        for(size_t i = 0; i < 1; ++i)
-//        {
-//            for(size_t j = 1; j <= 1; ++j)
-//            {
-//                for(size_t k = 2; k <= 10; ++k)
-//                {
-//                    Optimizer<MOGA<Terran,Protoss, Player::first>,MOGA<Terran,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-//                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
-//                }
-//            }
-//        }
-//        end = std::chrono::system_clock::now();
-    }
-    else if(race1 == "Zerg" && race2 == "Terran")
-    {
-        //        Optimizer<MOGA<Zerg,Terran, Player::first>,MOGA<Zerg,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Zerg,Terran, Player::first>,MOGA<Zerg,Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
+                }
+            }
+        }
+        end = std::chrono::system_clock::now();
+    }
+    else if(race1 == "Zerg" && race2 == "Terran")
+    {
+        for(size_t i = 0; i < 3; ++i)
+        {
+            for(size_t j = 0; j < 4; ++j)
+            {
+                for(size_t k = 0; k < 3; ++k)
+                {
+                    OptimizerInterface<Zerg, Terran> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -216,18 +203,15 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Zerg")
     {
-        //        Optimizer<MOGA<Zerg,Zerg, Player::first>,MOGA<Zerg,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Zerg,Zerg, Player::first>,MOGA<Zerg,Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Zerg, Zerg> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -235,18 +219,15 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Zerg" && race2 == "Protoss")
     {
-        //        Optimizer<MOGA<Zerg,Protoss, Player::first>,MOGA<Zerg, Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Zerg,Protoss, Player::first>,MOGA<Zerg, Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Zerg, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -255,18 +236,15 @@ int main(int argc, char *argv[])
     else if(race1 == "Protoss" && race2 == "Terran")
     {
 
-        //        Optimizer<MOGA<Protoss,Terran, Player::first>,MOGA<Protoss, Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Protoss,Terran, Player::first>,MOGA<Protoss, Terran, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Protoss, Terran> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -274,18 +252,15 @@ int main(int argc, char *argv[])
     }
     else if(race1 == "Protoss" && race2 == "Zerg")
     {
-        //        Optimizer<MOGA<Protoss,Zerg, Player::first>,MOGA<Protoss, Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Protoss,Zerg, Player::first>,MOGA<Protoss, Zerg, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Protoss, Zerg> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }
@@ -294,18 +269,13 @@ int main(int argc, char *argv[])
     else if(race1 == "Protoss" && race2 == "Protoss")
     {
 
-        //        Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-        //        opt.optimize(0, 0, 0, iterations, genPerIt, rank, procs, migrants);
-        //        end = std::chrono::system_clock::now();
-        //        opt.determineWinner(std::cout, rank, procs);
-
         for(size_t i = 0; i < 3; ++i)
         {
             for(size_t j = 0; j < 4; ++j)
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
-                    Optimizer<MOGA<Protoss,Protoss, Player::first>,MOGA<Protoss,Protoss, Player::second> > opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+                    OptimizerInterface<Protoss, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
                     opt.determineWinner(std::cout, rank, procs);
                 }

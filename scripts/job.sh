@@ -14,4 +14,5 @@ make clean
 make -j10
 cd ..
 export OMP_NUM_THREADS=40
+mkdir -p ./results
 /apps/rrze/bin/mpirun -pernode ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 100 10 100 10 > res.out 
