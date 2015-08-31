@@ -1,13 +1,13 @@
 #ifndef OPTIMIZERINTERFACE
 #define OPTIMIZERINTERFACE
-#include "Optimizer.h"
-#include "moga.h"
+#include "Optimizer_real.h"
+#include "moga_real.h"
 #include "Race.h"
 
 template<typename Race1, typename Race2> class OptimizerInterface
 {
 private:
-    Optimizer<MOGA<Race1, Race2, Player::first>, MOGA<Race1, Race2, Player::second> > mOpt;
+    Optimizer_real<MOGA_real<Race1, Race2, Player::first>, MOGA_real<Race1, Race2, Player::second> > mOpt;
 
 public:
     OptimizerInterface(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)

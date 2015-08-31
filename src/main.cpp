@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 
         for(size_t i = 0; i <= 0; ++i)
         {
-            for(size_t j = 4; j <= 4; ++j)
+            for(size_t j = 1; j <= 1; ++j)
             {
                 for(size_t k = 0; k <= 0; ++k)
                 {

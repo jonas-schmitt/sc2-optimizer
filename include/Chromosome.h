@@ -8,10 +8,10 @@
 using std::vector;
 using std::bitset;
 
-static size_t const NBITS = 32;
+//static size_t const NBITS = 32;
 
-typedef vector<bitset<NBITS>> Chromosome;
-
+//typedef vector<bitset<NBITS>> Chromosome;
+typedef vector<double> Chromosome;
 
 struct Fitness final
 {
@@ -73,10 +73,11 @@ struct Individual
     size_t computeHash() const
     {
         size_t hash = 0;
-        std::hash<bitset<NBITS> > hash_func;
-        for(auto const bits : chromosome)
+        //std::hash<bitset<NBITS> > hash_func;
+        std::hash<double > hash_func;
+        for(auto const gene : chromosome)
         {
-            hash ^= hash_func(bits) + 0x9e3779b9 + (hash<<6) + (hash>>2);
+            hash ^= hash_func(gene) + 0x9e3779b9 + (hash<<6) + (hash>>2);
         }
         return hash;
     }

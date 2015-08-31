@@ -667,7 +667,8 @@ double BaseUnit::computeAirRange(BaseUnit const& other) const
 
 double BaseUnit::getPhenotype(size_t const pos) const
 {
-    return mPhenotype[pos];
+    //return mPhenotype[pos];
+    return mChromosome[mChromosomeStartPosition + pos];
 }
 
 void BaseUnit::setChromosomeStartPosition(size_t const pos)
@@ -679,12 +680,13 @@ void BaseUnit::setChromosome(Chromosome const& chromosome)
 {
 
     mChromosome = chromosome.data();
-    mPhenotype.reserve(mNGenes);
-    double constexpr max_inv = 1.0/(std::pow(2, NBITS) - 1);
-    for(int i = 0; i < mNGenes; ++i)
-    {
-        mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max_inv);
-    }
+//    mPhenotype.reserve(mNGenes);
+//    double constexpr max_inv = 1.0/(std::pow(2, NBITS) - 1);
+//    for(int i = 0; i < mNGenes; ++i)
+//    {
+//        mPhenotype.push_back(static_cast<double>(mChromosome[mChromosomeStartPosition + i].to_ulong())*max_inv);
+//    }
+
     computeTemporaryValues();
 }
 
