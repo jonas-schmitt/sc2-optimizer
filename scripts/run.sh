@@ -6,7 +6,7 @@ make clean
 make -j4
 cd ..
 export OMP_NUM_THREADS=8
-export OMP_SCHEDULE="static"
-./build/opt lists/TerranAttack.txt lists/ProtossAttack.txt 16 2 2 1
+export OMP_SCHEDULE="dynamic,1"
+./build/opt lists/TerranAttack.txt lists/ProtossAttack.txt 32 10 10 1
 #python ./scripts/animation.py
 

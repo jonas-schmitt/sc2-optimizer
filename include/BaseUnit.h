@@ -228,7 +228,7 @@ protected:
             //tmp[5] = 1e1*getPhenotype(9);
             //tmp[6] = 1e2*getPhenotype(11);
             //tmp[7] = 1e3*getPhenotype(12);
-            double const val = a*own.tmp[5] + b*own.getPhenotype(10) + enemyDamage.total*own.tmp[6] + own.tmp[7];
+            double const val = a*own.tmp[5] + 1e1*b*own.getPhenotype(10) + enemyDamage.total*own.tmp[6] + own.tmp[7];
             res2.x *= val;
             res2.y *= val;
         }

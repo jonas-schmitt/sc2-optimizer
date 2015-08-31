@@ -90,11 +90,11 @@ private:
     unordered_set<size_t> mPopControl;
 
     vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> mCrossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover"};
+    vector<string> mCrossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover", "Uniform Crossover per Parameter"};
     vector<string> mMutationFuncNames = {"Bit Flipping Mutation", "Interchanging Mutation", "Reversing Mutation"};
 
     size_t mSelectionChoice = 0;
-    size_t mCrossoverChoice = 2;
+    size_t mCrossoverChoice = 0;
     size_t mMutationChoice = 0;
 
     double mOnlinePerformance = 0.0;
@@ -414,6 +414,33 @@ private:
         return std::make_pair(child1, child2);
     };
 
+    function<pair<Individual, Individual>(CrossoverParameter)> uniformCrossoverPerParameter = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
+        std::bernoulli_distribution dist(0.5);
+        Individual child1(NGenes), child2(NGenes);
+
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            if(dist(generator))
+            {
+                child1.chromosome[i] = parent1.chromosome[i];
+                child2.chromosome[i] = parent2.chromosome[i];
+            }
+            else
+            {
+                child1.chromosome[i] = parent2.chromosome[i];
+                child2.chromosome[i] = parent1.chromosome[i];
+            }
+        }
+        return std::make_pair(child1, child2);
+    };
+
     function<pair<Individual, Individual>(CrossoverParameter)> threeParentCrossover = [&] (CrossoverParameter params)
     {
         vector<Individual> const& parents = *params.parents;
@@ -548,7 +575,7 @@ private:
 
 
     vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
-    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {singlePointCrossover, twoPointCrossover, nPointCrossover, uniformCrossover};
+    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {singlePointCrossover, twoPointCrossover, nPointCrossover, uniformCrossover, uniformCrossoverPerParameter};
     vector<function<void(MutationParameter) > > mutationFuncs = {bitFlipMutation, interchangingMutation, reversingMutation};
 
 
