@@ -1,19 +1,19 @@
-#ifndef _OPTIMIZER_REAL_
-#define _OPTIMIZER_REAL_
+#ifndef _OPTIMIZER_
+#define _OPTIMIZER_
 
 #include <ostream>
 #include <iostream>
 #include <mpi.h>
 
 
-#include "moga_real.h"
+#include "moga_binary.h"
 #include "Chromosome.h"
 
 using std::cout;
 using std::endl;
 
 template <typename GA1, typename GA2>
-class Optimizer_real
+class Optimizer
 {
 private:
     size_t mPopSize;
@@ -31,7 +31,7 @@ private:
 
 
 public:
-    Optimizer_real(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+    Optimizer(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
         : mPopSize(popSize),
           mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
           mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
@@ -61,8 +61,8 @@ public:
             cout << "Generations per Iteration: " << genPerIt << endl;
         }
 
-        Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
-        Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
+        vector<unsigned long> buf1(procs*migrants*mGa1.getNumberOfGenes());
+        vector<unsigned long> buf2(procs*migrants*mGa2.getNumberOfGenes());
 
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -241,10 +241,10 @@ public:
     }
 
     template<typename GA>
-    void migrate(Chromosome& buf, size_t const migrants, GA& ga, int const rank, int const procs)
+    void migrate(vector<unsigned long>& buf, size_t const migrants, GA& ga, int const rank, int const procs)
     {
-        Chromosome sendData = std::move(ga.getChromosomes(migrants));
-        MPI_Allgather(sendData.data(), sendData.size(), MPI_DOUBLE, buf.data(), sendData.size(), MPI_DOUBLE, MPI_COMM_WORLD);
+        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(migrants));
+        MPI_Allgather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
         ga.includeDecodedChromosomes(buf, migrants, rank, procs);
     }
 
@@ -268,21 +268,21 @@ public:
     template<typename GA>
     void gatherPopulation(GA& ga, int const rank, int const procs)
     {
-        Chromosome buf;
+        vector<unsigned long> buf;
         if(rank == 0)
         {
             buf.resize(procs*mPopSize*ga.getNumberOfGenes());
         }
-        Chromosome sendData = std::move(ga.getChromosomes(mPopSize));
+        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(mPopSize));
 
         if(rank == 0)
         {
-            MPI_Gather(sendData.data(), sendData.size(), MPI_DOUBLE, buf.data(), sendData.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
             ga.includeDecodedChromosomes(buf, mPopSize, 0, procs);
         }
         else
         {
-            MPI_Gather(sendData.data(), sendData.size(), MPI_DOUBLE, NULL, sendData.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, NULL, sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
         }
     }
 };

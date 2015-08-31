@@ -1,5 +1,5 @@
-#ifndef _MOGA_REAL_
-#define _MOGA_REAL_
+#ifndef _MOGA_
+#define _MOGA_
 
 #include <vector>
 #include <random>
@@ -44,26 +44,28 @@ struct SelectionParameter
 
 struct CrossoverParameter
 {
-    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t NGenes_, size_t crossoverPoints_)
-        : parents(&parents_), generator(&generator_), NGenes(NGenes_), crossoverPoints(crossoverPoints_) {}
+    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t NGenes_, size_t NBits_, size_t crossoverPoints_)
+        : parents(&parents_), generator(&generator_), NGenes(NGenes_), NBits(NBits_), crossoverPoints(crossoverPoints_) {}
     vector<Individual> const * parents;
     mt19937 *generator;
     size_t NGenes;
+    size_t NBits;
     size_t crossoverPoints;
 };
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution& mutationDist_, size_t NGenes_)
-        : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_) {}
+    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution& mutationDist_, size_t NGenes_, size_t NBits_)
+        : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_), NBits(NBits_) {}
     Individual* individual;
     mt19937* generator;
     std::bernoulli_distribution * mutationDist;
     size_t NGenes;
+    size_t NBits;
 };
 
 template <typename T, typename U, Player const player>
-class MOGA_real final
+class MOGA final
 {
 private:
     double mMutationProbability = 0.01;
@@ -78,6 +80,7 @@ private:
     bernoulli_distribution mFlipCoin;
     std::uniform_int_distribution<size_t> mChooseIndividual;
     std::uniform_real_distribution<double> mSpinWheel;
+    std::uniform_int_distribution<size_t> mChooseBit;
     bernoulli_distribution mMutationDist;
 
     vector<Individual> mPop;
@@ -87,8 +90,8 @@ private:
     unordered_set<size_t> mPopControl;
 
     vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> mCrossoverFuncNames = {"N-Point Crossover", "Uniform Crossover"};
-    vector<string> mMutationFuncNames = {"Uniform Mutation", "Gaussian Mutation"};
+    vector<string> mCrossoverFuncNames = {"Single-Point Crossover", "Two-Point Crossover", "N-Point Crossover", "Uniform Crossover", "Uniform Crossover per Parameter"};
+    vector<string> mMutationFuncNames = {"Bit Flipping Mutation", "Interchanging Mutation", "Reversing Mutation"};
 
     size_t mSelectionChoice = 0;
     size_t mCrossoverChoice = 0;
@@ -213,29 +216,133 @@ private:
 
     // Crossover methods
 
+    function<pair<Individual, Individual>(CrossoverParameter)> singlePointCrossover = [&] (CrossoverParameter params)
+    {
 
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
+        size_t bitPos = dist(generator);
+        size_t const genePos = bitPos / NBits;
+        size_t const coPoint = bitPos - genePos * NBits;
+        Individual child1(NGenes), child2(NGenes);
+        for(size_t i = 0; i < genePos; ++i)
+        {
+            child1.chromosome[i] = parent1.chromosome[i];
+            child2.chromosome[i] = parent2.chromosome[i];
+        }
+        for(size_t i = 0; i < coPoint; ++i)
+        {
+            child1.chromosome[genePos][i] = parent1.chromosome[genePos][i];
+            child2.chromosome[genePos][i] = parent2.chromosome[genePos][i];
+        }
+        for(size_t i = coPoint; i < NBITS; ++i)
+        {
+            child1.chromosome[genePos][i] = parent2.chromosome[genePos][i];
+            child2.chromosome[genePos][i] = parent1.chromosome[genePos][i];
+        }
+        for(size_t i = genePos + 1; i < NGenes; ++i)
+        {
+            child1.chromosome[i] = parent2.chromosome[i];
+            child2.chromosome[i] = parent1.chromosome[i];
+        }
+        return std::make_pair(child1, child2);
+    };
+
+    function<pair<Individual, Individual>(CrossoverParameter)> twoPointCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
+        size_t bitPos1 = dist(generator);
+        size_t bitPos2 = dist(generator);
+        while(bitPos1 / NBits == bitPos2 / NBits)
+        {
+            bitPos2 = dist(generator);
+        }
+
+        if(bitPos1 > bitPos2)
+        {
+            size_t const tmp = bitPos2;
+            bitPos2 = bitPos1;
+            bitPos1 = tmp;
+        }
+        size_t const genePos1 = bitPos1 / NBits;
+        size_t const coPoint1 = bitPos1 - genePos1 * NBits;
+
+        size_t const genePos2 = bitPos2 / NBits;
+        size_t const coPoint2 = bitPos2 - genePos2 * NBits;
+
+        Individual child1(NGenes), child2(NGenes);
+        for(size_t i = 0; i < genePos1; ++i)
+        {
+            child1.chromosome[i] = parent1.chromosome[i];
+            child2.chromosome[i] = parent2.chromosome[i];
+        }
+        for(size_t i = 0; i < coPoint1; ++i)
+        {
+            child1.chromosome[genePos1][i] = parent1.chromosome[genePos1][i];
+            child2.chromosome[genePos1][i] = parent2.chromosome[genePos1][i];
+        }
+        for(size_t i = coPoint1; i < NBits; ++i)
+        {
+            child1.chromosome[genePos1][i] = parent2.chromosome[genePos1][i];
+            child2.chromosome[genePos1][i] = parent1.chromosome[genePos1][i];
+        }
+        for(size_t i = genePos1 + 1; i < genePos2; ++i)
+        {
+            child1.chromosome[i] = parent2.chromosome[i];
+            child2.chromosome[i] = parent1.chromosome[i];
+        }
+        for(size_t i = 0; i < coPoint2; ++i)
+        {
+            child1.chromosome[genePos2][i] = parent2.chromosome[genePos2][i];
+            child2.chromosome[genePos2][i] = parent1.chromosome[genePos2][i];
+        }
+        for(size_t i = coPoint2; i < NBits; ++i)
+        {
+            child1.chromosome[genePos2][i] = parent1.chromosome[genePos2][i];
+            child2.chromosome[genePos2][i] = parent2.chromosome[genePos2][i];
+        }
+        for(size_t i = genePos2 + 1; i < NGenes; ++i)
+        {
+            child1.chromosome[i] = parent1.chromosome[i];
+            child2.chromosome[i] = parent2.chromosome[i];
+        }
+
+        return std::make_pair(child1, child2);
+    };
 
     function<pair<Individual, Individual>(CrossoverParameter)> nPointCrossover = [&] (CrossoverParameter params)
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
         size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
         size_t const crossoverPoints = params.crossoverPoints;
 
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
-        std::uniform_int_distribution<size_t> dist(1,NGenes-2);
+        std::uniform_int_distribution<size_t> dist(1,NGenes*NBits-2);
 
-        vector<size_t> posArray(crossoverPoints);
+        vector<size_t> bitPosArray(crossoverPoints);
         unordered_set<size_t> positions;
-        for(size_t& pos : posArray)
+        for(size_t& bitPos : bitPosArray)
         {
             do {
-            pos = dist(generator);
-            } while(positions.count(pos) == 1);
-            positions.insert(pos);
+            bitPos = dist(generator);
+            } while(positions.count(bitPos / NBits) == 1);
+            positions.insert(bitPos / NBits);
         }
-        std::sort(posArray.begin(), posArray.end());
+        std::sort(bitPosArray.begin(), bitPosArray.end());
         Individual child1(NGenes), child2(NGenes);
         auto swap = [] (Individual& A, Individual& B)
         {
@@ -247,15 +354,27 @@ private:
         Individual& B = child2;
 
         size_t start = 0;
-        for(size_t const pos : posArray)
+        for(size_t const bitPos : bitPosArray)
         {
-            for(size_t i = start; i < pos; ++i)
+            size_t const genePos = bitPos / NBits;
+            size_t const coPoint = bitPos - genePos * NBits;
+            for(size_t i = start; i < genePos; ++i)
             {
                 A.chromosome[i] = parent1.chromosome[i];
                 B.chromosome[i] = parent2.chromosome[i];
             }
+            for(size_t i = 0; i < coPoint; ++i)
+            {
+                A.chromosome[genePos][i] = parent1.chromosome[genePos][i];
+                B.chromosome[genePos][i] = parent2.chromosome[genePos][i];
+            }
             swap(A,B);
-            start = pos + 1;
+            for(size_t i = coPoint; i < NBits; ++i)
+            {
+                A.chromosome[genePos][i] = parent1.chromosome[genePos][i];
+                B.chromosome[genePos][i] = parent2.chromosome[genePos][i];
+            }
+            start = genePos + 1;
         }
         for(size_t i = start; i < NGenes; ++i)
         {
@@ -265,8 +384,37 @@ private:
         return std::make_pair(child1, child2);
     };
 
-
     function<pair<Individual, Individual>(CrossoverParameter)> uniformCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
+        std::bernoulli_distribution dist(0.5);
+        Individual child1(NGenes), child2(NGenes);
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            for(size_t j = 0; j < NBits; ++j)
+            {
+                if(dist(generator))
+                {
+                    child1.chromosome[i][j] = parent1.chromosome[i][j];
+                    child2.chromosome[i][j] = parent2.chromosome[i][j];
+                }
+                else
+                {
+                    child1.chromosome[i][j] = parent2.chromosome[i][j];
+                    child2.chromosome[i][j] = parent1.chromosome[i][j];
+                }
+            }
+        }
+        return std::make_pair(child1, child2);
+    };
+
+    function<pair<Individual, Individual>(CrossoverParameter)> uniformCrossoverPerParameter = [&] (CrossoverParameter params)
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
@@ -293,46 +441,142 @@ private:
         return std::make_pair(child1, child2);
     };
 
+    function<pair<Individual, Individual>(CrossoverParameter)> threeParentCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        size_t const NBits = params.NBits;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+        Individual const& parent3 = parents.at(2);
+        Individual child(NGenes);
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            for(size_t j = 0; j < NBits; ++j)
+            {
 
+                if(parent1.chromosome[i][j] == parent2.chromosome[i][j])
+                {
+                    child.chromosome[i][j] = parent1.chromosome[i][j];
+                }
+                else
+                {
+                    child.chromosome[i][j] = parent3.chromosome[i][j];
+                }
 
-    function<void(MutationParameter)> uniformMutation = [&] (MutationParameter params)
+            }
+        }
+        return std::make_pair(child, child);
+    };
+
+    function<void(MutationParameter)> bitFlipMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
         std::bernoulli_distribution& mutationDist = *params.mutationDist;
         size_t NGenes = params.NGenes;
-        std::uniform_real_distribution<double> valueDist(MIN,MAX);
+        size_t NBits = params.NBits;
         for(size_t i = 0; i < NGenes; ++i)
         {
-            if(mutationDist(generator))
+            for(size_t j = 0; j < NBits; ++j)
             {
-                individual.chromosome[i] = valueDist(generator);
+                if(mutationDist(generator))
+                {
+                    individual.chromosome[i].flip(j);
+                }
             }
         }
     };
 
-    function<void(MutationParameter)> gaussianMutation = [&] (MutationParameter params)
+    function<void(MutationParameter)> interchangingMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
         std::bernoulli_distribution& mutationDist = *params.mutationDist;
         size_t NGenes = params.NGenes;
-        std::normal_distribution<double> valueDist(0,0.5);
+        size_t NBits = params.NBits;
+        vector<pair<size_t, size_t>> positions;
         for(size_t i = 0; i < NGenes; ++i)
         {
-            if(mutationDist(generator))
+            for(size_t j = 0; j < NBits; ++j)
             {
-                double const val = individual.chromosome[i] + valueDist(generator);
-                if(val < MIN) individual.chromosome[i] = MIN;
-                else if(val > MAX) individual.chromosome[i] = MAX;
+                if(mutationDist(generator))
+                {
+                    positions.emplace_back(i,j);
+                }
             }
+        }
+        if(positions.size() == 0) return;
+        std::shuffle(positions.begin(), positions.end(), generator);
+        for(size_t i = 0; i < positions.size()-1; i += 2)
+        {
+            auto const& pos1 = positions[i];
+            auto const& pos2 = positions[i+1];
+            auto tmp = individual.chromosome[pos1.first][pos1.second];
+            individual.chromosome[pos1.first][pos1.second] = individual.chromosome[pos2.first][pos2.second];
+            individual.chromosome[pos2.first][pos2.second] = tmp;
+        }
+    };
+    function<void(MutationParameter)> reversingMutation = [&] (MutationParameter params)
+    {
+        Individual& individual = *params.individual;
+        mt19937& generator = *params.generator;
+        std::bernoulli_distribution& mutationDist = *params.mutationDist;
+        size_t NGenes = params.NGenes;
+        size_t NBits = params.NBits;
+        std::bernoulli_distribution coin(0.5);
+        vector<pair<size_t, size_t>> positions;
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            for(size_t j = 0; j < NBits; ++j)
+            {
+                if(mutationDist(generator))
+                {
+                    positions.emplace_back(i,j);
+                }
+            }
+        }
+        for(auto const& pos1 : positions)
+        {
+            pair<size_t, size_t> pos2;
+            if((coin(generator) && !(pos1.first == NGenes-1 && pos1.second == NBits-1)) || (pos1.first == 0 && pos1.second == 0))
+            {
+                // swap with right neighbour
+                if(pos1.second == NBits-1)
+                {
+                    pos2.first = pos1.first+1;
+                    pos2.second = 0;
+                }
+                else
+                {
+                    pos2.first = pos1.first;
+                    pos2.second = pos1.second + 1;
+                }
+            }
+            else
+            {
+                if(pos1.second == 0)
+                {
+                    pos2.first = pos1.first-1;
+                    pos2.second = NBits-1;
+                }
+                else
+                {
+                    pos2.first = pos1.first;
+                    pos2.second = pos1.second-1;
+                }
+            }
+            auto tmp = individual.chromosome[pos1.first][pos1.second];
+            individual.chromosome[pos1.first][pos1.second] = individual.chromosome[pos2.first][pos2.second];
+            individual.chromosome[pos2.first][pos2.second] = tmp;
         }
     };
 
 
     vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
-    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {nPointCrossover, uniformCrossover};
-    vector<function<void(MutationParameter) > > mutationFuncs = {uniformMutation, gaussianMutation};
+    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {singlePointCrossover, twoPointCrossover, nPointCrossover, uniformCrossover, uniformCrossoverPerParameter};
+    vector<function<void(MutationParameter) > > mutationFuncs = {bitFlipMutation, interchangingMutation, reversingMutation};
 
 
 
@@ -368,7 +612,7 @@ private:
     {
         if(goals.size() != mNGoals)
         {
-            throw std::invalid_argument("MOGA_real::setGoals(): Invalid number of arguments");
+            throw std::invalid_argument("MOGA::setGoals(): Invalid number of arguments");
         }
         #pragma omp parallel
         {
@@ -580,7 +824,7 @@ public:
     typedef T race1;
     typedef U race2;
 
-    MOGA_real(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+    MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
         :  mPopSize(popSize), mGenerator(std::chrono::system_clock::now().time_since_epoch().count()), mFlipCoin(0.5), mChooseIndividual(0,popSize-1), mSpinWheel(0,1.0), mNGoals(nGoals)
     {
 
@@ -617,14 +861,17 @@ public:
             mNCrossoverPoints = countUnitTypes(buildList2);
         }
         if(mNCrossoverPoints > 1) --mNCrossoverPoints;
-        std::uniform_real_distribution<double> valueDist(MIN, MAX);
+        mChooseBit = std::uniform_int_distribution<size_t>(1, mNGenes*NBITS - 1);
         vector<Chromosome> initChroms(mNGoals);
         for(auto& chrom : initChroms)
         {
             chrom.resize(mNGenes);
             for(auto& gene : chrom)
             {
-                gene = valueDist(mGenerator);
+                for(size_t i = 0; i < gene.size(); ++i)
+                {
+                    gene.set(i, mFlipCoin(mGenerator));
+                }
             }
         }
         setGoals(initChroms);
@@ -646,7 +893,10 @@ public:
             {
                 for(auto& gene : chrom)
                 {
-                    gene = valueDist(mGenerator);
+                    for(size_t j = 0; j < gene.size(); ++j)
+                    {
+                        gene.set(j, mFlipCoin(mGenerator));
+                    }
                 }
                 hash = mPop[i].computeHash();
             }
@@ -687,10 +937,10 @@ public:
                 {
                     pair<Individual, Individual> children;
 
-                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, mGenerator, mNGenes, mNCrossoverPoints));
-                    mutationFuncs[mMutationChoice](MutationParameter(children.first, mGenerator, mMutationDist, mNGenes));
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, mGenerator, mNGenes, NBITS, mNCrossoverPoints));
+                    mutationFuncs[mMutationChoice](MutationParameter(children.first, mGenerator, mMutationDist, mNGenes, NBITS));
 
-                    mutationFuncs[mMutationChoice](MutationParameter(children.second, mGenerator, mMutationDist, mNGenes));
+                    mutationFuncs[mMutationChoice](MutationParameter(children.second, mGenerator, mMutationDist, mNGenes, NBITS));
 
                     size_t hash = children.first.computeHash ();
                     if(mPopControl.count(hash) == 0)
@@ -830,15 +1080,15 @@ public:
         return mPop.size();
     }
 
-    Chromosome getChromosomes(size_t const migrants)
+    vector<unsigned long> getDecodedChromosomes(size_t const migrants)
     {
-        Chromosome res;
+        vector<unsigned long> res;
         res.reserve(migrants*mNGenes);
         for(size_t i = 0; i < migrants; ++i)
         {
             for(size_t j = 0; j < mNGenes; ++j)
             {
-                res.push_back(mPop[i].chromosome[j]);
+                res.push_back(mPop[i].chromosome[j].to_ulong());
             }
         }
         return res;
@@ -849,7 +1099,7 @@ public:
         return mNGenes;
     }
 
-    void includeDecodedChromosomes(Chromosome const& data, size_t const migrants, int const rank, int const procs)
+    void includeDecodedChromosomes(vector<unsigned long> const& data, size_t const migrants, int const rank, int const procs)
     {
         vector<Individual> newPop;
         newPop.reserve((procs-1)*migrants);

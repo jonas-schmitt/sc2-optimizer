@@ -6,7 +6,6 @@
 #include <mpi.h>
 
 
-#include "soga.h"
 #include "moga.h"
 #include "Chromosome.h"
 
@@ -62,8 +61,8 @@ public:
             cout << "Generations per Iteration: " << genPerIt << endl;
         }
 
-        vector<unsigned long> buf1(procs*migrants*mGa1.getNumberOfGenes());
-        vector<unsigned long> buf2(procs*migrants*mGa2.getNumberOfGenes());
+        Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
+        Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
 
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -242,10 +241,10 @@ public:
     }
 
     template<typename GA>
-    void migrate(vector<unsigned long>& buf, size_t const migrants, GA& ga, int const rank, int const procs)
+    void migrate(Chromosome& buf, size_t const migrants, GA& ga, int const rank, int const procs)
     {
-        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(migrants));
-        MPI_Allgather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
+        Chromosome sendData = std::move(ga.getChromosomes(migrants));
+        MPI_Allgather(sendData.data(), sendData.size(), MPI_DOUBLE, buf.data(), sendData.size(), MPI_DOUBLE, MPI_COMM_WORLD);
         ga.includeDecodedChromosomes(buf, migrants, rank, procs);
     }
 
@@ -269,21 +268,21 @@ public:
     template<typename GA>
     void gatherPopulation(GA& ga, int const rank, int const procs)
     {
-        vector<unsigned long> buf;
+        Chromosome buf;
         if(rank == 0)
         {
             buf.resize(procs*mPopSize*ga.getNumberOfGenes());
         }
-        vector<unsigned long> sendData = std::move(ga.getDecodedChromosomes(mPopSize));
+        Chromosome sendData = std::move(ga.getChromosomes(mPopSize));
 
         if(rank == 0)
         {
-            MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, buf.data(), sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+            MPI_Gather(sendData.data(), sendData.size(), MPI_DOUBLE, buf.data(), sendData.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
             ga.includeDecodedChromosomes(buf, mPopSize, 0, procs);
         }
         else
         {
-            MPI_Gather(sendData.data(), sendData.size(), MPI_UNSIGNED_LONG, NULL, sendData.size(), MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+            MPI_Gather(sendData.data(), sendData.size(), MPI_DOUBLE, NULL, sendData.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
         }
     }
 };
