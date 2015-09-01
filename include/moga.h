@@ -54,7 +54,7 @@ struct CrossoverParameter
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution& mutationDist_, size_t NGenes_, size_t currentGeneration_, size_t maxGenerations_)
+    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution mutationDist_, size_t NGenes_, size_t currentGeneration_, size_t maxGenerations_)
         : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_) , currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
     Individual* individual;
     mt19937* generator;
@@ -68,7 +68,7 @@ template <typename T, typename U, Player const player>
 class MOGA final
 {
 private:
-    double mMutationProbability = 0.01;
+    double mMutationProbability;
 
     double mBeta = 1.0;
 
@@ -229,27 +229,19 @@ private:
         Individual child1(NGenes), child2(NGenes);
 
         std::uniform_real_distribution<double> dist(0,1);
-        double const u = dist(generator);
-        double const n_c = 3.0;
-        double const exp1 = n_c + 1;
-        double const exp2 = 1/exp1;
 
-        bool const lower = u < 0.5;
-        double const a = lower ? std::pow(2*u, exp2) : std::pow(1.0 / (2.0 * (1.0 - u)), exp2);
+        double constexpr n_c = 3.0;
+        double constexpr exp1 = n_c + 1;
+        double constexpr exp2 = 1/exp1;
 
         for(size_t i = 0; i < NGenes; ++i)
         {
-            double x1, x2;
-            if(parent1.chromosome[i] < parent2.chromosome[i])
-            {
-                x1 = parent1.chromosome[i];
-                x2 = parent2.chromosome[i];
-            }
-            else
-            {
-                x2 = parent1.chromosome[i];
-                x1 = parent2.chromosome[i];
-            }
+            double const u = dist(generator);
+            double const a = u < 0.5 ? std::pow(2*u, exp2) : std::pow(1.0 / (2.0 * (1.0 - u)), exp2);
+
+            double const x1 = parent1.chromosome[i];
+            double const x2 = parent2.chromosome[i];
+
             double const avg = 0.5*(x1 + x2);
             double const diff = 0.5*(x2 - x1);
 //            double const b = 1.0 + 2.0 / (a*diff) * std::min(x1 - MIN, MAX - x2);
@@ -501,7 +493,7 @@ private:
                 double constexpr d = 2/(b*M_PI);
                 double const e = d + c/2;
                 double const f = c/b;
-                double const g = sgn(a)*std::pow((std::sqrt(e*e - f) - e), 0.5);
+                double const g = sgn(a) * std::sqrt(std::sqrt(e*e - f) - e);
 
                 individual.chromosome[i] += std::sqrt(2) * sigma * (MAX - MIN) * g;
             }
@@ -793,6 +785,9 @@ public:
             mNGenes = mSims[0][0].getPlayer2ChromosomeLength();
             mNCrossoverPoints = countUnitTypes(buildList2);
         }
+
+        mMutationProbability = 1.0/mNGenes;
+
         if(mNCrossoverPoints > 1) --mNCrossoverPoints;
         std::uniform_real_distribution<double> valueDist(MIN, MAX);
         vector<Chromosome> initChroms(mNGoals);
@@ -847,6 +842,7 @@ public:
 
         computeStatistics();
         computeCDF();
+
         for(size_t i = 0; i < iterations; ++i)
         {
             // apply genetic algorithm
@@ -860,28 +856,43 @@ public:
             for(size_t count = 0; count < 100; ++count)
             {
                 if(selected.size() == 0) break; // Just for safety
-                for(size_t j = 0; j < selected.size()-1 && newPop.size() < mPopSize; j += 2)
+                #pragma omp parallel
                 {
-                    pair<Individual, Individual> children;
+                    mt19937 generator(mGenerator);
 
-                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, mGenerator, mNGenes, mNCrossoverPoints));
-                    mutationFuncs[mMutationChoice](MutationParameter(children.first, mGenerator, mMutationDist, mNGenes, i, iterations));
-
-                    mutationFuncs[mMutationChoice](MutationParameter(children.second, mGenerator, mMutationDist, mNGenes, i, iterations));
-
-                    size_t hash = children.first.computeHash ();
-                    if(mPopControl.count(hash) == 0)
+                    #pragma omp for schedule(static) nowait
+                    for(size_t j = 0; j < selected.size()-1; j += 2)
                     {
-                        newPop.push_back(children.first);
-                        mPopControl.insert(hash);
-                    }
-                    hash = children.second.computeHash();
-                    if(mPopControl.count(hash) == 0)
-                    {
-                        newPop.push_back(children.second);
-                        mPopControl.insert(hash);
-                    }
+                        if(newPop.size() < mPopSize)
+                        {
+                            pair<Individual, Individual> children;
 
+                            children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNGenes, mNCrossoverPoints));
+                            mutationFuncs[mMutationChoice](MutationParameter(children.first, generator, mMutationDist, mNGenes, i, iterations));
+
+                            mutationFuncs[mMutationChoice](MutationParameter(children.second, generator, mMutationDist, mNGenes, i, iterations));
+                            size_t hash1 = children.first.computeHash ();
+                            size_t hash2 = children.second.computeHash();
+                            #pragma omp critical
+                            {
+
+                                if(mPopControl.count(hash1) == 0)
+                                {
+                                    newPop.push_back(children.first);
+                                    mPopControl.insert(hash1);
+                                }
+                                if(mPopControl.count(hash2) == 0)
+                                {
+                                    newPop.push_back(children.second);
+                                    mPopControl.insert(hash2);
+                                }
+                            }
+                        }
+                    }
+                    #pragma omp single
+                    {
+                        mGenerator = generator;
+                    }
                 }
                 if(newPop.size () >= mPopSize)
                 {
@@ -907,6 +918,7 @@ public:
         }
         mOnlinePerformance /= iterations;
         mOfflinePerformance /= iterations;
+
 
     }
 

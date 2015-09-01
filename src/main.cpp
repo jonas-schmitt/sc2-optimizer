@@ -177,13 +177,16 @@ int main(int argc, char *argv[])
             {
                 for(size_t k = 0; k < 3; ++k)
                 {
+                    start = std::chrono::system_clock::now();
                     OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);
-                    opt.determineWinner(std::cout, rank, procs);
+                    //opt.determineWinner(std::cout, rank, procs);
+                    end = std::chrono::system_clock::now();
+                    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+                    if(rank == 0) std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
                 }
             }
         }
-        end = std::chrono::system_clock::now();
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {
