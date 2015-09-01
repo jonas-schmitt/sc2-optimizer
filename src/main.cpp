@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        for(size_t i = 0; i <= 0; ++i)
+        for(size_t i = 0; i < 3; ++i)
         {
-            for(size_t j = 0; j <= 0; ++j)
+            for(size_t j = 0; j < 6; ++j)
             {
-                for(size_t k = 0; k <= 0; ++k)
+                for(size_t k = 0; k < 3; ++k)
                 {
                     OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
                     opt.optimize(k, j, i, iterations, genPerIt, rank, procs, migrants);

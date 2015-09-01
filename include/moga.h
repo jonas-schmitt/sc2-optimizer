@@ -54,12 +54,14 @@ struct CrossoverParameter
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution& mutationDist_, size_t NGenes_)
-        : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_) {}
+    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution& mutationDist_, size_t NGenes_, size_t currentGeneration_, size_t maxGenerations_)
+        : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_) , currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
     Individual* individual;
     mt19937* generator;
     std::bernoulli_distribution * mutationDist;
     size_t NGenes;
+    size_t currentGeneration;
+    size_t maxGenerations;
 };
 
 template <typename T, typename U, Player const player>
@@ -89,8 +91,8 @@ private:
     unordered_set<size_t> mPopControl;
 
     vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> mCrossoverFuncNames = {"Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover"};
-    vector<string> mMutationFuncNames = {"Uniform Mutation", "Gaussian Mutation"};
+    vector<string> mCrossoverFuncNames = {"Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
+    vector<string> mMutationFuncNames = {"Polynomial Mutation", "Gaussian Mutation", "Uniform Mutation"};
 
     size_t mSelectionChoice = 0;
     size_t mCrossoverChoice = 0;
@@ -226,12 +228,40 @@ private:
 
         Individual child1(NGenes), child2(NGenes);
 
+        std::uniform_real_distribution<double> dist(0,1);
+        double const u = dist(generator);
+        double const n_c = 3.0;
+        double const exp1 = n_c + 1;
+        double const exp2 = 1/exp1;
+
+        bool const lower = u < 0.5;
+        double const a = lower ? std::pow(2*u, exp2) : std::pow(1.0 / (2.0 * (1.0 - u)), exp2);
+
         for(size_t i = 0; i < NGenes; ++i)
         {
-            double const avg = 0.5*(parent1.chromosome[i] + parent2.chromosome[i]);
-            double const diff = 0.5*mBeta*std::abs(parent1.chromosome[i] - parent2.chromosome[i]);
-            child1.chromosome[i] = avg + diff;
-            child2.chromosome[i] = avg - diff;
+            double x1, x2;
+            if(parent1.chromosome[i] < parent2.chromosome[i])
+            {
+                x1 = parent1.chromosome[i];
+                x2 = parent2.chromosome[i];
+            }
+            else
+            {
+                x2 = parent1.chromosome[i];
+                x1 = parent2.chromosome[i];
+            }
+            double const avg = 0.5*(x1 + x2);
+            double const diff = 0.5*(x2 - x1);
+//            double const b = 1.0 + 2.0 / (a*diff) * std::min(x1 - MIN, MAX - x2);
+//            double const c = 2 - std::pow(b, -exp1);
+//            double const d = lower ? std::pow(c*u, exp2) : std::pow(1.0/(2 - c*u), exp2);
+//            double const y1 = avg - d * diff;
+//            double const y2 = avg + d * diff;
+            double const y1 = avg - a * diff;
+            double const y2 = avg + a * diff;
+            child1.chromosome[i] = y1;
+            child2.chromosome[i] = y2;
+
         }
         return std::make_pair(child1, child2);
 
@@ -316,6 +346,119 @@ private:
         return std::make_pair(child1, child2);
     };
 
+    function<pair<Individual, Individual>(CrossoverParameter)> intermediateCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
+        std::uniform_real_distribution<double> dist(0.25,1.25);
+        Individual child1(NGenes), child2(NGenes);
+
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            child1.chromosome[i] = parent1.chromosome[i] + dist(generator)*(parent2.chromosome[i] - parent1.chromosome[i]);
+            child2.chromosome[i] = parent1.chromosome[i] + dist(generator)*(parent2.chromosome[i] - parent1.chromosome[i]);
+        }
+        return std::make_pair(child1, child2);
+    };
+
+    function<pair<Individual, Individual>(CrossoverParameter)> lineCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
+        std::uniform_real_distribution<double> dist(0.25,1.25);
+        Individual child1(NGenes), child2(NGenes);
+
+        double const alpha1 = dist(generator);
+        double const alpha2 = dist(generator);
+
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            child1.chromosome[i] = parent1.chromosome[i] + alpha1*(parent2.chromosome[i] - parent1.chromosome[i]);
+            child2.chromosome[i] = parent1.chromosome[i] + alpha2*(parent2.chromosome[i] - parent1.chromosome[i]);
+        }
+        return std::make_pair(child1, child2);
+    };
+
+    function<pair<Individual, Individual>(CrossoverParameter)> arithmeticCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        size_t const NGenes = params.NGenes;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
+        std::uniform_real_distribution<double> dist(0,1);
+        Individual child1(NGenes), child2(NGenes);
+
+        double const alpha1 = dist(generator);
+        double const alpha2 = dist(generator);
+
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            child1.chromosome[i] = alpha1*parent1.chromosome[i] + (1.0-alpha1)*parent2.chromosome[i];
+            child2.chromosome[i] = alpha2*parent1.chromosome[i] + (1.0-alpha2)*parent2.chromosome[i];
+        }
+        return std::make_pair(child1, child2);
+    };
+
+
+    function<void(MutationParameter)> polynomialMutation = [&] (MutationParameter params)
+    {
+        Individual& individual = *params.individual;
+        mt19937& generator = *params.generator;
+        std::bernoulli_distribution& mutationDist = *params.mutationDist;
+        size_t NGenes = params.NGenes;
+
+        // comment in for adaptive mutation probability
+        //double const t = static_cast<double>(params.currentGeneration);
+        //double const t_max = static_cast<double>(params.maxGenerations);
+
+        //double const len_inv = 1.0 / static_cast<double>(individual.chromosome.size());
+        //double const prob = len_inv + (t / t_max)*(1 - len_inv);
+        //std::bernoulli_distribution mutationDist(prob);
+
+        double const n_m = 100.0; // + t;
+        std::uniform_real_distribution<double> dist(0,1);
+        double const exp1 = n_m + 1;
+        double const exp2 = 1/exp1;
+        double const max_range = MAX - MIN;
+
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            if(mutationDist(generator))
+            {
+                double const u = dist(generator);
+                if(u < 0.5)
+                {
+                    double const a = 2*u;
+                    double const b = 1 - a;
+                    double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
+                    double const d = std::pow(1-c, exp1);
+                    double const delta = std::pow(a + b*d, exp2) - 1;
+                    individual.chromosome[i] += delta * max_range;
+                }
+                else
+                {
+                    double const a = 2*(1 - u);
+                    double const b = 2*(u - 0.5);
+                    double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
+                    double const d = std::pow(1-c, exp1);
+                    double const delta = 1 - std::pow(a + b * d, exp2);
+                    individual.chromosome[i] += delta * max_range;
+                }
+            }
+        }
+
+
+    };
 
 
     function<void(MutationParameter)> uniformMutation = [&] (MutationParameter params)
@@ -340,24 +483,35 @@ private:
         mt19937& generator = *params.generator;
         std::bernoulli_distribution& mutationDist = *params.mutationDist;
         size_t NGenes = params.NGenes;
-        std::normal_distribution<double> valueDist(0,0.5);
+        double constexpr sigma = 1.0/30.0;
+        double constexpr tmp = std::sqrt(2)*(MAX-MIN)*sigma;
+        std::uniform_real_distribution<double> dist(0,1);
+
         for(size_t i = 0; i < NGenes; ++i)
         {
             if(mutationDist(generator))
             {
-                double const val = individual.chromosome[i] + valueDist(generator);
-                if(val < MIN) individual.chromosome[i] = MIN;
-                else if(val > MAX) individual.chromosome[i] = MAX;
+                double const u = dist(generator);
+                double const x = individual.chromosome[i];
+                double const u_min = 0.5 * std::erf((MIN - x)/tmp) + 0.5;
+                double const u_max = 0.5 * std::erf((MAX - x)/tmp) + 0.5;
+                double const a = u < 0.5 ? 2*u_min*(1 - 2*u) : 2*u_max*(2*u - 1);
+                double constexpr b = 8*(M_PI - 3)/(3*M_PI*(4 - M_PI));
+                double const c = std::log(1-a*a);
+                double constexpr d = 2/(b*M_PI);
+                double const e = d + c/2;
+                double const f = c/b;
+                double const g = sgn(a)*std::pow((std::sqrt(e*e - f) - e), 0.5);
+
+                individual.chromosome[i] += std::sqrt(2) * sigma * (MAX - MIN) * g;
             }
         }
     };
 
 
     vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
-    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {simulatedBinaryCrossover, nPointCrossover, uniformCrossover};
-    vector<function<void(MutationParameter) > > mutationFuncs = {uniformMutation, gaussianMutation};
-
-
+    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
+    vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
 
 
 
@@ -706,14 +860,14 @@ public:
             for(size_t count = 0; count < 100; ++count)
             {
                 if(selected.size() == 0) break; // Just for safety
-                for(size_t i = 0; i < selected.size()-1 && newPop.size() < mPopSize; i += 2)
+                for(size_t j = 0; j < selected.size()-1 && newPop.size() < mPopSize; j += 2)
                 {
                     pair<Individual, Individual> children;
 
-                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[i], *selected[i+1]}, mGenerator, mNGenes, mNCrossoverPoints));
-                    mutationFuncs[mMutationChoice](MutationParameter(children.first, mGenerator, mMutationDist, mNGenes));
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, mGenerator, mNGenes, mNCrossoverPoints));
+                    mutationFuncs[mMutationChoice](MutationParameter(children.first, mGenerator, mMutationDist, mNGenes, i, iterations));
 
-                    mutationFuncs[mMutationChoice](MutationParameter(children.second, mGenerator, mMutationDist, mNGenes));
+                    mutationFuncs[mMutationChoice](MutationParameter(children.second, mGenerator, mMutationDist, mNGenes, i, iterations));
 
                     size_t hash = children.first.computeHash ();
                     if(mPopControl.count(hash) == 0)

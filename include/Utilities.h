@@ -7,18 +7,18 @@
 using std::cout;
 using std::endl;
 
-static double const LIMIT = 10000;
-static double const EPS = 1e-10;
-static double const GASTOMINERALS = 1.5;
-static double const STDLEN = 1./std::sqrt(2);
+static double constexpr LIMIT = 10000;
+static double constexpr EPS = 1e-10;
+static double constexpr GASTOMINERALS = 1.5;
+static double constexpr STDLEN = 1./std::sqrt(2);
 //static long const INTLIMIT = std::numeric_limits<int>::max();
 //static long const BOUND = std::pow(2,16);
 
-static double const MIN = 0.0;
-static double const MAX = 1.0; //static_cast<int>(std::min(INTLIMIT,BOUND));
-static double const MAX_INV = 1.0/MAX;
+static double constexpr MIN = 0.0;
+static double constexpr MAX = 1.0; //static_cast<int>(std::min(INTLIMIT,BOUND));
+static double constexpr MAX_INV = 1.0/MAX;
 
-static double const INF = std::numeric_limits<double>::max();
+static double constexpr INF = std::numeric_limits<double>::max();
 
 
 struct Vec2D final
@@ -188,6 +188,10 @@ enum class Player
 {
     first, second
 };
+
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 
 #endif // UTILITIES_H
