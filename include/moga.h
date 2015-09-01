@@ -54,12 +54,11 @@ struct CrossoverParameter
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, std::bernoulli_distribution mutationDist_, size_t NGenes_, size_t currentGeneration_, size_t maxGenerations_)
-        : individual(&individual_), generator(&generator_), mutationDist(&mutationDist_), NGenes(NGenes_) , currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
+    MutationParameter(Individual& individual_, mt19937& generator_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
+        : individual(&individual_), generator(&generator_), geneToMutate(geneToMutate_), currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
     Individual* individual;
     mt19937* generator;
-    std::bernoulli_distribution * mutationDist;
-    size_t NGenes;
+    size_t geneToMutate;
     size_t currentGeneration;
     size_t maxGenerations;
 };
@@ -88,7 +87,7 @@ private:
 
     vector<vector<MicroSimulation<T,U>>> mSims;
 
-    unordered_set<size_t> mPopControl;
+
 
     vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
     vector<string> mCrossoverFuncNames = {"Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
@@ -105,6 +104,20 @@ private:
 
     size_t mTournamentSize = 4;
     size_t mNCrossoverPoints;
+
+    size_t mIndividualToMutate;
+    size_t mGeneToMutate;
+
+    size_t mMutationCount = 0;
+
+    void mutationClock()
+    {
+        double const u = mSpinWheel(mGenerator);
+        double const l = mNGenes * (-std::log(1-u));
+        size_t const tmp = static_cast<size_t>(mGeneToMutate + l);
+        mIndividualToMutate = tmp / mNGenes;
+        mGeneToMutate = tmp % mNGenes;
+    }
 
 
 
@@ -406,8 +419,7 @@ private:
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
-        std::bernoulli_distribution& mutationDist = *params.mutationDist;
-        size_t NGenes = params.NGenes;
+        size_t const i = params.geneToMutate;
 
         // comment in for adaptive mutation probability
         //double const t = static_cast<double>(params.currentGeneration);
@@ -423,32 +435,25 @@ private:
         double const exp2 = 1/exp1;
         double const max_range = MAX - MIN;
 
-        for(size_t i = 0; i < NGenes; ++i)
+        double const u = dist(generator);
+        if(u < 0.5)
         {
-            if(mutationDist(generator))
-            {
-                double const u = dist(generator);
-                if(u < 0.5)
-                {
-                    double const a = 2*u;
-                    double const b = 1 - a;
-                    double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
-                    double const d = std::pow(1-c, exp1);
-                    double const delta = std::pow(a + b*d, exp2) - 1;
-                    individual.chromosome[i] += delta * max_range;
-                }
-                else
-                {
-                    double const a = 2*(1 - u);
-                    double const b = 2*(u - 0.5);
-                    double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
-                    double const d = std::pow(1-c, exp1);
-                    double const delta = 1 - std::pow(a + b * d, exp2);
-                    individual.chromosome[i] += delta * max_range;
-                }
-            }
+            double const a = 2*u;
+            double const b = 1 - a;
+            double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
+            double const d = std::pow(1-c, exp1);
+            double const delta = std::pow(a + b*d, exp2) - 1;
+            individual.chromosome[i] += delta * max_range;
         }
-
+        else
+        {
+            double const a = 2*(1 - u);
+            double const b = 2*(u - 0.5);
+            double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
+            double const d = std::pow(1-c, exp1);
+            double const delta = 1 - std::pow(a + b * d, exp2);
+            individual.chromosome[i] += delta * max_range;
+        }
 
     };
 
@@ -457,47 +462,36 @@ private:
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
-        std::bernoulli_distribution& mutationDist = *params.mutationDist;
-        size_t NGenes = params.NGenes;
+        size_t const i = params.geneToMutate;
         std::uniform_real_distribution<double> valueDist(MIN,MAX);
-        for(size_t i = 0; i < NGenes; ++i)
-        {
-            if(mutationDist(generator))
-            {
-                individual.chromosome[i] = valueDist(generator);
-            }
-        }
+        individual.chromosome[i] = valueDist(generator);
     };
 
     function<void(MutationParameter)> gaussianMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
-        std::bernoulli_distribution& mutationDist = *params.mutationDist;
-        size_t NGenes = params.NGenes;
+        size_t const i = params.geneToMutate;
         double constexpr sigma = 1.0/30.0;
         double constexpr tmp = std::sqrt(2)*(MAX-MIN)*sigma;
         std::uniform_real_distribution<double> dist(0,1);
 
-        for(size_t i = 0; i < NGenes; ++i)
-        {
-            if(mutationDist(generator))
-            {
-                double const u = dist(generator);
-                double const x = individual.chromosome[i];
-                double const u_min = 0.5 * std::erf((MIN - x)/tmp) + 0.5;
-                double const u_max = 0.5 * std::erf((MAX - x)/tmp) + 0.5;
-                double const a = u < 0.5 ? 2*u_min*(1 - 2*u) : 2*u_max*(2*u - 1);
-                double constexpr b = 8*(M_PI - 3)/(3*M_PI*(4 - M_PI));
-                double const c = std::log(1-a*a);
-                double constexpr d = 2/(b*M_PI);
-                double const e = d + c/2;
-                double const f = c/b;
-                double const g = sgn(a) * std::sqrt(std::sqrt(e*e - f) - e);
 
-                individual.chromosome[i] += std::sqrt(2) * sigma * (MAX - MIN) * g;
-            }
-        }
+        double const u = dist(generator);
+        double const x = individual.chromosome[i];
+        double const u_min = 0.5 * std::erf((MIN - x)/tmp) + 0.5;
+        double const u_max = 0.5 * std::erf((MAX - x)/tmp) + 0.5;
+        double const a = u < 0.5 ? 2*u_min*(1 - 2*u) : 2*u_max*(2*u - 1);
+        double constexpr b = 8*(M_PI - 3)/(3*M_PI*(4 - M_PI));
+        double const c = std::log(1-a*a);
+        double constexpr d = 2/(b*M_PI);
+        double const e = d + c/2;
+        double const f = c/b;
+        double const g = sgn(a) * std::sqrt(std::sqrt(e*e - f) - e);
+
+        individual.chromosome[i] += std::sqrt(2) * sigma * (MAX - MIN) * g;
+
+
     };
 
 
@@ -753,6 +747,7 @@ public:
         :  mPopSize(popSize), mGenerator(std::chrono::system_clock::now().time_since_epoch().count()), mFlipCoin(0.5), mChooseIndividual(0,popSize-1), mSpinWheel(0,1.0), mNGoals(nGoals)
     {
 
+
         mSims.reserve(omp_get_num_threads());
         #pragma omp parallel
         {
@@ -813,17 +808,12 @@ public:
         {
             Chromosome& chrom = mPop[i].chromosome;
             chrom.resize(mNGenes);
-            double hash;
-            do
+
+            for(auto& gene : chrom)
             {
-                for(auto& gene : chrom)
-                {
-                    gene = valueDist(mGenerator);
-                }
-                hash = mPop[i].computeHash();
+                gene = valueDist(mGenerator);
             }
-            while(mPopControl.count(hash) == 1);
-            mPopControl.insert(hash);
+
         }
         evaluate(mPop);
         computeStatistics();
@@ -833,6 +823,10 @@ public:
 
     void optimize(vector<Chromosome> const& goals, size_t const iterations)
     {
+        mMutationCount = 0;
+        mIndividualToMutate = 0;
+        mGeneToMutate = 0;
+
         mOnlinePerformance = 0.0;
         mOfflinePerformance = 0.0;
 
@@ -843,8 +837,11 @@ public:
         computeStatistics();
         computeCDF();
 
+
         for(size_t i = 0; i < iterations; ++i)
         {
+
+            mutationClock();
             // apply genetic algorithm
 
             vector<Individual> newPop;
@@ -853,61 +850,49 @@ public:
 
             selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mPop, mTournamentSize));
 
-            for(size_t count = 0; count < 100; ++count)
+            if(selected.size() == 0) break; // Just for safety
+            #pragma omp parallel
             {
-                if(selected.size() == 0) break; // Just for safety
-                #pragma omp parallel
+                mt19937 generator(mGenerator);
+
+                vector<Individual> newPop_local;
+                newPop_local.reserve(selected.size() / 2 / omp_get_num_threads());
+                #pragma omp for schedule(static) nowait
+                for(size_t j = 0; j < selected.size()-1; j += 2)
                 {
-                    mt19937 generator(mGenerator);
-
-                    #pragma omp for schedule(static) nowait
-                    for(size_t j = 0; j < selected.size()-1; j += 2)
-                    {
-                        if(newPop.size() < mPopSize)
-                        {
-                            pair<Individual, Individual> children;
-
-                            children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNGenes, mNCrossoverPoints));
-                            mutationFuncs[mMutationChoice](MutationParameter(children.first, generator, mMutationDist, mNGenes, i, iterations));
-
-                            mutationFuncs[mMutationChoice](MutationParameter(children.second, generator, mMutationDist, mNGenes, i, iterations));
-                            size_t hash1 = children.first.computeHash ();
-                            size_t hash2 = children.second.computeHash();
-                            #pragma omp critical
-                            {
-
-                                if(mPopControl.count(hash1) == 0)
-                                {
-                                    newPop.push_back(children.first);
-                                    mPopControl.insert(hash1);
-                                }
-                                if(mPopControl.count(hash2) == 0)
-                                {
-                                    newPop.push_back(children.second);
-                                    mPopControl.insert(hash2);
-                                }
-                            }
-                        }
-                    }
-                    #pragma omp single
-                    {
-                        mGenerator = generator;
-                    }
+                    pair<Individual, Individual> children;
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNGenes, mNCrossoverPoints));
+                    newPop_local.push_back(children.first);
+                    newPop_local.push_back(children.second);
                 }
-                if(newPop.size () >= mPopSize)
+                #pragma omp single nowait
                 {
-                    break;
+                    mGenerator = generator;
                 }
-                std::shuffle(selected.begin (), selected.end(), mGenerator);
+                #pragma omp critical
+                {
+                    newPop.insert(newPop.end(), newPop_local.begin(), newPop_local.end());
+                }
             }
 
+
+            mMutationCount += newPop.size();
+            size_t pos = 0, pos_old;
+            while(mIndividualToMutate < mMutationCount)
+            {
+                pos_old = pos;
+                size_t const offset = mMutationCount - mIndividualToMutate;
+                pos = newPop.size() > offset ? newPop.size() - offset : 0;
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], mGenerator, mGeneToMutate, i, iterations));
+                mutationClock();
+                mMutationCount = mMutationCount > (pos-pos_old) ? mMutationCount - (pos - pos_old) : 0;
+            }
             evaluate(newPop);
             mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
             nondominatedSort();
             do
             {
-                mPopControl.erase(mPop.back().computeHash());
                 mPop.pop_back();
             } while(mPop.size() > mPopSize);
 
@@ -915,9 +900,9 @@ public:
             computeCDF();
             mOnlinePerformance += mStats.mean;
             mOfflinePerformance += mStats.max;
-        }
-        mOnlinePerformance /= iterations;
-        mOfflinePerformance /= iterations;
+    }
+    mOnlinePerformance /= iterations;
+    mOfflinePerformance /= iterations;
 
 
     }
@@ -1061,7 +1046,6 @@ public:
         nondominatedSort();
         do
         {
-            mPopControl.erase(mPop.back().computeHash());
             mPop.pop_back();
         } while(mPop.size() > mPopSize);
     }
