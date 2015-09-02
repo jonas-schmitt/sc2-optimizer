@@ -33,10 +33,11 @@ using std::endl;
 
 struct SelectionParameter
 {
-    SelectionParameter(size_t N_, mt19937& generator_, vector<Individual>& pop_, size_t tournamentSize_)
-        : N(N_), generator(&generator_), pop(&pop_),  tournamentSize(tournamentSize_){}
+    SelectionParameter(size_t N_, mt19937& generator_, std::uniform_real_distribution<double>& distribution_, vector<Individual>& pop_, size_t tournamentSize_)
+        : N(N_), generator(&generator_), distribution(&distribution_), pop(&pop_),  tournamentSize(tournamentSize_){}
     size_t N;
     mt19937 *generator;
+    std::uniform_real_distribution<double> *distribution;
     vector<Individual> *pop;
     size_t tournamentSize;
 
@@ -44,20 +45,22 @@ struct SelectionParameter
 
 struct CrossoverParameter
 {
-    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t NGenes_, size_t crossoverPoints_)
-        : parents(&parents_), generator(&generator_), NGenes(NGenes_), crossoverPoints(crossoverPoints_) {}
+    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, std::uniform_real_distribution<double>& distribution_, size_t NGenes_, size_t crossoverPoints_)
+        : parents(&parents_), generator(&generator_), distribution(&distribution_), NGenes(NGenes_), crossoverPoints(crossoverPoints_) {}
     vector<Individual> const * parents;
     mt19937 *generator;
+    std::uniform_real_distribution<double> *distribution;
     size_t NGenes;
     size_t crossoverPoints;
 };
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
-        : individual(&individual_), generator(&generator_), geneToMutate(geneToMutate_), currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
+    MutationParameter(Individual& individual_, mt19937& generator_, std::uniform_real_distribution<double>& distribution_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
+        : individual(&individual_), generator(&generator_), distribution(&distribution_), geneToMutate(geneToMutate_), currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
     Individual* individual;
     mt19937* generator;
+    std::uniform_real_distribution<double> *distribution;
     size_t geneToMutate;
     size_t currentGeneration;
     size_t maxGenerations;
@@ -69,8 +72,6 @@ class MOGA final
 private:
     double mMutationProbability;
 
-    double mBeta = 1.0;
-
     Statistics mStats;
 
     size_t mPopSize;
@@ -78,10 +79,8 @@ private:
     size_t mNGenes;
 
     mt19937 mGenerator;
-    bernoulli_distribution mFlipCoin;
-    std::uniform_int_distribution<size_t> mChooseIndividual;
-    std::uniform_real_distribution<double> mSpinWheel;
-    bernoulli_distribution mMutationDist;
+
+    std::uniform_real_distribution<double> mDistribution;
 
     vector<Individual> mPop;
 
@@ -90,7 +89,7 @@ private:
 
 
     vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> mCrossoverFuncNames = {"Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
+    vector<string> mCrossoverFuncNames = {"Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover", "Adaptive SBX"};
     vector<string> mMutationFuncNames = {"Polynomial Mutation", "Gaussian Mutation", "Uniform Mutation"};
 
     size_t mSelectionChoice = 0;
@@ -112,7 +111,7 @@ private:
 
     void mutationClock()
     {
-        double const u = mSpinWheel(mGenerator);
+        double const u = mDistribution(mGenerator);
         double const l = mNGenes * (-std::log(1-u));
         size_t const tmp = static_cast<size_t>(mGeneToMutate + l);
         mIndividualToMutate = tmp / mNGenes;
@@ -169,8 +168,9 @@ private:
     {
         size_t const N = params.N;
         mt19937& generator = *params.generator;
+        std::uniform_real_distribution<double>& dist = *params.distribution;
         vector<Individual>& pop = *params.pop;
-        std::uniform_real_distribution<double> dist(0,1.0);
+
         auto func = [&] (double const p)
         {
             auto cmp = [] (Individual const& ind, double val)
@@ -235,39 +235,211 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
+        std::uniform_real_distribution<double>& dist = *params.distribution;
         size_t const NGenes = params.NGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
         Individual child1(NGenes), child2(NGenes);
 
-        std::uniform_real_distribution<double> dist(0,1);
 
-        double constexpr n_c = 3.0;
-        double constexpr exp1 = n_c + 1;
-        double constexpr exp2 = 1/exp1;
+        double constexpr n_c = 2.0;
+        double constexpr exp1 = n_c + 1.0;
+        double constexpr exp2 = 1.0 / exp1;
+        double const u = dist(generator);
+        double const a = u < 0.5 ? std::pow(2.0 * u, exp2) : std::pow(1.0 / (2.0 * (1.0 - u)), exp2);
 
         for(size_t i = 0; i < NGenes; ++i)
         {
-            double const u = dist(generator);
-            double const a = u < 0.5 ? std::pow(2*u, exp2) : std::pow(1.0 / (2.0 * (1.0 - u)), exp2);
-
             double const x1 = parent1.chromosome[i];
             double const x2 = parent2.chromosome[i];
 
-            double const avg = 0.5*(x1 + x2);
-            double const diff = 0.5*(x2 - x1);
-//            double const b = 1.0 + 2.0 / (a*diff) * std::min(x1 - MIN, MAX - x2);
-//            double const c = 2 - std::pow(b, -exp1);
-//            double const d = lower ? std::pow(c*u, exp2) : std::pow(1.0/(2 - c*u), exp2);
-//            double const y1 = avg - d * diff;
-//            double const y2 = avg + d * diff;
+            double const avg = 0.5 * (x1 + x2);
+            double const diff = 0.5 * (x2 - x1);
             double const y1 = avg - a * diff;
             double const y2 = avg + a * diff;
             child1.chromosome[i] = y1;
             child2.chromosome[i] = y2;
 
         }
+        return std::make_pair(child1, child2);
+
+    };
+
+    function<pair<Individual, Individual>(CrossoverParameter)> adaptiveSimulatedBinaryCrossover = [&] (CrossoverParameter params)
+    {
+        vector<Individual> const& parents = *params.parents;
+        mt19937 &generator = *params.generator;
+        std::uniform_real_distribution<double>& dist = *params.distribution;
+        size_t const NGenes = params.NGenes;
+        Individual const& parent1 = parents.at(0);
+        Individual const& parent2 = parents.at(1);
+
+        Individual child1(NGenes), child2(NGenes);
+        double const u = dist(generator);
+
+        bool const contraction = u < 0.5;
+
+        double constexpr n_c = 2.0;
+        double constexpr exp = 1.0/(n_c + 1.0);
+
+        double const tmp1 = 2.0 * u;
+        double const tmp2 = 1.0 / (2.0 * (1.0 - u));
+
+        double const a = contraction ? std::pow(tmp1, exp) : std::pow(tmp2, exp);
+
+        for(size_t i = 0; i < NGenes; ++i)
+        {
+            double const x1 = parent1.chromosome[i];
+            double const x2 = parent2.chromosome[i];
+
+            double const avg = 0.5 * (x1 + x2);
+            double const diff = 0.5 * (x2 - x1);
+            double const y1 = avg - a * diff;
+            double const y2 = avg + a * diff;
+            child1.chromosome[i] = y1;
+            child2.chromosome[i] = y2;
+
+        }
+
+        child1.fitness = 0;
+        child2.fitness = 0;
+        for(size_t j = 0; j < mNGoals; ++j)
+        {
+            if(player == Player::first)
+            {
+                mSims[omp_get_thread_num()][j].setPlayer1Chromosome(child1.chromosome);
+                child1.fitness += mSims[omp_get_thread_num()][j].run(true, Player::first);
+                mSims[omp_get_thread_num()][j].setPlayer1Chromosome(child2.chromosome);
+                child2.fitness += mSims[omp_get_thread_num()][j].run(true, Player::first);
+            }
+            else
+            {
+                mSims[omp_get_thread_num()][j].setPlayer2Chromosome(child1.chromosome);
+                child1.fitness += mSims[omp_get_thread_num()][j].run(true, Player::second);
+                mSims[omp_get_thread_num()][j].setPlayer2Chromosome(child2.chromosome);
+                child2.fitness += mSims[omp_get_thread_num()][j].run(true, Player::second);
+            }
+        }
+        child1.fitness /= static_cast<double>(mNGoals);
+        child2.fitness /= static_cast<double>(mNGoals);
+
+        // First child
+
+
+        bool const worse1 = parent1.dominates(child1) && parent2.dominates(child1);
+        bool const better1 = child1.dominates(parent1) && child1.dominates(parent2);
+        bool const worse2 = parent1.dominates(child2) && parent2.dominates(child2);
+        bool const better2 = child2.dominates(parent1) && child2.dominates(parent2);
+
+        double constexpr alpha = 1.5;
+
+        if(contraction)
+        {
+            double n_c1, n_c2;
+            if(better1)
+            {
+                n_c1 = std::max(0.0, std::min(50.0, (1.0+n_c)/alpha - 1.0));
+            }
+            else if(worse1)
+            {
+                n_c1 = std::max(0.0, std::min(50.0, alpha*(1.0+n_c) - 1.0));
+            }
+            else
+            {
+                n_c1 = n_c;
+            }
+
+            if(better2)
+            {
+                if(better1) n_c2 = n_c1;
+                else n_c2 = std::max(0.0, std::min(50.0, (1.0+n_c)/alpha - 1.0));
+            }
+            else if(worse2)
+            {
+                if(worse1) n_c2 = n_c1;
+                else n_c2 = std::max(0.0, std::min(50.0, alpha*(1.0+n_c) - 1.0));
+            }
+            else
+            {
+                n_c2 = n_c;
+            }
+            double const exp1 = 1.0 / (n_c1 + 1.0);
+            double const a1 = std::pow(tmp2, exp1);
+
+            double const exp2 = 1.0 / (n_c2 + 1.0);
+            double const a2 = std::pow(tmp2, exp2);
+
+            for(size_t i = 0; i < NGenes; ++i)
+            {
+                double const x1 = parent1.chromosome[i];
+                double const x2 = parent2.chromosome[i];
+
+                double const avg = 0.5 * (x1 + x2);
+                double const diff = 0.5 * (x2 - x1);
+                double const y1 = avg - a1 * diff;
+                double const y2 = avg + a2 * diff;
+                child1.chromosome[i] = y1;
+                child2.chromosome[i] = y2;
+
+            }
+        }
+        else
+        {
+            for(size_t i = 0; i < NGenes; ++i)
+            {
+                double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(parent2.chromosome[i] - parent1.chromosome[i]));
+                double n_c1, n_c2;
+                if(better1)
+                {
+                    n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+                }
+                else if(worse1)
+                {
+                    n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+                }
+                else
+                {
+                    n_c1 = n_c;
+                }
+
+                if(better2)
+                {
+                    if(better1) n_c2 = n_c1;
+                    else n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+                }
+                else if(worse2)
+                {
+                    if(worse1) n_c2 = n_c1;
+                    else n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+                }
+                else
+                {
+                    n_c2 = n_c;
+                }
+
+
+                double const exp1 = 1.0 / (n_c1 + 1.0);
+                double const a1 = std::pow(tmp1, exp1);
+
+                double const exp2 = 1.0 / (n_c2 + 1.0);
+                double const a2 = std::pow(tmp1, exp2);
+
+                double const x1 = parent1.chromosome[i];
+                double const x2 = parent2.chromosome[i];
+
+                double const avg = 0.5 * (x1 + x2);
+                double const diff = 0.5 * (x2 - x1);
+                double const y1 = avg - a1 * diff;
+                double const y2 = avg + a2 * diff;
+                child1.chromosome[i] = y1;
+                child2.chromosome[i] = y2;
+
+            }
+        }
+
+
+
         return std::make_pair(child1, child2);
 
     };
@@ -396,11 +568,11 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
+        std::uniform_real_distribution<double>& dist = *params.distribution;
         size_t const NGenes = params.NGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
-        std::uniform_real_distribution<double> dist(0,1);
         Individual child1(NGenes), child2(NGenes);
 
         double const alpha1 = dist(generator);
@@ -419,6 +591,7 @@ private:
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
+        std::uniform_real_distribution<double>& dist = *params.distribution;
         size_t const i = params.geneToMutate;
 
         // comment in for adaptive mutation probability
@@ -429,52 +602,42 @@ private:
         //double const prob = len_inv + (t / t_max)*(1 - len_inv);
         //std::bernoulli_distribution mutationDist(prob);
 
-        double const n_m = 100.0; // + t;
-        std::uniform_real_distribution<double> dist(0,1);
-        double const exp1 = n_m + 1;
-        double const exp2 = 1/exp1;
-        double const max_range = MAX - MIN;
+        double constexpr n_m = 100.0; // + t;
+        double constexpr exp1 = n_m + 1;
+        double constexpr exp2 = 1/exp1;
+        double constexpr max_range = MAX - MIN;
+        double constexpr max_range_inv = 1.0/max_range;
 
         double const u = dist(generator);
+
+        double const a = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) * max_range_inv;
+        double const b = std::pow(1.0 - a, exp1);
+
+        double delta;
         if(u < 0.5)
         {
-            double const a = 2*u;
-            double const b = 1 - a;
-            double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
-            double const d = std::pow(1-c, exp1);
-            double const delta = std::pow(a + b*d, exp2) - 1;
-            individual.chromosome[i] += delta * max_range;
+            double const c = 2.0 * u;
+            double const d = 1.0 - c;
+            delta = std::pow(c + d * b, exp2) - 1.0;
         }
         else
         {
-            double const a = 2*(1 - u);
-            double const b = 2*(u - 0.5);
-            double const c = std::min(individual.chromosome[i] - MIN, MAX - individual.chromosome[i]) / (MAX - MIN);
-            double const d = std::pow(1-c, exp1);
-            double const delta = 1 - std::pow(a + b * d, exp2);
-            individual.chromosome[i] += delta * max_range;
+            double const c = 2.0*(1.0 - u);
+            double const d = 2.0*(u - 0.5);
+            delta = 1.0 - std::pow(c + d * b, exp2);
         }
+        individual.chromosome[i] += delta * max_range;
 
-    };
-
-
-    function<void(MutationParameter)> uniformMutation = [&] (MutationParameter params)
-    {
-        Individual& individual = *params.individual;
-        mt19937& generator = *params.generator;
-        size_t const i = params.geneToMutate;
-        std::uniform_real_distribution<double> valueDist(MIN,MAX);
-        individual.chromosome[i] = valueDist(generator);
     };
 
     function<void(MutationParameter)> gaussianMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
+        std::uniform_real_distribution<double>& dist = *params.distribution;
         size_t const i = params.geneToMutate;
-        double constexpr sigma = 1.0/30.0;
+        double constexpr sigma = 0.375/(MAX - MIN);
         double constexpr tmp = std::sqrt(2)*(MAX-MIN)*sigma;
-        std::uniform_real_distribution<double> dist(0,1);
 
 
         double const u = dist(generator);
@@ -490,13 +653,22 @@ private:
         double const g = sgn(a) * std::sqrt(std::sqrt(e*e - f) - e);
 
         individual.chromosome[i] += std::sqrt(2) * sigma * (MAX - MIN) * g;
-
-
     };
 
 
+    function<void(MutationParameter)> uniformMutation = [&] (MutationParameter params)
+    {
+        Individual& individual = *params.individual;
+        mt19937& generator = *params.generator;
+        size_t const i = params.geneToMutate;
+        std::uniform_real_distribution<double> valueDist(MIN,MAX);
+        individual.chromosome[i] = valueDist(generator);
+    };
+
+
+
     vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
-    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
+    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover, adaptiveSimulatedBinaryCrossover};
     vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
 
 
@@ -504,10 +676,9 @@ private:
     void evaluate(vector<Individual>& pop)
     {
 
-        #pragma omp parallel for schedule(runtime)
+        #pragma omp parallel for schedule(dynamic,1)
         for(size_t i = 0; i < pop.size(); ++i)
         {
-            double const value = 1.0/mNGoals;
             pop[i].fitness = 0;
             for(size_t j = 0; j < mNGoals; ++j)
             {
@@ -523,7 +694,7 @@ private:
                 }
 
             }
-            pop[i].fitness *= value;
+            pop[i].fitness /= static_cast<double>(mNGoals);
         }
     }
 
@@ -546,7 +717,6 @@ private:
                     mSims[omp_get_thread_num()][j].setPlayer1Chromosome(goals[j]);
                 }
             }
-            #pragma omp barrier
         }
     }
 
@@ -744,7 +914,7 @@ public:
     typedef U race2;
 
     MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
-        :  mPopSize(popSize), mGenerator(std::chrono::system_clock::now().time_since_epoch().count()), mFlipCoin(0.5), mChooseIndividual(0,popSize-1), mSpinWheel(0,1.0), mNGoals(nGoals)
+        :  mPopSize(popSize), mGenerator(std::chrono::system_clock::now().time_since_epoch().count()), mDistribution(0,1.0), mNGoals(nGoals)
     {
 
 
@@ -830,7 +1000,6 @@ public:
         mOnlinePerformance = 0.0;
         mOfflinePerformance = 0.0;
 
-        mMutationDist = std::move(std::bernoulli_distribution(mMutationProbability));
         setGoals(goals);
         evaluate(mPop);
 
@@ -848,26 +1017,22 @@ public:
             newPop.reserve(mPopSize);
             vector<Individual *> selected;
 
-            selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mPop, mTournamentSize));
+            selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mDistribution, mPop, mTournamentSize));
 
             if(selected.size() == 0) break; // Just for safety
             #pragma omp parallel
             {
-                mt19937 generator(mGenerator);
+                mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
 
                 vector<Individual> newPop_local;
                 newPop_local.reserve(selected.size() / 2 / omp_get_num_threads());
-                #pragma omp for schedule(static) nowait
+                #pragma omp for schedule(dynamic,1) nowait
                 for(size_t j = 0; j < selected.size()-1; j += 2)
                 {
                     pair<Individual, Individual> children;
-                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNGenes, mNCrossoverPoints));
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mDistribution, mNGenes, mNCrossoverPoints));
                     newPop_local.push_back(children.first);
                     newPop_local.push_back(children.second);
-                }
-                #pragma omp single nowait
-                {
-                    mGenerator = generator;
                 }
                 #pragma omp critical
                 {
@@ -883,9 +1048,10 @@ public:
                 pos_old = pos;
                 size_t const offset = mMutationCount - mIndividualToMutate;
                 pos = newPop.size() > offset ? newPop.size() - offset : 0;
-                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], mGenerator, mGeneToMutate, i, iterations));
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], mGenerator, mDistribution, mGeneToMutate, i, iterations));
                 mutationClock();
-                mMutationCount = mMutationCount > (pos-pos_old) ? mMutationCount - (pos - pos_old) : 0;
+                size_t const pos_diff = pos - pos_old;
+                mMutationCount = mMutationCount > pos_diff ? mMutationCount - pos_diff : 0;
             }
             evaluate(newPop);
             mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
@@ -900,9 +1066,9 @@ public:
             computeCDF();
             mOnlinePerformance += mStats.mean;
             mOfflinePerformance += mStats.max;
-    }
-    mOnlinePerformance /= iterations;
-    mOfflinePerformance /= iterations;
+        }
+        mOnlinePerformance /= iterations;
+        mOfflinePerformance /= iterations;
 
 
     }

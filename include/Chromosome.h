@@ -50,6 +50,14 @@ struct Fitness final
 
         return *this;
     }
+    Fitness& operator/=(double const value)
+    {
+        score /= value;
+        damage /= value;
+        health /= value;
+        timeSteps /= value;
+        return *this;
+    }
 
 
 };

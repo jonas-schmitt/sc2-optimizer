@@ -87,6 +87,17 @@ public:
 
             mStats1 = mGa1.getStatistics();
             mStats2 = mGa2.getStatistics();
+            if(mMPI)
+            {
+                computeGlobalStatistics(mStats1, rank, procs);
+                computeGlobalStatistics(mStats2, rank, procs);
+            }
+            if(rank == 0)
+            {
+                //printStatistics();
+                cout << "Average of both players: " << 0.5*(mStats1.mean + mStats2.mean) << endl;
+                cout << "Maximum of both players: " << 0.5*(mStats1.max + mStats2.max) << "\n" << endl;
+            }
 
             mOnlinePerformance += 0.5*(mGa1.getOnlinePerformance() + mGa2.getOnlinePerformance());
             mOfflinePerformance += 0.5*(mGa1.getOfflinePerformance() + mGa2.getOfflinePerformance());
@@ -100,8 +111,6 @@ public:
             MPI_Reduce (&mOnlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
             MPI_Reduce (&mOfflinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-            computeGlobalStatistics(mStats1, rank, procs);
-            computeGlobalStatistics(mStats2, rank, procs);
         }
 
         if(rank == 0)
@@ -113,6 +122,8 @@ public:
             }
 
             printStatistics();
+            cout << "Online Performance: " << mOnlinePerformance << endl;
+            cout << "Offline Performance: " << mOfflinePerformance << endl;
             cout << "\n" << endl;
         }
     }
@@ -127,9 +138,6 @@ public:
         cout << separator << endl;
         cout << separator << "Statistics Player 2:" << endl;
         mStats2.print();
-        cout << separator << endl;
-        cout << "Online Performance: " << mOnlinePerformance << endl;
-        cout << "Offline Performance: " << mOfflinePerformance << endl;
         cout << separator << endl;
     }
 
