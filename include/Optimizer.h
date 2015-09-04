@@ -20,7 +20,7 @@ private:
     GA1 mGa1;
     GA2 mGa2;
     Individual mOptimum1, mOptimum2;
-    Statistics mStats1, mStats2;
+    std::pair<Statistics,Statistics> mStats1, mStats2;
     double mOfflinePerformance = 0.0;
     double mOnlinePerformance = 0.0;
     size_t mNGoals;
@@ -89,15 +89,12 @@ public:
             mStats2 = mGa2.getStatistics();
             if(mMPI)
             {
-                computeGlobalStatistics(mStats1, rank, procs);
-                computeGlobalStatistics(mStats2, rank, procs);
+                computeGlobalStatistics(mStats1.first, rank, procs);
+                computeGlobalStatistics(mStats1.second, rank, procs);
+                computeGlobalStatistics(mStats2.first, rank, procs);
+                computeGlobalStatistics(mStats2.second, rank, procs);
             }
-            if(rank == 0)
-            {
-                //printStatistics();
-                cout << "Average of both players: " << 0.5*(mStats1.mean + mStats2.mean) << endl;
-                cout << "Maximum of both players: " << 0.5*(mStats1.max + mStats2.max) << "\n" << endl;
-            }
+            printStatistics();
 
             mOnlinePerformance += 0.5*(mGa1.getOnlinePerformance() + mGa2.getOnlinePerformance());
             mOfflinePerformance += 0.5*(mGa1.getOfflinePerformance() + mGa2.getOfflinePerformance());
@@ -107,10 +104,8 @@ public:
         double onlinePerformance_tmp, offlinePerformance_tmp;
         if(mMPI)
         {
-
             MPI_Reduce (&mOnlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
             MPI_Reduce (&mOfflinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
         }
 
         if(rank == 0)
@@ -134,10 +129,16 @@ public:
         for(int i = 0; i < 50; ++i) separator += "-";
         separator += '\n';
         cout << separator << "Statistics Player 1:" << endl;
-        mStats1.print();
+        cout << "Damage:" << endl;
+        mStats1.first.print();
+        cout << "Health:" << endl;
+        mStats1.second.print();
         cout << separator << endl;
         cout << separator << "Statistics Player 2:" << endl;
-        mStats2.print();
+        cout << "Damage:" << endl;
+        mStats2.first.print();
+        cout << "Health:" << endl;
+        mStats2.second.print();
         cout << separator << endl;
     }
 
@@ -218,7 +219,15 @@ public:
 
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
             {
-                return lhs.fitness.score > rhs.fitness.score;
+                if(lhs.fitness.damage > rhs.fitness.damage)
+                {
+                    return true;
+                }
+                else if(std::abs(lhs.fitness.damage - rhs.fitness.damage) < EPS && std::abs(lhs.fitness.health - rhs.fitness.health) > EPS && lhs.fitness.health > rhs.fitness.health)
+                {
+                    return true;
+                }
+                else return false;
             };
 
             std::sort(pop1.begin(), pop1.end(), cmp);

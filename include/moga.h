@@ -14,6 +14,7 @@
 #include <set>
 #include <mpi.h>
 #include <omp.h>
+#include <functional>
 
 
 #include "Chromosome.h"
@@ -72,7 +73,7 @@ class MOGA final
 private:
     double mMutationProbability;
 
-    Statistics mStats;
+    std::pair<Statistics,Statistics> mStats;
 
     size_t mPopSize;
 
@@ -365,10 +366,10 @@ private:
                 n_c2 = n_c;
             }
             double const exp1 = 1.0 / (n_c1 + 1.0);
-            double const a1 = std::pow(tmp2, exp1);
+            double const a1 = std::pow(tmp1, exp1);
 
             double const exp2 = 1.0 / (n_c2 + 1.0);
-            double const a2 = std::pow(tmp2, exp2);
+            double const a2 = std::pow(tmp1, exp2);
 
             for(size_t i = 0; i < NGenes; ++i)
             {
@@ -420,10 +421,10 @@ private:
 
 
                 double const exp1 = 1.0 / (n_c1 + 1.0);
-                double const a1 = std::pow(tmp1, exp1);
+                double const a1 = std::pow(tmp2, exp1);
 
                 double const exp2 = 1.0 / (n_c2 + 1.0);
-                double const a2 = std::pow(tmp1, exp2);
+                double const a2 = std::pow(tmp2, exp2);
 
                 double const x1 = parent1.chromosome[i];
                 double const x2 = parent2.chromosome[i];
@@ -441,6 +442,7 @@ private:
 
 
         return std::make_pair(child1, child2);
+
 
     };
 
@@ -722,23 +724,18 @@ private:
 
     void computeCDF()
     {
-        double const inv_sum = 1.0/mStats.sum;
+        double const inv_sum = 2.0/(mStats.first.sum + mStats.second.sum);
         double tmp = 0.0;
         for(Individual& ind : mPop)
         {
             tmp += ind.fitness.score * inv_sum;
             ind.cdf = tmp;
-            ind.total = mStats.sum;
+            ind.total = 0.5*(mStats.first.sum + mStats.second.sum);
         }
     }
 
-    void computeStatistics()
+    void computeStatistics(Statistics& stats, vector<double> const& v)
     {
-        vector<double> v(mPop.size());
-        for(size_t i = 0; i < v.size(); ++i)
-        {
-            v[i] = mPop[i].fitness.score;
-        }
         double sum = std::accumulate(v.begin(), v.end(), 0.0);
         double mean = sum / v.size();
         std::vector<double> diff(v.size());
@@ -746,10 +743,10 @@ private:
                        std::bind2nd(std::minus<double>(), mean));
         double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
         double stdev = std::sqrt(sq_sum / v.size());
-        mStats.sum = sum;
-        mStats.mean = mean;
-        mStats.max = *std::max_element(v.begin(), v.end());
-        mStats.stdev = stdev;
+        stats.sum = sum;
+        stats.mean = mean;
+        stats.max = *std::max_element(v.begin(), v.end());
+        stats.stdev = stdev;
 
     }
 
@@ -971,8 +968,10 @@ public:
         mPop.resize(popSize);
 
 
-        mStats.sum = 0.0;
-        mStats.max = 0.0;
+        mStats.first.sum = 0.0;
+        mStats.first.max = 0.0;
+        mStats.second.sum = 0.0;
+        mStats.second.max = 0.0;
 
         for(size_t i = 0; i < popSize; ++i)
         {
@@ -986,7 +985,17 @@ public:
 
         }
         evaluate(mPop);
-        computeStatistics();
+        vector<double> v(mPop.size());
+        for(size_t i = 0; i < v.size(); ++i)
+        {
+            v[i] = mPop[i].fitness.damage;
+        }
+        computeStatistics(mStats.first, v);
+        for(size_t i = 0; i < v.size(); ++i)
+        {
+            v[i] = mPop[i].fitness.health;
+        }
+        computeStatistics(mStats.second, v);
         computeCDF();
 
     }
@@ -1003,7 +1012,17 @@ public:
         setGoals(goals);
         evaluate(mPop);
 
-        computeStatistics();
+        vector<double> v(mPop.size());
+        for(size_t i = 0; i < v.size(); ++i)
+        {
+            v[i] = mPop[i].fitness.damage;
+        }
+        computeStatistics(mStats.first, v);
+        for(size_t i = 0; i < v.size(); ++i)
+        {
+            v[i] = mPop[i].fitness.health;
+        }
+        computeStatistics(mStats.second, v);
         computeCDF();
 
 
@@ -1062,10 +1081,20 @@ public:
                 mPop.pop_back();
             } while(mPop.size() > mPopSize);
 
-            computeStatistics();
+            vector<double> v(mPop.size());
+            for(size_t i = 0; i < v.size(); ++i)
+            {
+                v[i] = mPop[i].fitness.damage;
+            }
+            computeStatistics(mStats.first, v);
+            for(size_t i = 0; i < v.size(); ++i)
+            {
+                v[i] = mPop[i].fitness.health;
+            }
+            computeStatistics(mStats.second, v);
             computeCDF();
-            mOnlinePerformance += mStats.mean;
-            mOfflinePerformance += mStats.max;
+            mOnlinePerformance += 0.5*(mStats.first.mean + mStats.second.mean);
+            mOfflinePerformance += 0.5*(mStats.first.max + mStats.second.max);
         }
         mOnlinePerformance /= iterations;
         mOfflinePerformance /= iterations;
@@ -1098,7 +1127,7 @@ public:
         return mutationFuncs.size();
     }
 
-    Statistics getStatistics() const
+    std::pair<Statistics,Statistics> getStatistics() const
     {
         return mStats;
     }
@@ -1187,6 +1216,15 @@ public:
     size_t getNumberOfGenes() const
     {
         return mNGenes;
+    }
+    size_t getNumberOfGoals()
+    {
+        return mNGoals;
+    }
+
+    void setNumberOfGoals(size_t const value)
+    {
+        mNGoals = value;
     }
 
     void includeDecodedChromosomes(Chromosome const& data, size_t const migrants, int const rank, int const procs)

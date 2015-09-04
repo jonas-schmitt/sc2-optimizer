@@ -1,444 +1,0 @@
-Number of Threads used: 8
-Performing Optimization with the following parameters
-
-Selection Operator: Tournament Selection
-Crossover Operator: Single-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 39287.5
-Average: 78.575
-Maximum: 91.7829
-Standard Deviation: 7.43268
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 39242.9
-Average: 78.4858
-Maximum: 95.0863
-Standard Deviation: 4.92994
---------------------------------------------------
-
-Online Performance: 71.9968
-Offline Performance: 91.2791
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Roulette Wheel Selection
-Crossover Operator: Single-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 37323.4
-Average: 74.6468
-Maximum: 90.3973
-Standard Deviation: 8.88195
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 45137.9
-Average: 90.2758
-Maximum: 93.1183
-Standard Deviation: 1.18917
---------------------------------------------------
-
-Online Performance: 71.399
-Offline Performance: 91.9968
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Stochastic Universal Sampling
-Crossover Operator: Single-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 41144.9
-Average: 82.2898
-Maximum: 92.2481
-Standard Deviation: 4.03276
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 41554.1
-Average: 83.1083
-Maximum: 92.3656
-Standard Deviation: 6.09998
---------------------------------------------------
-
-Online Performance: 79.0363
-Offline Performance: 92.0126
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Tournament Selection
-Crossover Operator: Two-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 34993.9
-Average: 69.9878
-Maximum: 90.6977
-Standard Deviation: 7.32999
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 40137.1
-Average: 80.2742
-Maximum: 95.6989
-Standard Deviation: 4.60826
---------------------------------------------------
-
-Online Performance: 69.424
-Offline Performance: 88.9329
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Roulette Wheel Selection
-Crossover Operator: Two-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 39500.8
-Average: 79.0016
-Maximum: 92.3256
-Standard Deviation: 5.83364
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 37087.4
-Average: 74.1748
-Maximum: 79.6114
-Standard Deviation: 0.905901
---------------------------------------------------
-
-Online Performance: 70.9711
-Offline Performance: 87.3366
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Stochastic Universal Sampling
-Crossover Operator: Two-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 36389.4
-Average: 72.7789
-Maximum: 90.9302
-Standard Deviation: 5.69057
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 32924.5
-Average: 65.849
-Maximum: 89.4858
-Standard Deviation: 5.88979
---------------------------------------------------
-
-Online Performance: 66.9518
-Offline Performance: 87.6659
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Tournament Selection
-Crossover Operator: N-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 38650.8
-Average: 77.3015
-Maximum: 92.8295
-Standard Deviation: 7.40814
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 19080.5
-Average: 38.1611
-Maximum: 78.1392
-Standard Deviation: 8.15158
---------------------------------------------------
-
-Online Performance: 58.3173
-Offline Performance: 87.1386
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Roulette Wheel Selection
-Crossover Operator: N-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 39432.5
-Average: 78.8651
-Maximum: 92.5194
-Standard Deviation: 7.42441
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 39038.5
-Average: 78.0771
-Maximum: 80.1403
-Standard Deviation: 1.04811
---------------------------------------------------
-
-Online Performance: 73.3743
-Offline Performance: 89.5676
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Stochastic Universal Sampling
-Crossover Operator: N-Point Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 38867.7
-Average: 77.7354
-Maximum: 89.5543
-Standard Deviation: 7.00986
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 25204.5
-Average: 50.4089
-Maximum: 90.9946
-Standard Deviation: 9.23908
---------------------------------------------------
-
-Online Performance: 64.7662
-Offline Performance: 88.8376
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Tournament Selection
-Crossover Operator: Uniform Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 39713.6
-Average: 79.4272
-Maximum: 88.8857
-Standard Deviation: 6.65001
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 40104.3
-Average: 80.2087
-Maximum: 91.4785
-Standard Deviation: 5.6473
---------------------------------------------------
-
-Online Performance: 74.854
-Offline Performance: 91.1333
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Roulette Wheel Selection
-Crossover Operator: Uniform Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 38435.1
-Average: 76.8702
-Maximum: 88.8469
-Standard Deviation: 5.47692
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 32293.1
-Average: 64.5863
-Maximum: 78.3453
-Standard Deviation: 4.99342
---------------------------------------------------
-
-Online Performance: 72.0411
-Offline Performance: 88.0502
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Stochastic Universal Sampling
-Crossover Operator: Uniform Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 39833.3
-Average: 79.6667
-Maximum: 92.2481
-Standard Deviation: 5.35916
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 43005.6
-Average: 86.0112
-Maximum: 93.4946
-Standard Deviation: 6.70464
---------------------------------------------------
-
-Online Performance: 76.7622
-Offline Performance: 93.0527
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Tournament Selection
-Crossover Operator: Three Parent Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 43692.4
-Average: 87.3848
-Maximum: 92.4903
-Standard Deviation: 2.23097
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 39386.5
-Average: 78.773
-Maximum: 95.1075
-Standard Deviation: 4.48399
---------------------------------------------------
-
-Online Performance: 73.7153
-Offline Performance: 91.0854
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Roulette Wheel Selection
-Crossover Operator: Three Parent Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 39474.9
-Average: 78.9497
-Maximum: 91.0853
-Standard Deviation: 6.94809
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 39757.5
-Average: 79.5149
-Maximum: 93.3333
-Standard Deviation: 6.79373
---------------------------------------------------
-
-Online Performance: 72.4885
-Offline Performance: 92.3225
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Stochastic Universal Sampling
-Crossover Operator: Three Parent Crossover
-Mutation Operator: Bit Flipping Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%[2KProgress: 1%[2KProgress: 2%[2KProgress: 3%[2KProgress: 4%[2KProgress: 5%[2KProgress: 6%[2KProgress: 7%[2KProgress: 8%[2KProgress: 9%[2KProgress: 10%[2KProgress: 11%[2KProgress: 12%[2KProgress: 13%[2KProgress: 14%[2KProgress: 15%[2KProgress: 16%[2KProgress: 17%[2KProgress: 18%[2KProgress: 19%[2KProgress: 20%[2KProgress: 21%[2KProgress: 22%[2KProgress: 23%[2KProgress: 24%[2KProgress: 25%[2KProgress: 26%[2KProgress: 27%[2KProgress: 28%[2KProgress: 29%[2KProgress: 30%[2KProgress: 31%[2KProgress: 32%[2KProgress: 33%[2KProgress: 34%[2KProgress: 35%[2KProgress: 36%[2KProgress: 37%[2KProgress: 38%[2KProgress: 39%[2KProgress: 40%[2KProgress: 41%[2KProgress: 42%[2KProgress: 43%[2KProgress: 44%[2KProgress: 45%[2KProgress: 46%[2KProgress: 47%[2KProgress: 48%[2KProgress: 49%[2KProgress: 50%[2KProgress: 51%[2KProgress: 52%[2KProgress: 53%[2KProgress: 54%[2KProgress: 55%[2KProgress: 56%[2KProgress: 57%[2KProgress: 58%[2KProgress: 59%[2KProgress: 60%[2KProgress: 61%[2KProgress: 62%[2KProgress: 63%[2KProgress: 64%[2KProgress: 65%[2KProgress: 66%[2KProgress: 67%[2KProgress: 68%[2KProgress: 69%[2KProgress: 70%[2KProgress: 71%[2KProgress: 72%[2KProgress: 73%[2KProgress: 74%[2KProgress: 75%[2KProgress: 76%[2KProgress: 77%[2KProgress: 78%[2KProgress: 79%[2KProgress: 80%[2KProgress: 81%[2KProgress: 82%[2KProgress: 83%[2KProgress: 84%[2KProgress: 85%[2KProgress: 86%[2KProgress: 87%[2KProgress: 88%[2KProgress: 89%[2KProgress: 90%[2KProgress: 91%[2KProgress: 92%[2KProgress: 93%[2KProgress: 94%[2KProgress: 95%[2KProgress: 96%[2KProgress: 97%[2KProgress: 98%[2KProgress: 99%[2K--------------------------------------------------
-Statistics Player 1:
-Total: 41229.5
-Average: 82.459
-Maximum: 91.7054
-Standard Deviation: 4.41215
---------------------------------------------------
-
---------------------------------------------------
-Statistics Player 2:
-Total: 40634
-Average: 81.2679
-Maximum: 97.0068
-Standard Deviation: 7.52937
---------------------------------------------------
-
-Online Performance: 75.6012
-Offline Performance: 91.1872
---------------------------------------------------
-
-
-
-Performing Optimization with the following parameters
-
-Selection Operator: Tournament Selection
-Crossover Operator: Single-Point Crossover
-Mutation Operator: Interchanging Mutation
-Number of Iterations: 100
-Generations per Iteration: 10
-Progress: 0%

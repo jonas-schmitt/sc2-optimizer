@@ -178,9 +178,9 @@ struct Statistics
     void print()
     {
         cout << "Total: " << sum << endl;
-        cout << "Average: " << mean << endl;
-        cout << "Maximum: " << max << endl;
-        cout << "Standard Deviation: " << stdev << endl;
+        cout << "Average: " << mean*100.0 << " %" << endl;
+        cout << "Maximum: " << max*100.0 << " %" << endl;
+        cout << "Standard Deviation: " << stdev*100 << " %" << endl;
     }
 };
 

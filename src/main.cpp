@@ -98,12 +98,13 @@ int main(int argc, char *argv[])
     filePath2 = "./data/"+race2;
 
 
-    size_t popSize = atoi(argv[3]);
-    size_t iterations = atoi(argv[4]);
-    size_t genPerIt = atoi(argv[5]);
-    size_t nGoals = atoi(argv[6]);
-    size_t migrants = 2*nGoals;
-    size_t fieldSize = 10 * std::max(buildOrder1.size(), buildOrder2.size());
+    size_t const popSize = atoi(argv[3]);
+    size_t const iterations = atoi(argv[4]);
+    size_t const genPerIt = atoi(argv[5]);
+    size_t const nGoals = atoi(argv[6]);
+    size_t const migrants = 2*nGoals;
+    size_t constexpr minFieldSize = 100;
+    size_t fieldSize = std::min(minFieldSize, 10 * std::max(buildOrder1.size(), buildOrder2.size()));
     Vec2D minPos(0.0), maxPos(fieldSize,fieldSize);
     //cout << "Number of Threads used: " << omp_get_num_threads() << std::endl;
 
@@ -171,11 +172,11 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        for(size_t i = 0; i < 3; ++i)
+        for(size_t i = 0; i < 1; ++i)
         {
-            for(size_t j = 0; j < 7; ++j)
+            for(size_t j = 6; j < 7; ++j)
             {
-                for(size_t k = 0; k < 3; ++k)
+                for(size_t k = 0; k < 1; ++k)
                 {
                     start = std::chrono::system_clock::now();
                     OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
@@ -184,7 +185,7 @@ int main(int argc, char *argv[])
                     end = std::chrono::system_clock::now();
                     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
                     if(rank == 0) std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
-                    //opt.determineWinner(std::cout, rank, procs);
+                    opt.determineWinner(std::cout, rank, procs);
                 }
             }
         }

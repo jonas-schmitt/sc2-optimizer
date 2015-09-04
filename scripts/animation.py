@@ -65,7 +65,7 @@ file2 = open(paths[1], 'r')
 sizes1 = getUnitStats(file1)
 sizes2 = getUnitStats(file2)
 
-fieldSize = max(len(sizes1), len(sizes2))*10
+fieldSize = min(100, max(len(sizes1), len(sizes2))*10)
 
 len = (file_len(paths[0])-2)#/10
 
@@ -141,7 +141,7 @@ def animate(i):
     return circles1, circles2, rect
 
 ani = animation.FuncAnimation(fig, animate, frames=len,
-                              interval=100, blit=True, init_func=init)
+                              interval=10, blit=True, init_func=init)
 
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
