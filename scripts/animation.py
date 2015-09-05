@@ -65,7 +65,7 @@ file2 = open(paths[1], 'r')
 sizes1 = getUnitStats(file1)
 sizes2 = getUnitStats(file2)
 
-fieldSize = min(100, max(len(sizes1), len(sizes2))*10)
+fieldSize = max(100, max(len(sizes1), len(sizes2))*10)
 
 len = (file_len(paths[0])-2)#/10
 

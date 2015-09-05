@@ -90,7 +90,7 @@ private:
 
 
     vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> mCrossoverFuncNames = {"Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover", "Adaptive SBX"};
+    vector<string> mCrossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
     vector<string> mMutationFuncNames = {"Polynomial Mutation", "Gaussian Mutation", "Uniform Mutation"};
 
     size_t mSelectionChoice = 0;
@@ -267,7 +267,7 @@ private:
 
     };
 
-    function<pair<Individual, Individual>(CrossoverParameter)> adaptiveSimulatedBinaryCrossover = [&] (CrossoverParameter params)
+    function<pair<Individual, Individual>(CrossoverParameter)> adaptiveSBX = [&] (CrossoverParameter params)
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
@@ -324,6 +324,8 @@ private:
         }
         child1.fitness /= static_cast<double>(mNGoals);
         child2.fitness /= static_cast<double>(mNGoals);
+        child1.evaluated = true;
+        child1.evaluated = true;
 
         // First child
 
@@ -333,109 +335,323 @@ private:
         bool const worse2 = parent1.dominates(child2) && parent2.dominates(child2);
         bool const better2 = child2.dominates(parent1) && child2.dominates(parent2);
 
+        if(better1 || worse1)
+        {
+            child1.evaluated = false;
+        }
+        if(better2 || worse2)
+        {
+            child2.evaluated = false;
+        }
+
         double constexpr alpha = 1.5;
 
+        bool skip1 = false, skip2 = false;
         if(contraction)
         {
-            double n_c1, n_c2;
+            double exp1, exp2, a1, a2;
             if(better1)
             {
-                n_c1 = std::max(0.0, std::min(50.0, (1.0+n_c)/alpha - 1.0));
+                double const n_c1 = std::max(0.0, std::min(50.0, (1.0+n_c)/alpha - 1.0));
+                exp1 = 1.0 / (n_c1 + 1.0);
+                a1 = std::pow(tmp1, exp1);
             }
             else if(worse1)
             {
-                n_c1 = std::max(0.0, std::min(50.0, alpha*(1.0+n_c) - 1.0));
+                double const n_c1 = std::max(0.0, std::min(50.0, alpha*(1.0+n_c) - 1.0));
+                exp1 = 1.0 / (n_c1 + 1.0);
+                a1 = std::pow(tmp1, exp1);
             }
             else
             {
-                n_c1 = n_c;
+                skip1 = true;
             }
 
             if(better2)
             {
-                if(better1) n_c2 = n_c1;
-                else n_c2 = std::max(0.0, std::min(50.0, (1.0+n_c)/alpha - 1.0));
+                if(better1)
+                {
+                    exp2 = exp1;
+                    a2 = a1;
+                }
+                else
+                {
+                    double const n_c2 = std::max(0.0, std::min(50.0, (1.0+n_c)/alpha - 1.0));
+                    exp2 = 1.0 / (n_c2 + 1.0);
+                    a2 = std::pow(tmp1, exp2);
+                }
             }
             else if(worse2)
             {
-                if(worse1) n_c2 = n_c1;
-                else n_c2 = std::max(0.0, std::min(50.0, alpha*(1.0+n_c) - 1.0));
+                if(worse1)
+                {
+                    exp2 = exp1;
+                    a2 = a1;
+                }
+
+                else
+                {
+                    double const n_c2 = std::max(0.0, std::min(50.0, alpha*(1.0+n_c) - 1.0));
+                    exp2 = 1.0 / (n_c2 + 1.0);
+                    a2 = std::pow(tmp1, exp2);
+                }
             }
             else
             {
-                n_c2 = n_c;
+               skip2 = true;
             }
-            double const exp1 = 1.0 / (n_c1 + 1.0);
-            double const a1 = std::pow(tmp1, exp1);
 
-            double const exp2 = 1.0 / (n_c2 + 1.0);
-            double const a2 = std::pow(tmp1, exp2);
-
-            for(size_t i = 0; i < NGenes; ++i)
+            if(!skip1 && !skip2)
             {
-                double const x1 = parent1.chromosome[i];
-                double const x2 = parent2.chromosome[i];
+                child1.alternative = child1.chromosome;
+                child2.alternative = child2.chromosome;
+                for(size_t i = 0; i < NGenes; ++i)
+                {
+                    double const x1 = parent1.chromosome[i];
+                    double const x2 = parent2.chromosome[i];
 
-                double const avg = 0.5 * (x1 + x2);
-                double const diff = 0.5 * (x2 - x1);
-                double const y1 = avg - a1 * diff;
-                double const y2 = avg + a2 * diff;
-                child1.chromosome[i] = y1;
-                child2.chromosome[i] = y2;
+                    double const avg = 0.5 * (x1 + x2);
+                    double const diff = 0.5 * (x2 - x1);
+                    double const y1 = avg - a1 * diff;
+                    double const y2 = avg + a2 * diff;
+                    child1.chromosome[i] = y1;
+                    child2.chromosome[i] = y2;
+                }
+            }
+            else if(skip1)
+            {
+                child2.alternative = child2.chromosome;
+                for(size_t i = 0; i < NGenes; ++i)
+                {
+                    double const x1 = parent1.chromosome[i];
+                    double const x2 = parent2.chromosome[i];
 
+                    double const avg = 0.5 * (x1 + x2);
+                    double const diff = 0.5 * (x2 - x1);
+                    double const y2 = avg + a2 * diff;
+                    child2.chromosome[i] = y2;
+
+                }
+            }
+            else if(skip2)
+            {
+                child1.alternative = child1.chromosome;
+                for(size_t i = 0; i < NGenes; ++i)
+                {
+                    double const x1 = parent1.chromosome[i];
+                    double const x2 = parent2.chromosome[i];
+
+                    double const avg = 0.5 * (x1 + x2);
+                    double const diff = 0.5 * (x2 - x1);
+                    double const y1 = avg - a1 * diff;
+                    child1.chromosome[i] = y1;
+                }
             }
         }
         else
         {
-            for(size_t i = 0; i < NGenes; ++i)
-            {
-                double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(parent2.chromosome[i] - parent1.chromosome[i]));
-                double n_c1, n_c2;
-                if(better1)
-                {
-                    n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-                }
-                else if(worse1)
-                {
-                    n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-                }
-                else
-                {
-                    n_c1 = n_c;
-                }
 
+            if(better1)
+            {
                 if(better2)
                 {
-                    if(better1) n_c2 = n_c1;
-                    else n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+                    child1.alternative = child1.chromosome;
+                    child2.alternative = child2.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+                        double n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+
+                        double const exp = 1.0 / (n_c12 + 1.0);
+                        double const a = std::pow(tmp2, exp);
+
+
+                        double const avg = 0.5 * (x1 + x2);
+                        double const shift = a * 0.5 * diff;
+                        double const y1 = avg - shift;
+                        double const y2 = avg + shift;
+                        child1.chromosome[i] = y1;
+                        child2.chromosome[i] = y2;
+                    }
                 }
                 else if(worse2)
                 {
-                    if(worse1) n_c2 = n_c1;
-                    else n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+                    child1.alternative = child1.chromosome;
+                    child2.alternative = child2.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+
+                        double const log_beta = std::log(beta);
+                        double constexpr alpha_inv = 1.0/alpha;
+                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
+
+                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
+
+                        double const exp1 = 1.0 / (n_c1 + 1.0);
+                        double const a1 = std::pow(tmp2, exp1);
+
+                        double const exp2 = 1.0 / (n_c2 + 1.0);
+                        double const a2 = std::pow(tmp2, exp2);
+
+                        double const avg = 0.5 * (x1 + x2);
+                        double const y1 = avg - a1 * 0.5 * diff;
+                        double const y2 = avg + a2 * 0.5 * diff;
+                        child1.chromosome[i] = y1;
+                        child2.chromosome[i] = y2;
+
+                    }
                 }
                 else
                 {
-                    n_c2 = n_c;
+                    child1.alternative = child1.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+                        double n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+                        double const exp = 1.0 / (n_c1 + 1.0);
+                        double const a = std::pow(tmp2, exp);
+
+                        double const avg = 0.5 * (x1 + x2);
+
+                        double const y1 = avg - a * 0.5 * diff;
+                        child1.chromosome[i] = y1;
+                    }
                 }
+            }
+            else if(worse1)
+            {
+                if(better2)
+                {
+                    child1.alternative = child1.chromosome;
+                    child2.alternative = child2.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+
+                        double const log_beta = std::log(beta);
+                        double constexpr alpha_inv = 1.0/alpha;
+
+                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
+
+                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
+
+                        double const exp1 = 1.0 / (n_c1 + 1.0);
+                        double const a1 = std::pow(tmp2, exp1);
+
+                        double const exp2 = 1.0 / (n_c2 + 1.0);
+                        double const a2 = std::pow(tmp2, exp2);
 
 
-                double const exp1 = 1.0 / (n_c1 + 1.0);
-                double const a1 = std::pow(tmp2, exp1);
+                        double const avg = 0.5 * (x1 + x2);
+                        double const y1 = avg - a1 * 0.5 * diff;
+                        double const y2 = avg + a2 * 0.5 * diff;
+                        child1.chromosome[i] = y1;
+                        child2.chromosome[i] = y2;
 
-                double const exp2 = 1.0 / (n_c2 + 1.0);
-                double const a2 = std::pow(tmp2, exp2);
+                    }
+                }
+                else if(worse2)
+                {
+                    child1.alternative = child1.chromosome;
+                    child2.alternative = child2.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+                        double const n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
 
-                double const x1 = parent1.chromosome[i];
-                double const x2 = parent2.chromosome[i];
+                        double const exp = 1.0 / (n_c12 + 1.0);
+                        double const a = std::pow(tmp2, exp);
 
-                double const avg = 0.5 * (x1 + x2);
-                double const diff = 0.5 * (x2 - x1);
-                double const y1 = avg - a1 * diff;
-                double const y2 = avg + a2 * diff;
-                child1.chromosome[i] = y1;
-                child2.chromosome[i] = y2;
 
+                        double const avg = 0.5 * (x1 + x2);
+                        double const shift = a * 0.5 * diff;
+                        double const y1 = avg - shift;
+                        double const y2 = avg + shift;
+                        child1.chromosome[i] = y1;
+                        child2.chromosome[i] = y2;
+
+                    }
+                }
+                else
+                {
+                    child1.alternative = child1.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                        double const exp = 1.0 / (n_c1 + 1.0);
+                        double const a = std::pow(tmp2, exp);
+
+                        double const avg = 0.5 * (x1 + x2);
+                        double const y1 = avg - a * 0.5 * diff;
+                        child1.chromosome[i] = y1;
+                    }
+                }
+            }
+            else
+            {
+                if(better2)
+                {
+                    child2.alternative = child2.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+
+                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+                        double const exp = 1.0 / (n_c2 + 1.0);
+                        double const a = std::pow(tmp2, exp);
+
+                        double const avg = 0.5 * (x1 + x2);
+                        double const y2 = avg + a * 0.5* diff;
+                        child2.chromosome[i] = y2;
+                    }
+                }
+                else if(worse2)
+                {
+                    child2.alternative = child2.chromosome;
+                    for(size_t i = 0; i < NGenes; ++i)
+                    {
+                        double const x1 = parent1.chromosome[i];
+                        double const x2 = parent2.chromosome[i];
+                        double const diff = x2 - x1;
+                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
+
+                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                        double const exp = 1.0 / (n_c2 + 1.0);
+                        double const a = std::pow(tmp2, exp);
+
+                        double const avg = 0.5 * (x1 + x2);
+                        double const y2 = avg + 0.5 * a * diff;
+                        child2.chromosome[i] = y2;
+                    }
+                }
             }
         }
 
@@ -670,7 +886,7 @@ private:
 
 
     vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
-    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover, adaptiveSimulatedBinaryCrossover};
+    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
     vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
 
 
@@ -678,25 +894,41 @@ private:
     void evaluate(vector<Individual>& pop)
     {
 
+
         #pragma omp parallel for schedule(dynamic,1)
         for(size_t i = 0; i < pop.size(); ++i)
         {
-            pop[i].fitness = 0;
-            for(size_t j = 0; j < mNGoals; ++j)
+            if(!pop[i].evaluated)
             {
-                if(player == Player::first)
+                Fitness fn;
+                for(size_t j = 0; j < mNGoals; ++j)
                 {
-                    mSims[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
-                    pop[i].fitness += mSims[omp_get_thread_num()][j].run(true, Player::first);
-                }
-                else
-                {
-                    mSims[omp_get_thread_num()][j].setPlayer2Chromosome(pop[i].chromosome);
-                    pop[i].fitness += mSims[omp_get_thread_num()][j].run(true, Player::second);
-                }
+                    if(player == Player::first)
+                    {
+                        mSims[omp_get_thread_num()][j].setPlayer1Chromosome(pop[i].chromosome);
+                        fn += mSims[omp_get_thread_num()][j].run(true, Player::first);
+                    }
+                    else
+                    {
+                        mSims[omp_get_thread_num()][j].setPlayer2Chromosome(pop[i].chromosome);
+                        fn += mSims[omp_get_thread_num()][j].run(true, Player::second);
+                    }
 
+                }
+                fn /= static_cast<double>(mNGoals);
+                if(!pop[i].alternative.empty())
+                {
+                    if(pop[i].fitness.dominates(fn))
+                    {
+                        pop[i].chromosome = pop[i].alternative;
+                    }
+                    else
+                    {
+                        pop[i].fitness = fn;
+                    }
+                    pop[i].alternative.clear();
+                }
             }
-            pop[i].fitness /= static_cast<double>(mNGoals);
         }
     }
 

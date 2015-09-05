@@ -205,7 +205,7 @@ protected:
             // tmp[2] = 1e1*own.getPhenotype(4)
             // tmp[3] = 1e2*own.getPhenotype(6)
             // tmp[4] = 1e3*own.getPhenotype(7)
-            double const val = a*own.tmp[2] + b*own.getPhenotype(5) + ownDamage.total*own.tmp[3] + own.tmp[4];
+            double const val = a*own.tmp[2] + b * own.getPhenotype(5) + ownDamage.total*own.tmp[3] + own.tmp[4];
             res1.x *= val;
             res1.y *= val;
         }

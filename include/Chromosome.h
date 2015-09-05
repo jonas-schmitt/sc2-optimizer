@@ -59,6 +59,21 @@ struct Fitness final
         return *this;
     }
 
+    bool dominates(Fitness const& other) const
+    {
+        bool const faster = this->timeSteps < other.timeSteps;
+        if((this->damage > other.damage || (std::abs(other.damage - this->damage) < EPS && faster))
+         && (this->health > other.health || (std::abs(other.health - this->health) < EPS && faster)))
+//        if(this->damage > other.damage && this->health > other.health && this->timeSteps < other.timeSteps)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 
 };
 
@@ -66,6 +81,7 @@ struct Individual
 {
     Fitness fitness;
     Chromosome chromosome;
+    Chromosome alternative;
     double cdf;
     double total;
 
@@ -73,6 +89,7 @@ struct Individual
     vector<size_t> dominationSet;
     int rank;
     double distance;
+    bool evaluated = false;
 
 
     Individual() {}
@@ -92,18 +109,10 @@ struct Individual
 
     bool dominates(Individual const& ind) const
     {
-        bool const faster = fitness.timeSteps < ind.fitness.timeSteps;
-        if((fitness.damage > ind.fitness.damage || (std::abs(ind.fitness.damage - fitness.damage) < EPS && faster))
-         && (fitness.health > ind.fitness.health || (std::abs(ind.fitness.health - fitness.health) < EPS && faster)))
-//        if(fitness.damage > ind.fitness.damage && fitness.health > ind.fitness.health && fitness.timeSteps < ind.fitness.timeSteps)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return fitness.dominates(ind.fitness);
     }
+
+
 
 
 };
