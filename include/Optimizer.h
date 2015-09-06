@@ -66,6 +66,7 @@ public:
 
         for(size_t i = 0; i < iterations; ++i)
         {
+
             if(rank == 0)
             {
                 std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << endl;
@@ -102,10 +103,13 @@ public:
         mOnlinePerformance /= iterations;
         mOfflinePerformance /= iterations;
         double onlinePerformance_tmp, offlinePerformance_tmp;
+        unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
+        unsigned long evaluations_tmp;
         if(mMPI)
         {
             MPI_Reduce (&mOnlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
             MPI_Reduce (&mOfflinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+            MPI_Reduce (&evaluations, &evaluations_tmp, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
         }
 
         if(rank == 0)
@@ -114,11 +118,13 @@ public:
             {
                 mOnlinePerformance = onlinePerformance_tmp/procs;
                 mOfflinePerformance = offlinePerformance_tmp/procs;
+                evaluations = evaluations_tmp;
             }
 
-            printStatistics();
+            //printStatistics();
             cout << "Online Performance: " << mOnlinePerformance << endl;
             cout << "Offline Performance: " << mOfflinePerformance << endl;
+            cout << "Number of evaluations: " << evaluations << endl;
             cout << "\n" << endl;
         }
     }

@@ -52,9 +52,13 @@ private:
     long mTimeSteps = 30000;
     int mTimeSlice = 10;
 
+    unsigned long mRuns = 0;
+
     string mTrackingFileName1, mTrackingFileName2;
 
     ofstream mFile1, mFile2;
+
+
 
 public:
     MicroSimulation(MicroSimulation const& microSim);
@@ -99,8 +103,8 @@ public:
     size_t getPlayer2ChromosomeLength() const;
 
     template<class W>
-    void choosePlayerStartPosition(PlayerState<W>& pl, double const x_start);
-
+    void choosePlayerStartPosition(PlayerState<W>& pl, double const x_start, double const radius);
+    unsigned long getNumberOfRuns() const;
 };
 
 #endif

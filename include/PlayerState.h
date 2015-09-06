@@ -54,6 +54,7 @@ template <class Race> struct PlayerState final : public Race
     Vec2D minPos;
     Vec2D maxPos;
     Vec2D fieldSize;
+    double maxUnitSize;
 
     vector<PotentialField<Race>> potentialList;
     deque<pair<int,PotentialField<Race>>> forceFieldQueue;

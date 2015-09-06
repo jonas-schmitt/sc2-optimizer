@@ -74,19 +74,19 @@ void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 
 template<class T, class U>
 template<class W>
-void MicroSimulation<T, U>::choosePlayerStartPosition(PlayerState<W>& pl, double const x_start)
+void MicroSimulation<T, U>::choosePlayerStartPosition(PlayerState<W>& pl, double const x_start, double const radius)
 {
 
     double const fieldSizeY = pl.maxPos.y-pl.minPos.y;
     Vec2D startPos = Vec2D(x_start, pl.minPos.y + 0.5*fieldSizeY);
     int i = 0;
     mt19937 generator (std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_real_distribution<double> distribution_x(-15,15);
+    std::uniform_real_distribution<double> distribution_x(-radius,radius);
     std::bernoulli_distribution coin(0.5);
     for(auto unit : pl.unitList)
     {
         double const x = distribution_x(generator);
-        std::uniform_real_distribution<double> distribution_y(0, coin(generator) ? 15 - std::abs(x) : std::abs(x) - 15);
+        std::uniform_real_distribution<double> distribution_y(0, coin(generator) ? radius - std::abs(x) : std::abs(x) - radius);
         unit->setStartPos(Vec2D(startPos.x + distribution_x(generator), startPos.y + distribution_y(generator)));
         unit->resetPos();
     }
@@ -233,11 +233,20 @@ void MicroSimulation<T, U>::timestep()
 }
 
 template <class T, class U>
+unsigned long MicroSimulation<T, U>::getNumberOfRuns() const
+{
+    return mRuns;
+}
+
+template <class T, class U>
 Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 {
 
-    choosePlayerStartPosition(pl1, pl1.minPos.x + 20);
-    choosePlayerStartPosition(pl2, pl2.maxPos.x - 20);
+    ++mRuns;
+    double radius = pl1.unitList.size() * pl1.maxUnitSize;
+    choosePlayerStartPosition(pl1, pl1.minPos.x + 10 + radius, radius);
+    radius = pl2.unitList.size() * pl2.maxUnitSize;
+    choosePlayerStartPosition(pl2, pl2.maxPos.x - 10 - radius, radius);
 
     if(mTracking)
     {
@@ -328,7 +337,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         for(auto unit : pl2.unitList)
         {
             maxDamage += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
-            res.damage += (unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield())*(unit->getMinerals()+unit->getGas());;
+            res.damage += (unit->getMaxHealth() + unit->getMaxShield() - std::max(0.0, unit->getHealth()) - std::max(0.0, unit->getShield()))*(unit->getMinerals()+unit->getGas());;
         }
 
     }
@@ -343,7 +352,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         for(auto unit : pl1.unitList)
         {
             maxDamage += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
-            res.damage += (unit->getMaxHealth() + unit->getMaxShield() - unit->getHealth() - unit->getShield())*(unit->getMinerals()+unit->getGas());;
+            res.damage += (unit->getMaxHealth() + unit->getMaxShield() - std::max(0.0, unit->getHealth()) - std::max(0.0, unit->getShield()))*(unit->getMinerals()+unit->getGas());;
         }
     }
 

@@ -536,6 +536,15 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     pl.potentialList.emplace_back(pl.maxPos,funcMaxX);
     pl.potentialList.emplace_back(pl.minPos,funcMinY);
     pl.potentialList.emplace_back(pl.maxPos,funcMaxY);
+
+    auto cmp = [] (typename Race::RUT *lhs, typename Race::RUT *rhs)
+    {
+	return lhs->getSize() < rhs->getSize();
+    };
+	
+    auto it = std::max_element(pl.unitList.begin(), pl.unitList.end(), cmp);
+    pl.maxUnitSize = (*it)->getSize();
+			 
 }
 
 

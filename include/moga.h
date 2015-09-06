@@ -34,34 +34,29 @@ using std::endl;
 
 struct SelectionParameter
 {
-    SelectionParameter(size_t N_, mt19937& generator_, std::uniform_real_distribution<double>& distribution_, vector<Individual>& pop_, size_t tournamentSize_)
-        : N(N_), generator(&generator_), distribution(&distribution_), pop(&pop_),  tournamentSize(tournamentSize_){}
+    SelectionParameter(size_t N_, mt19937& generator_, size_t tournamentSize_)
+        : N(N_), generator(&generator_), tournamentSize(tournamentSize_){}
     size_t N;
     mt19937 *generator;
-    std::uniform_real_distribution<double> *distribution;
-    vector<Individual> *pop;
     size_t tournamentSize;
 
 };
 
 struct CrossoverParameter
 {
-    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, std::uniform_real_distribution<double>& distribution_, size_t NGenes_, size_t crossoverPoints_)
-        : parents(&parents_), generator(&generator_), distribution(&distribution_), NGenes(NGenes_), crossoverPoints(crossoverPoints_) {}
+    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t crossoverPoints_)
+        : parents(&parents_), generator(&generator_), crossoverPoints(crossoverPoints_) {}
     vector<Individual> const * parents;
     mt19937 *generator;
-    std::uniform_real_distribution<double> *distribution;
-    size_t NGenes;
     size_t crossoverPoints;
 };
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, std::uniform_real_distribution<double>& distribution_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
-        : individual(&individual_), generator(&generator_), distribution(&distribution_), geneToMutate(geneToMutate_), currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
+    MutationParameter(Individual& individual_, mt19937& generator_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
+        : individual(&individual_), generator(&generator_), geneToMutate(geneToMutate_), currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
     Individual* individual;
     mt19937* generator;
-    std::uniform_real_distribution<double> *distribution;
     size_t geneToMutate;
     size_t currentGeneration;
     size_t maxGenerations;
@@ -126,7 +121,7 @@ private:
 
         size_t const N = params.N;
         mt19937& generator = *params.generator;
-        vector<Individual>& pop = *params.pop;
+        vector<Individual>& pop = mPop;
         size_t tournamentSize = params.tournamentSize;
         std::uniform_int_distribution<size_t> dist(0,pop.size()-1);
         auto func = [&] (std::uniform_int_distribution<size_t>& dist, mt19937& generator)
@@ -169,8 +164,8 @@ private:
     {
         size_t const N = params.N;
         mt19937& generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = *params.distribution;
-        vector<Individual>& pop = *params.pop;
+        std::uniform_real_distribution<double>& dist = mDistribution;
+        vector<Individual>& pop = mPop;
 
         auto func = [&] (double const p)
         {
@@ -197,7 +192,7 @@ private:
     {
         size_t const N = params.N;
         mt19937& generator = *params.generator;
-        vector<Individual>& pop = *params.pop;
+        vector<Individual>& pop = mPop;
         auto func = [&] (double const p)
         {
             auto cmp = [] (Individual const& ind, double val)
@@ -236,8 +231,8 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = *params.distribution;
-        size_t const NGenes = params.NGenes;
+        std::uniform_real_distribution<double>& dist = mDistribution;
+        size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -271,8 +266,8 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = *params.distribution;
-        size_t const NGenes = params.NGenes;
+        std::uniform_real_distribution<double>& dist = mDistribution;
+        size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -667,7 +662,7 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        size_t const NGenes = params.NGenes;
+        size_t const NGenes = mNGenes;
         size_t const crossoverPoints = params.crossoverPoints;
 
         Individual const& parent1 = parents.at(0);
@@ -718,7 +713,7 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        size_t const NGenes = params.NGenes;
+        size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -745,7 +740,7 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        size_t const NGenes = params.NGenes;
+        size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -764,7 +759,7 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        size_t const NGenes = params.NGenes;
+        size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -786,8 +781,8 @@ private:
     {
         vector<Individual> const& parents = *params.parents;
         mt19937 &generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = *params.distribution;
-        size_t const NGenes = params.NGenes;
+        std::uniform_real_distribution<double>& dist = mDistribution;
+        size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
 
@@ -809,7 +804,7 @@ private:
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = *params.distribution;
+        std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const i = params.geneToMutate;
 
         // comment in for adaptive mutation probability
@@ -852,10 +847,10 @@ private:
     {
         Individual& individual = *params.individual;
         mt19937& generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = *params.distribution;
+        std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const i = params.geneToMutate;
         double constexpr sigma = 0.375/(MAX - MIN);
-        double constexpr tmp = std::sqrt(2)*(MAX-MIN)*sigma;
+        double constexpr tmp = std::sqrt(2.0)*(MAX-MIN)*sigma;
 
 
         double const u = dist(generator);
@@ -928,6 +923,10 @@ private:
                     }
                     pop[i].alternative.clear();
                 }
+		else
+		{
+		    pop[i].fitness = fn;
+		}
             }
         }
     }
@@ -956,13 +955,13 @@ private:
 
     void computeCDF()
     {
-        double const inv_sum = 2.0/(mStats.first.sum + mStats.second.sum);
+        double const inv_sum = 1.0/(50.0*(mStats.first.sum + mStats.second.sum));
         double tmp = 0.0;
         for(Individual& ind : mPop)
         {
             tmp += ind.fitness.score * inv_sum;
             ind.cdf = tmp;
-            ind.total = 0.5*(mStats.first.sum + mStats.second.sum);
+            ind.total = 50.0*(mStats.first.sum + mStats.second.sum);
         }
     }
 
@@ -1268,7 +1267,7 @@ public:
             newPop.reserve(mPopSize);
             vector<Individual *> selected;
 
-            selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mDistribution, mPop, mTournamentSize));
+            selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mTournamentSize));
 
             if(selected.size() == 0) break; // Just for safety
             #pragma omp parallel
@@ -1281,7 +1280,7 @@ public:
                 for(size_t j = 0; j < selected.size()-1; j += 2)
                 {
                     pair<Individual, Individual> children;
-                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mDistribution, mNGenes, mNCrossoverPoints));
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNCrossoverPoints));
                     newPop_local.push_back(children.first);
                     newPop_local.push_back(children.second);
                 }
@@ -1299,7 +1298,7 @@ public:
                 pos_old = pos;
                 size_t const offset = mMutationCount - mIndividualToMutate;
                 pos = newPop.size() > offset ? newPop.size() - offset : 0;
-                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], mGenerator, mDistribution, mGeneToMutate, i, iterations));
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], mGenerator, mGeneToMutate, i, iterations));
                 mutationClock();
                 size_t const pos_diff = pos - pos_old;
                 mMutationCount = mMutationCount > pos_diff ? mMutationCount - pos_diff : 0;
@@ -1308,10 +1307,10 @@ public:
             mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
             nondominatedSort();
-            do
+            while(mPop.size() > mPopSize)
             {
                 mPop.pop_back();
-            } while(mPop.size() > mPopSize);
+            }
 
             vector<double> v(mPop.size());
             for(size_t i = 0; i < v.size(); ++i)
@@ -1325,8 +1324,8 @@ public:
             }
             computeStatistics(mStats.second, v);
             computeCDF();
-            mOnlinePerformance += 0.5*(mStats.first.mean + mStats.second.mean);
-            mOfflinePerformance += 0.5*(mStats.first.max + mStats.second.max);
+            mOnlinePerformance += 50.0*(mStats.first.mean + mStats.second.mean);
+            mOfflinePerformance += 50.0*(mStats.first.max + mStats.second.max);
         }
         mOnlinePerformance /= iterations;
         mOfflinePerformance /= iterations;
@@ -1484,6 +1483,19 @@ public:
         {
             mPop.pop_back();
         } while(mPop.size() > mPopSize);
+    }
+
+    unsigned long getNumberOfEvaluations() const
+    {
+        unsigned long sum = 0;
+        for(auto const& simsPerThread : mSims)
+        {
+            for(auto const& sim : simsPerThread)
+            {
+                sum += sim.getNumberOfRuns();
+            }
+        }
+        return sum;
     }
 
 
