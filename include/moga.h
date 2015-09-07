@@ -32,16 +32,6 @@ using std::function;
 using std::cout;
 using std::endl;
 
-struct SelectionParameter
-{
-    SelectionParameter(size_t N_, mt19937& generator_, size_t tournamentSize_)
-        : N(N_), generator(&generator_), tournamentSize(tournamentSize_){}
-    size_t N;
-    mt19937 *generator;
-    size_t tournamentSize;
-
-};
-
 struct CrossoverParameter
 {
     CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t crossoverPoints_)
@@ -101,191 +91,6 @@ private:
     size_t mGeneToMutate;
 
     size_t mMutationCount = 0;
-
-    void mutationClock()
-    {
-        double const u = mDistribution(mGenerator);
-        double const l = mNGenes * (-std::log(1-u));
-        size_t const tmp = static_cast<size_t>(mGeneToMutate + l);
-        mIndividualToMutate = tmp / mNGenes;
-        mGeneToMutate = tmp % mNGenes;
-    }
-
-
-    vector<Individual *> binaryTournamentSelection(size_t const N, mt19937& generator)
-    {
-        std::uniform_int_distribution<size_t> dist(0, mPop.size()-1);
-        vector<Individual *> res;
-        res.reserve(N);
-        for(size_t i = 0; i < N; ++i)
-        {
-            size_t const pos1 = dist(generator);
-            size_t pos2;
-            while((pos2 = dist(generator)) == pos1);
-            Individual& ind1 = mPop[pos1];
-            Individual& ind2 = mPop[pos2];
-            if(ind1.rank < ind2.rank || ind1.rank == ind2.rank && ind1.distance > ind2.distance)
-            {
-                res.push_back(&ind1);
-            }
-            else
-            {
-                res.push_back(&ind2);
-            }
-        }
-        return res;
-    }
-
-    vector<Individual *> tournamentSelection(SelectionParameter params)
-    {
-
-        size_t const N = params.N;
-        mt19937& generator = *params.generator;
-        vector<Individual>& pop = mPop;
-        size_t tournamentSize = params.tournamentSize;
-        std::uniform_int_distribution<size_t> dist(0,pop.size()-1);
-        auto func = [&] (std::uniform_int_distribution<size_t>& dist, mt19937& generator)
-        {
-            vector<size_t> positions;
-            positions.reserve(tournamentSize);
-            do
-            {
-                positions.push_back(dist(generator));
-            } while(positions.size() < tournamentSize);
-            while(positions.size() > 1)
-            {
-                Individual const& ind1 = pop[positions.back()];
-                Individual const& ind2 = pop[positions[positions.size()-2]];
-                if(ind1.rank < ind2.rank)
-                {
-                    positions[positions.size()-2] = positions.back();
-                }
-                else if(ind1.rank == ind2.rank && ind1.distance > ind2.distance)
-                {
-                    positions[positions.size()-2] = positions.back();
-                }
-                positions.pop_back();
-            }
-            return positions.front();
-
-        };
-
-        vector<Individual *> res;
-        res.reserve(N);
-        for(size_t i = 0; i < N; ++i)
-        {
-            res.push_back(&pop[func(dist, generator)]);
-        }
-        return res;
-    }
-
-//    function<vector<Individual *>(SelectionParameter)> tournamentSelection = [&](SelectionParameter params)
-//    {
-
-//        size_t const N = params.N;
-//        mt19937& generator = *params.generator;
-//        vector<Individual>& pop = mPop;
-//        size_t tournamentSize = params.tournamentSize;
-//        std::uniform_int_distribution<size_t> dist(0,pop.size()-1);
-//        auto func = [&] (std::uniform_int_distribution<size_t>& dist, mt19937& generator)
-//        {
-//            vector<size_t> positions;
-//            positions.reserve(tournamentSize);
-//            do
-//            {
-//                positions.push_back(dist(generator));
-//            } while(positions.size() < tournamentSize);
-//            while(positions.size() > 1)
-//            {
-//                Individual const& ind1 = pop[positions.back()];
-//                Individual const& ind2 = pop[positions[positions.size()-2]];
-//                if(ind1.rank < ind2.rank)
-//                {
-//                    positions[positions.size()-2] = positions.back();
-//                }
-//                else if(ind1.rank == ind2.rank && ind1.distance > ind2.distance)
-//                {
-//                    positions[positions.size()-2] = positions.back();
-//                }
-//                positions.pop_back();
-//            }
-//            return positions.front();
-
-//        };
-
-//        vector<Individual *> res;
-//        res.reserve(N);
-//        for(size_t i = 0; i < N; ++i)
-//        {
-//            res.push_back(&pop[func(dist, generator)]);
-//        }
-//        return res;
-//    };
-
-
-//    function<vector<Individual *>(SelectionParameter)> rouletteWheelSelection = [&](SelectionParameter params)
-//    {
-//        size_t const N = params.N;
-//        mt19937& generator = *params.generator;
-//        std::uniform_real_distribution<double>& dist = mDistribution;
-//        vector<Individual>& pop = mPop;
-
-//        auto func = [&] (double const p)
-//        {
-//            auto cmp = [] (Individual const& ind, double val)
-//            {
-//                return ind.cdf < val;
-//            };
-
-//            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
-//            return low;
-//        };
-
-//        vector<Individual *> res;
-//        res.reserve(N);
-//        for(size_t i = 0; i < N; ++i)
-//        {
-//            auto it = func(dist(generator));
-//            res.push_back(&(*it));
-//        }
-//        return res;
-//    };
-
-//    function<vector<Individual *>(SelectionParameter)> stochasticUniversalSampling = [&](SelectionParameter params)
-//    {
-//        size_t const N = params.N;
-//        mt19937& generator = *params.generator;
-//        vector<Individual>& pop = mPop;
-//        auto func = [&] (double const p)
-//        {
-//            auto cmp = [] (Individual const& ind, double val)
-//            {
-//                return ind.cdf < val;
-//            };
-
-//            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
-//            return low;
-//        };
-//        vector<Individual *> res;
-//        res.reserve(N);
-//        double const total = pop.front ().total;
-//        double const distance = total / N;
-//        std::uniform_real_distribution<double> distribution(0,distance);
-//        double const start = distribution(generator);
-//        vector<double> pointers;
-//        pointers.reserve(N);
-//        for(size_t i = 0; i < N; ++i)
-//        {
-//            pointers.push_back(start + i * distance);
-//        }
-//        for(double const p : pointers)
-//        {
-//            auto it = func(p/total);
-//            res.push_back(&(*it));
-//        }
-//        std::shuffle(res.begin(), res.end(), generator);
-//        return res;
-//    };
 
     // Crossover methods
 
@@ -713,8 +518,6 @@ private:
             }
         }
 
-
-
         return std::make_pair(child1, child2);
 
 
@@ -942,12 +745,94 @@ private:
     };
 
 
-
-    //vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
     vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
     vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
 
+    void mutationClock()
+    {
+        double const u = mDistribution(mGenerator);
+        double const l = mNGenes * (-std::log(1-u));
+        size_t const tmp = static_cast<size_t>(mGeneToMutate + l);
+        mIndividualToMutate = tmp / mNGenes;
+        mGeneToMutate = tmp % mNGenes;
+    }
 
+
+    vector<Individual *> binaryTournamentSelection(size_t const N, mt19937& generator)
+    {
+        std::uniform_int_distribution<size_t> dist(0, mPop.size()-1);
+        vector<Individual *> res;
+        res.reserve(N);
+
+        #pragma omp parallel
+        {
+            vector<Individual *> res_local;
+            res_local.reserve(N / omp_get_num_threads() + N % omp_get_max_threads());
+
+            #pragma omp for schedule(static)
+            for(size_t i = 0; i < N; ++i)
+            {
+
+                size_t const pos1 = dist(generator);
+                size_t pos2;
+                while((pos2 = dist(generator)) == pos1);
+                Individual& ind1 = mPop[pos1];
+                Individual& ind2 = mPop[pos2];
+                if(ind1.rank < ind2.rank || ind1.rank == ind2.rank && ind1.distance > ind2.distance)
+                {
+                    res_local.push_back(&ind1);
+                }
+                else
+                {
+                    res_local.push_back(&ind2);
+                }
+            }
+            #pragma omp critical
+            {
+                res.insert(res.end(), res_local.begin(), res_local.end());
+            }
+        }
+        return res;
+    }
+
+    vector<Individual *> tournamentSelection(size_t const N, mt19937& generator)
+    {
+        std::uniform_int_distribution<size_t> dist(0,mPop.size()-1);
+        vector<Individual *> res;
+        res.reserve(N);
+        #pragma omp parallel
+        {
+            vector<Individual *> res_local;
+            res_local.reserve(N / omp_get_num_threads() + N % omp_get_max_threads());
+            vector<size_t> positions;
+            positions.reserve(mTournamentSize);
+            #pragma omp for schedule(static)
+            for(size_t i = 0; i < N; ++i)
+            {
+                do
+                {
+                    positions.push_back(dist(generator));
+                } while(positions.size() < mTournamentSize);
+                while(positions.size() > 1)
+                {
+                    Individual const& ind1 = mPop[positions.back()];
+                    Individual const& ind2 = mPop[positions[positions.size()-2]];
+                    if(ind1.rank < ind2.rank || ind1.rank == ind2.rank && ind1.distance > ind2.distance)
+                    {
+                        positions[positions.size()-2] = positions.back();
+                    }
+                    positions.pop_back();
+                }
+                res_local.push_back(&mPop[positions[0]]);
+                positions.pop_back();
+            }
+            #pragma omp critical
+            {
+                res.insert(res.end(), res_local.begin(), res_local.end());
+            }
+        }
+        return res;
+    }
 
     void evaluate(vector<Individual>& pop)
     {
@@ -1016,17 +901,6 @@ private:
         }
     }
 
-    void computeCDF()
-    {
-        double const inv_sum = 1.0/(50.0*(mStats.first.sum + mStats.second.sum));
-        double tmp = 0.0;
-        for(Individual& ind : mPop)
-        {
-            tmp += ind.fitness.score * inv_sum;
-            ind.cdf = tmp;
-            ind.total = 50.0*(mStats.first.sum + mStats.second.sum);
-        }
-    }
 
     void computeStatistics(Statistics& stats, vector<double> const& v)
     {
@@ -1310,8 +1184,14 @@ public:
             v[i] = mPop[i].fitness.health;
         }
         computeStatistics(mStats.second, v);
-        //computeCDF();
 
+        static mt19937 generator;
+
+        #pragma omp threadprivate(generator)
+        #pragma omp parallel
+        {
+            generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+        }
 
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -1323,12 +1203,10 @@ public:
             newPop.reserve(mPopSize);
             vector<Individual *> selected;
 
-            //selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mTournamentSize));
-            selected = binaryTournamentSelection(mPopSize, mGenerator);
+            selected = tournamentSelection(mPopSize, generator);
             if(selected.size() == 0) break; // Just for safety
             #pragma omp parallel
             {
-                mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
 
                 vector<Individual> newPop_local;
                 newPop_local.reserve(selected.size() / 2 / omp_get_num_threads());
@@ -1379,17 +1257,11 @@ public:
                 v[i] = mPop[i].fitness.health;
             }
             computeStatistics(mStats.second, v);
-            //computeCDF();
         }
 
 
     }
 
-
-//    size_t getNumberOfSelectionOperators() const
-//    {
-//        return selectionFuncs.size();
-//    }
 
     size_t getNumberOfCrossoverOperators() const
     {
@@ -1406,10 +1278,6 @@ public:
         return mStats;
     }
 
-//    void setSelection(size_t const value)
-//    {
-//        mSelectionChoice = value < selectionFuncs.size() ? value : mSelectionChoice;
-//    }
 
     void setCrossover(size_t const value)
     {
@@ -1421,10 +1289,6 @@ public:
         mMutationChoice = value < mutationFuncs.size() ? value : mMutationChoice;
     }
 
-//    string getSelectionOperatorName()
-//    {
-//        return mSelectionFuncNames[mSelectionChoice];
-//    }
     string getCrossoverOperatorName()
     {
         return mCrossoverFuncNames[mCrossoverChoice];
@@ -1557,5 +1421,5 @@ public:
 };
 
 
-#endif // SOGA
+#endif // MOGA
 
