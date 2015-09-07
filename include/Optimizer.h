@@ -43,6 +43,14 @@ public:
 
     void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
     {
+        static mt19937 generator;
+
+        #pragma omp threadprivate(generator)
+        #pragma omp parallel
+        {
+            generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+        }
+
         mMPI = procs > 1;
         setTournamentSize(tournamentSize);
         setCrossover(co);
@@ -83,8 +91,8 @@ public:
             vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
             vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
-            mGa1.optimize(optima2, genPerIt);
-            mGa2.optimize(optima1, genPerIt);
+            mGa1.optimize(optima2, genPerIt, generator);
+            mGa2.optimize(optima1, genPerIt, generator);
 
             mStats1 = mGa1.getStatistics();
             mStats2 = mGa2.getStatistics();

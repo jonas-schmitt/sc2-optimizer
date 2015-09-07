@@ -64,7 +64,6 @@ private:
 
     size_t mNGenes;
 
-    mt19937 mGenerator;
 
     std::uniform_real_distribution<double> mDistribution;
 
@@ -748,9 +747,9 @@ private:
     vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
     vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
 
-    void mutationClock()
+    void mutationClock(mt19937& generator)
     {
-        double const u = mDistribution(mGenerator);
+        double const u = mDistribution(generator);
         double const l = mNGenes * (-std::log(1-u));
         size_t const tmp = static_cast<size_t>(mGeneToMutate + l);
         mIndividualToMutate = tmp / mNGenes;
@@ -1082,7 +1081,7 @@ public:
     typedef U race2;
 
     MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
-        :  mPopSize(popSize), mGenerator(std::chrono::system_clock::now().time_since_epoch().count()), mDistribution(0,1.0), mNGoals(nGoals)
+        :  mPopSize(popSize), mDistribution(0,1.0), mNGoals(nGoals)
     {
 
 
@@ -1107,6 +1106,7 @@ public:
                 #pragma omp barrier
             }
         }
+        mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
 
         if(player == Player::first)
         {
@@ -1129,7 +1129,7 @@ public:
             chrom.resize(mNGenes);
             for(auto& gene : chrom)
             {
-                gene = valueDist(mGenerator);
+                gene = valueDist(generator);
             }
         }
         setGoals(initChroms);
@@ -1151,7 +1151,7 @@ public:
 
             for(auto& gene : chrom)
             {
-                gene = valueDist(mGenerator);
+                gene = valueDist(generator);
             }
 
         }
@@ -1163,12 +1163,11 @@ public:
 
     }
 
-    void optimize(vector<Chromosome> const& goals, size_t const iterations)
+    void optimize(vector<Chromosome> const& goals, size_t const iterations, mt19937& generator)
     {
         mMutationCount = 0;
         mIndividualToMutate = 0;
         mGeneToMutate = 0;
-
 
         setGoals(goals);
         evaluate(mPop);
@@ -1185,18 +1184,10 @@ public:
         }
         computeStatistics(mStats.second, v);
 
-        static mt19937 generator;
-
-        #pragma omp threadprivate(generator)
-        #pragma omp parallel
-        {
-            generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
-        }
-
         for(size_t i = 0; i < iterations; ++i)
         {
 
-            mutationClock();
+            mutationClock(generator);
             // apply genetic algorithm
 
             vector<Individual> newPop;
@@ -1232,8 +1223,8 @@ public:
                 pos_old = pos;
                 size_t const offset = mMutationCount - mIndividualToMutate;
                 pos = newPop.size() > offset ? newPop.size() - offset : 0;
-                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], mGenerator, mGeneToMutate, i, iterations));
-                mutationClock();
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], generator, mGeneToMutate, i, iterations));
+                mutationClock(generator);
                 size_t const pos_diff = pos - pos_old;
                 mMutationCount = mMutationCount > pos_diff ? mMutationCount - pos_diff : 0;
             }
