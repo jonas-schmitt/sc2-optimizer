@@ -231,15 +231,7 @@ public:
 
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
             {
-                if(lhs.fitness.damage > rhs.fitness.damage)
-                {
-                    return true;
-                }
-                else if(std::abs(lhs.fitness.damage - rhs.fitness.damage) < EPS && std::abs(lhs.fitness.health - rhs.fitness.health) > EPS && lhs.fitness.health > rhs.fitness.health)
-                {
-                    return true;
-                }
-                else return false;
+                return lhs.fitness.score > rhs.fitness.score;
             };
 
             std::sort(pop1.begin(), pop1.end(), cmp);
