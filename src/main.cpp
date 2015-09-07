@@ -172,23 +172,24 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-        for(size_t i = 0; i < 3; ++i)
-        {
-            for(size_t j = 0; j < 7; ++j)
-            {
-                for(size_t k = 0; k < 3; ++k)
-                {
-                    start = std::chrono::system_clock::now();
-                    OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
-                    size_t const generations = j == 0 ? genPerIt/2 : genPerIt;
-                    opt.optimize(k, j, i, iterations, generations, rank, procs, migrants);
-                    end = std::chrono::system_clock::now();
-                    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-                    if(rank == 0) std::cout << "Elapsed time: " << elapsed.count() << " milliseconds" <<  std::endl;
-                    //opt.determineWinner(std::cout, rank, procs);
-                }
-            }
-        }
+//        for(size_t i = 2; i < 5; i+=2)
+//        {
+//            for(size_t j = 0; j < 7; ++j)
+//            {
+//                for(size_t k = 0; k < 3; ++k)
+//                {
+        start = std::chrono::system_clock::now();
+        OptimizerInterface<Terran, Protoss> opt(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals);
+        opt.optimize(2, 0, 0, iterations, genPerIt, rank, procs, migrants);
+
+        end = std::chrono::system_clock::now();
+        auto elapsed_min = std::chrono::duration_cast<std::chrono::minutes>(end - start);
+        auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+        if(rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() << " sec" << std::endl;
+        opt.determineWinner(std::cout, rank, procs);
+//                }
+//            }
+//        }
     }
     else if(race1 == "Zerg" && race2 == "Terran")
     {

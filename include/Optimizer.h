@@ -41,10 +41,10 @@ public:
         mSim.initBothPlayers(buildList1, buildList2);
     }
 
-    void optimize(size_t const sel, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
+    void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
     {
         mMPI = procs > 1;
-        setSelection(sel);
+        setTournamentSize(tournamentSize);
         setCrossover(co);
         setMutation(mut);
 
@@ -53,7 +53,7 @@ public:
         if(rank == 0)
         {
             cout << "Performing Optimization with the following parameters" << endl << endl;
-            cout << "Selection Operator: " << getSelectionOperatorName() << endl;
+            cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << endl;
             cout << "Crossover Operator: " << getCrossoverOperatorName() << endl;
             cout << "Mutation Operator: " << getMutationOperatorName() << endl;
             cout << "Population Size: " << mPopSize*procs << endl;
@@ -66,13 +66,13 @@ public:
 
         for(size_t i = 0; i < iterations; ++i)
         {
-
+            /*
             if(rank == 0)
             {
                 std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << endl;
                 //std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
                 //printf("%c[2K", 27);
-            }
+            }*/
 
             if(mMPI)
             {
@@ -88,6 +88,7 @@ public:
 
             mStats1 = mGa1.getStatistics();
             mStats2 = mGa2.getStatistics();
+
             if(mMPI)
             {
                 computeGlobalStatistics(mStats1.first, rank, procs);
@@ -97,18 +98,11 @@ public:
             }
             printStatistics();
 
-            mOnlinePerformance += 0.5*(mGa1.getOnlinePerformance() + mGa2.getOnlinePerformance());
-            mOfflinePerformance += 0.5*(mGa1.getOfflinePerformance() + mGa2.getOfflinePerformance());
         }
-        mOnlinePerformance /= iterations;
-        mOfflinePerformance /= iterations;
-        double onlinePerformance_tmp, offlinePerformance_tmp;
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
         unsigned long evaluations_tmp;
         if(mMPI)
         {
-            MPI_Reduce (&mOnlinePerformance, &onlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-            MPI_Reduce (&mOfflinePerformance, &offlinePerformance_tmp, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
             MPI_Reduce (&evaluations, &evaluations_tmp, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
         }
 
@@ -116,15 +110,18 @@ public:
         {
             if(mMPI)
             {
-                mOnlinePerformance = onlinePerformance_tmp/procs;
-                mOfflinePerformance = offlinePerformance_tmp/procs;
                 evaluations = evaluations_tmp;
             }
 
-            //printStatistics();
-            cout << "Online Performance: " << mOnlinePerformance << endl;
-            cout << "Offline Performance: " << mOfflinePerformance << endl;
             cout << "Number of evaluations: " << evaluations << endl;
+            cout << endl;
+            cout << "Damage" << endl;
+            cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << endl;
+            cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << endl;
+            cout << endl;
+            cout << "Health" << endl;
+            cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << endl;
+            cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << endl;
             cout << "\n" << endl;
         }
     }
@@ -135,15 +132,15 @@ public:
         for(int i = 0; i < 50; ++i) separator += "-";
         separator += '\n';
         cout << separator << "Statistics Player 1:" << endl;
-        cout << "Damage:" << endl;
+        cout << "Damage" << endl;
         mStats1.first.print();
-        cout << "Health:" << endl;
+        cout << "Health" << endl;
         mStats1.second.print();
         cout << separator << endl;
         cout << separator << "Statistics Player 2:" << endl;
-        cout << "Damage:" << endl;
+        cout << "Damage" << endl;
         mStats2.first.print();
-        cout << "Health:" << endl;
+        cout << "Health" << endl;
         mStats2.second.print();
         cout << separator << endl;
     }
@@ -174,11 +171,12 @@ public:
 
 
 
-    void setSelection(size_t const value)
+    void setTournamentSize(size_t const value)
     {
-        mGa1.setSelection(value);
-        mGa2.setSelection(value);
+        mGa1.setTournamentSize(value);
+        mGa2.setTournamentSize(value);
     }
+
 
     void setCrossover(size_t const value)
     {
@@ -192,9 +190,9 @@ public:
         mGa2.setMutation(value);
     }
 
-    string getSelectionOperatorName()
+    size_t getTournamentSize()
     {
-        return mGa1.getSelectionOperatorName();
+        return mGa1.getTournamentSize();
     }
     string getCrossoverOperatorName()
     {
@@ -278,6 +276,8 @@ public:
         MPI_Reduce (&stats.max, &tmp.max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
         MPI_Reduce (&stats.sum, &tmp.sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         MPI_Reduce (&stats.stdev, &tmp.stdev, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.onlinePerformance, &tmp.onlinePerformance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.offlinePerformance, &tmp.offlinePerformance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
         if(rank == 0)
         {
@@ -285,6 +285,8 @@ public:
             stats.max = tmp.max;
             stats.sum = tmp.sum;
             stats.stdev = tmp.stdev / procs;
+            stats.onlinePerformance = tmp.onlinePerformance / procs;
+            stats.offlinePerformance = tmp.offlinePerformance / procs;
         }
     }
 

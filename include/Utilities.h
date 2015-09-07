@@ -175,12 +175,17 @@ struct Statistics
     double max;
     double sum;
     double stdev;
+    double onlinePerformance;
+    double offlinePerformance;
+    size_t iteration = 0;
     void print()
     {
         cout << "Total: " << sum << endl;
         cout << "Average: " << mean*100.0 << " %" << endl;
         cout << "Maximum: " << max*100.0 << " %" << endl;
         cout << "Standard Deviation: " << stdev*100 << " %" << endl;
+        cout << "Online Performance: " << onlinePerformance*100.0/iteration << " %" << endl;
+        cout << "Offline Performance: " << offlinePerformance*100.0/iteration << " %" << endl;
     }
 };
 

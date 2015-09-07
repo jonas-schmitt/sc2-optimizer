@@ -84,16 +84,13 @@ private:
 
 
 
-    vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
+    //vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
     vector<string> mCrossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
     vector<string> mMutationFuncNames = {"Polynomial Mutation", "Gaussian Mutation", "Uniform Mutation"};
 
-    size_t mSelectionChoice = 0;
+    //size_t mSelectionChoice = 0;
     size_t mCrossoverChoice = 0;
     size_t mMutationChoice = 0;
-
-    double mOnlinePerformance = 0.0;
-    double mOfflinePerformance = 0.0;
 
     size_t mNGoals;
 
@@ -115,8 +112,31 @@ private:
     }
 
 
+    vector<Individual *> binaryTournamentSelection(size_t const N, mt19937& generator)
+    {
+        std::uniform_int_distribution<size_t> dist(0, mPop.size()-1);
+        vector<Individual *> res;
+        res.reserve(N);
+        for(size_t i = 0; i < N; ++i)
+        {
+            size_t const pos1 = dist(generator);
+            size_t pos2;
+            while((pos2 = dist(generator)) == pos1);
+            Individual& ind1 = mPop[pos1];
+            Individual& ind2 = mPop[pos2];
+            if(ind1.rank < ind2.rank || ind1.rank == ind2.rank && ind1.distance > ind2.distance)
+            {
+                res.push_back(&ind1);
+            }
+            else
+            {
+                res.push_back(&ind2);
+            }
+        }
+        return res;
+    }
 
-    function<vector<Individual *>(SelectionParameter)> tournamentSelection = [&](SelectionParameter params)
+    vector<Individual *> tournamentSelection(SelectionParameter params)
     {
 
         size_t const N = params.N;
@@ -157,72 +177,115 @@ private:
             res.push_back(&pop[func(dist, generator)]);
         }
         return res;
-    };
+    }
+
+//    function<vector<Individual *>(SelectionParameter)> tournamentSelection = [&](SelectionParameter params)
+//    {
+
+//        size_t const N = params.N;
+//        mt19937& generator = *params.generator;
+//        vector<Individual>& pop = mPop;
+//        size_t tournamentSize = params.tournamentSize;
+//        std::uniform_int_distribution<size_t> dist(0,pop.size()-1);
+//        auto func = [&] (std::uniform_int_distribution<size_t>& dist, mt19937& generator)
+//        {
+//            vector<size_t> positions;
+//            positions.reserve(tournamentSize);
+//            do
+//            {
+//                positions.push_back(dist(generator));
+//            } while(positions.size() < tournamentSize);
+//            while(positions.size() > 1)
+//            {
+//                Individual const& ind1 = pop[positions.back()];
+//                Individual const& ind2 = pop[positions[positions.size()-2]];
+//                if(ind1.rank < ind2.rank)
+//                {
+//                    positions[positions.size()-2] = positions.back();
+//                }
+//                else if(ind1.rank == ind2.rank && ind1.distance > ind2.distance)
+//                {
+//                    positions[positions.size()-2] = positions.back();
+//                }
+//                positions.pop_back();
+//            }
+//            return positions.front();
+
+//        };
+
+//        vector<Individual *> res;
+//        res.reserve(N);
+//        for(size_t i = 0; i < N; ++i)
+//        {
+//            res.push_back(&pop[func(dist, generator)]);
+//        }
+//        return res;
+//    };
 
 
-    function<vector<Individual *>(SelectionParameter)> rouletteWheelSelection = [&](SelectionParameter params)
-    {
-        size_t const N = params.N;
-        mt19937& generator = *params.generator;
-        std::uniform_real_distribution<double>& dist = mDistribution;
-        vector<Individual>& pop = mPop;
+//    function<vector<Individual *>(SelectionParameter)> rouletteWheelSelection = [&](SelectionParameter params)
+//    {
+//        size_t const N = params.N;
+//        mt19937& generator = *params.generator;
+//        std::uniform_real_distribution<double>& dist = mDistribution;
+//        vector<Individual>& pop = mPop;
 
-        auto func = [&] (double const p)
-        {
-            auto cmp = [] (Individual const& ind, double val)
-            {
-                return ind.cdf < val;
-            };
+//        auto func = [&] (double const p)
+//        {
+//            auto cmp = [] (Individual const& ind, double val)
+//            {
+//                return ind.cdf < val;
+//            };
 
-            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
-            return low;
-        };
+//            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
+//            return low;
+//        };
 
-        vector<Individual *> res;
-        res.reserve(N);
-        for(size_t i = 0; i < N; ++i)
-        {
-            auto it = func(dist(generator));
-            res.push_back(&(*it));
-        }
-        return res;
-    };
+//        vector<Individual *> res;
+//        res.reserve(N);
+//        for(size_t i = 0; i < N; ++i)
+//        {
+//            auto it = func(dist(generator));
+//            res.push_back(&(*it));
+//        }
+//        return res;
+//    };
 
-    function<vector<Individual *>(SelectionParameter)> stochasticUniversalSampling = [&](SelectionParameter params)
-    {
-        size_t const N = params.N;
-        mt19937& generator = *params.generator;
-        vector<Individual>& pop = mPop;
-        auto func = [&] (double const p)
-        {
-            auto cmp = [] (Individual const& ind, double val)
-            {
-                return ind.cdf < val;
-            };
+//    function<vector<Individual *>(SelectionParameter)> stochasticUniversalSampling = [&](SelectionParameter params)
+//    {
+//        size_t const N = params.N;
+//        mt19937& generator = *params.generator;
+//        vector<Individual>& pop = mPop;
+//        auto func = [&] (double const p)
+//        {
+//            auto cmp = [] (Individual const& ind, double val)
+//            {
+//                return ind.cdf < val;
+//            };
 
-            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
-            return low;
-        };
-        vector<Individual *> res;
-        res.reserve(N);
-        double const total = pop.front ().total;
-        double const distance = total / N;
-        std::uniform_real_distribution<double> distribution(0,distance);
-        double const start = distribution(generator);
-        vector<double> pointers;
-        pointers.reserve(N);
-        for(size_t i = 0; i < N; ++i)
-        {
-            pointers.push_back(start + i * distance);
-        }
-        for(double const p : pointers)
-        {
-            auto it = func(p/total);
-            res.push_back(&(*it));
-        }
-        std::shuffle(res.begin(), res.end(), generator);
-        return res;
-    };
+//            auto low = std::lower_bound(pop.begin(), pop.end(), p, cmp);
+//            return low;
+//        };
+//        vector<Individual *> res;
+//        res.reserve(N);
+//        double const total = pop.front ().total;
+//        double const distance = total / N;
+//        std::uniform_real_distribution<double> distribution(0,distance);
+//        double const start = distribution(generator);
+//        vector<double> pointers;
+//        pointers.reserve(N);
+//        for(size_t i = 0; i < N; ++i)
+//        {
+//            pointers.push_back(start + i * distance);
+//        }
+//        for(double const p : pointers)
+//        {
+//            auto it = func(p/total);
+//            res.push_back(&(*it));
+//        }
+//        std::shuffle(res.begin(), res.end(), generator);
+//        return res;
+//    };
 
     // Crossover methods
 
@@ -880,7 +943,7 @@ private:
 
 
 
-    vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
+    //vector<function<vector<Individual *>(SelectionParameter) > > selectionFuncs = {tournamentSelection, rouletteWheelSelection, stochasticUniversalSampling};
     vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
     vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
 
@@ -978,6 +1041,9 @@ private:
         stats.mean = mean;
         stats.max = *std::max_element(v.begin(), v.end());
         stats.stdev = stdev;
+        stats.onlinePerformance += stats.mean;
+        stats.offlinePerformance += stats.max;
+        ++stats.iteration;
 
     }
 
@@ -1216,18 +1282,10 @@ public:
 
         }
         evaluate(mPop);
-        vector<double> v(mPop.size());
-        for(size_t i = 0; i < v.size(); ++i)
-        {
-            v[i] = mPop[i].fitness.damage;
-        }
-        computeStatistics(mStats.first, v);
-        for(size_t i = 0; i < v.size(); ++i)
-        {
-            v[i] = mPop[i].fitness.health;
-        }
-        computeStatistics(mStats.second, v);
-        computeCDF();
+        mStats.first.onlinePerformance = 0.0;
+        mStats.first.offlinePerformance = 0.0;
+        mStats.second.onlinePerformance = 0.0;
+        mStats.second.offlinePerformance = 0.0;
 
     }
 
@@ -1237,8 +1295,6 @@ public:
         mIndividualToMutate = 0;
         mGeneToMutate = 0;
 
-        mOnlinePerformance = 0.0;
-        mOfflinePerformance = 0.0;
 
         setGoals(goals);
         evaluate(mPop);
@@ -1254,7 +1310,7 @@ public:
             v[i] = mPop[i].fitness.health;
         }
         computeStatistics(mStats.second, v);
-        computeCDF();
+        //computeCDF();
 
 
         for(size_t i = 0; i < iterations; ++i)
@@ -1267,8 +1323,8 @@ public:
             newPop.reserve(mPopSize);
             vector<Individual *> selected;
 
-            selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mTournamentSize));
-
+            //selected = selectionFuncs[mSelectionChoice](SelectionParameter(mPopSize, mGenerator, mTournamentSize));
+            selected = binaryTournamentSelection(mPopSize, mGenerator);
             if(selected.size() == 0) break; // Just for safety
             #pragma omp parallel
             {
@@ -1323,30 +1379,17 @@ public:
                 v[i] = mPop[i].fitness.health;
             }
             computeStatistics(mStats.second, v);
-            computeCDF();
-            mOnlinePerformance += 50.0*(mStats.first.mean + mStats.second.mean);
-            mOfflinePerformance += 50.0*(mStats.first.max + mStats.second.max);
+            //computeCDF();
         }
-        mOnlinePerformance /= iterations;
-        mOfflinePerformance /= iterations;
 
 
     }
 
-    double getOnlinePerformance() const
-    {
-        return mOnlinePerformance;
-    }
 
-    double getOfflinePerformance() const
-    {
-        return mOfflinePerformance;
-    }
-
-    size_t getNumberOfSelectionOperators() const
-    {
-        return selectionFuncs.size();
-    }
+//    size_t getNumberOfSelectionOperators() const
+//    {
+//        return selectionFuncs.size();
+//    }
 
     size_t getNumberOfCrossoverOperators() const
     {
@@ -1363,10 +1406,10 @@ public:
         return mStats;
     }
 
-    void setSelection(size_t const value)
-    {
-        mSelectionChoice = value < selectionFuncs.size() ? value : mSelectionChoice;
-    }
+//    void setSelection(size_t const value)
+//    {
+//        mSelectionChoice = value < selectionFuncs.size() ? value : mSelectionChoice;
+//    }
 
     void setCrossover(size_t const value)
     {
@@ -1378,10 +1421,10 @@ public:
         mMutationChoice = value < mutationFuncs.size() ? value : mMutationChoice;
     }
 
-    string getSelectionOperatorName()
-    {
-        return mSelectionFuncNames[mSelectionChoice];
-    }
+//    string getSelectionOperatorName()
+//    {
+//        return mSelectionFuncNames[mSelectionChoice];
+//    }
     string getCrossoverOperatorName()
     {
         return mCrossoverFuncNames[mCrossoverChoice];
@@ -1496,6 +1539,16 @@ public:
             }
         }
         return sum;
+    }
+
+    void setTournamentSize(size_t const value)
+    {
+        mTournamentSize = value > 1 && value < mPopSize/2 ? value : 4;
+    }
+
+    size_t getTournamentSize() const
+    {
+        return mTournamentSize;
     }
 
 
