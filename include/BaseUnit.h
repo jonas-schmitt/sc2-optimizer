@@ -142,7 +142,7 @@ protected:
 
     BaseUnit *mTarget = nullptr;
 
-    bool mAttacked = false;
+    bool mHasAttacked = false;
 
 
 
