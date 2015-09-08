@@ -31,7 +31,7 @@ private:
 
 
 public:
-    Optimizer(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
         : mPopSize(popSize),
           mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
           mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
@@ -49,6 +49,7 @@ public:
         #pragma omp parallel
         {
             generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+            generator.discard(1000);
         }
 
         mMPI = procs > 1;

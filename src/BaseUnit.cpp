@@ -618,10 +618,12 @@ bool BaseUnit::attack(BaseUnit& unit)
     Damage const& damage = mPossibleDamage[unit.getIdentifier()];
     if(damage.shield > 0)
     {
+        mAttacked = true;
         unit.subShield(damage.shield);
     }
     if(damage.health > 0)
     {
+        mAttacked = true;
         unit.subHealth(damage.health);
     }
     if(unit.isAirUnit())
@@ -766,6 +768,11 @@ void BaseUnit::initUpgrades (vector<int> const& flags)
 {
     mAttackUpgrade = flags[0];
     mArmorUpgrade = flags[1];
+}
+
+bool BaseUnit::hasAttacked() const
+{
+    return mAttacked;
 }
 
 

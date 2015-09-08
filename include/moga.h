@@ -1107,6 +1107,7 @@ public:
             }
         }
         mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+        generator.discard(1000);
 
         if(player == Player::first)
         {

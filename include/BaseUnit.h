@@ -142,6 +142,8 @@ protected:
 
     BaseUnit *mTarget = nullptr;
 
+    bool mAttacked = false;
+
 
 
 
@@ -601,6 +603,8 @@ public:
     void multSpeed(double value);
 
     size_t getChromosomeStartPosition() const;
+
+    bool hasAttacked() const;
 };
 
 

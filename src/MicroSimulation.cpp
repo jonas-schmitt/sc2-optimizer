@@ -287,7 +287,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking)
+        if(mTracking && i % 10 == 0)
         {
             for(auto const unitPtr : pl1.unitList)
             {
@@ -297,7 +297,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
                 }
                 else
                 {
-                    mFile1 << unitPtr->getX() << "," << unitPtr->getY() << "\t\t\t";
+                    mFile1 << unitPtr->getX() << "," << unitPtr->getY() << "," << (unitPtr->getHealth()+unitPtr->getShield())/(unitPtr->getMaxHealth() + unitPtr->getMaxShield()) << "\t\t\t";
                 }
             }
             mFile1 << std::endl;
@@ -310,7 +310,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
                 }
                 else
                 {
-                    mFile2 << unitPtr->getX() << "," << unitPtr->getY() << "\t\t\t";
+                    mFile2 << unitPtr->getX() << "," << unitPtr->getY() << "," << (unitPtr->getHealth()+unitPtr->getShield())/(unitPtr->getMaxHealth() + unitPtr->getMaxShield()) << "\t\t\t";
                 }
             }
             mFile2 << std::endl;
@@ -331,7 +331,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         for(auto unit : pl1.unitList)
         {
             maxHealth += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
-            res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
+            if(unit->hasAttacked()) res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
         }
 
         for(auto unit : pl2.unitList)
@@ -346,7 +346,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         for(auto unit : pl2.unitList)
         {
             maxHealth += (unit->getMaxHealth() + unit->getMaxShield())*(unit->getMinerals()+unit->getGas());
-            res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
+            if(unit->hasAttacked()) res.health += (unit->getHealth() + unit->getShield())*(unit->getMinerals()+unit->getGas());
         }
 
         for(auto unit : pl1.unitList)
@@ -358,7 +358,16 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 
     res.damage /= maxDamage;
 
-    res.health /= maxHealth;
+    if(res.damage < 0.1)
+    {
+        res.health = 0.0;
+    }
+    else
+    {
+        res.health /= maxHealth;
+    }
+
+
 
     res.score = (res.damage + res.health) * 50.0;
 
