@@ -235,6 +235,16 @@ void BaseUnit::resetEnergy()
     mStats.energy = mStats.maxEnergy;
 }
 
+void BaseUnit::reset()
+{
+    mHasAttacked = false;
+    resetHealth();
+    resetShield();
+    resetEnergy();
+    resetPos();
+    resetTimer();
+}
+
 void BaseUnit::incArmor()
 {
     ++mStats.armor;
@@ -618,12 +628,12 @@ bool BaseUnit::attack(BaseUnit& unit)
     Damage const& damage = mPossibleDamage[unit.getIdentifier()];
     if(damage.shield > 0)
     {
-        mAttacked = true;
+        mHasAttacked = true;
         unit.subShield(damage.shield);
     }
     if(damage.health > 0)
     {
-        mAttacked = true;
+        mHasAttacked = true;
         unit.subHealth(damage.health);
     }
     if(unit.isAirUnit())
@@ -772,7 +782,7 @@ void BaseUnit::initUpgrades (vector<int> const& flags)
 
 bool BaseUnit::hasAttacked() const
 {
-    return mAttacked;
+    return mHasAttacked;
 }
 
 

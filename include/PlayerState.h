@@ -224,11 +224,7 @@ template <class Race> struct PlayerState final : public Race
         unitCount = unitList.size();
         for(auto unit : unitList)
         {
-            unit->resetHealth();
-            unit->resetShield();
-            unit->resetEnergy();
-            unit->resetPos();
-            unit->resetTimer();
+            unit->reset();
         }
         time = 0;
         regenerationTimer = regenerationUpdate;

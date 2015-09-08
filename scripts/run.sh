@@ -7,6 +7,6 @@ make -j4
 cd ..
 export OMP_NUM_THREADS=8
 export OMP_SCHEDULE="dynamic,1"
-nohup nice -n 19 ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 100 10 100 10 > res.out 2> test.err < /dev/null &
+nohup nice -n 19 ./build/opt lists/TerranAttack.txt lists/ProtossAttack.txt 100 5 50 10 > res.out 2> test.err < /dev/null &
 #sh ./scripts/visualize.sh
 

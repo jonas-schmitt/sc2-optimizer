@@ -605,6 +605,8 @@ public:
     size_t getChromosomeStartPosition() const;
 
     bool hasAttacked() const;
+
+    void reset();
 };
 
 

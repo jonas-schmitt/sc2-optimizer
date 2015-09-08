@@ -145,7 +145,7 @@ def animate(i):
     return circles1, circles2, rect
 
 ani = animation.FuncAnimation(fig, animate, frames=len,
-                              interval=100, blit=True, init_func=init)
+                              interval=10, blit=True, init_func=init)
 
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
