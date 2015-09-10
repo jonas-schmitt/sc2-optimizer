@@ -25,7 +25,7 @@ private:
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMinX = [](Vec2D const& pos,typename Race::BUT const& unit)
     {
         double const dist = fabs(pos.x-unit.getX());
-        if(dist < unit.getSpeed())
+        if(dist < unit.getMovementUpdateDist() + unit.getSize())
         {
             return Vec2D(1e6,0);
         }
@@ -36,7 +36,7 @@ private:
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMinY = [](Vec2D const& pos,typename Race::BUT const& unit)
     {
         double const dist = fabs(pos.y-unit.getY());
-        if(dist < unit.getSpeed())
+        if(dist < unit.getMovementUpdateDist() + unit.getSize())
         {
             return Vec2D(0,1e6);
         }
@@ -47,7 +47,7 @@ private:
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxX = [](Vec2D const& pos,typename Race::BUT const& unit)
     {
         double const dist = fabs(pos.x-unit.getX());
-        if(dist < unit.getSpeed())
+        if(dist < unit.getMovementUpdateDist() + unit.getSize())
         {
             return Vec2D(-1e6,0);
         }
@@ -58,7 +58,7 @@ private:
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMaxY = [](Vec2D const& pos,typename Race::BUT const& unit)
     {
         double const dist = fabs(pos.y-unit.getY());
-        if(dist < unit.getSpeed())
+        if(dist < unit.getMovementUpdateDist() + unit.getSize())
         {
             return Vec2D(0,-1e6);
         }

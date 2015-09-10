@@ -327,7 +327,9 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, Player
     mFactory.create(unitVec, pl);
     for(auto unit : pl.unitList)
     {
-        unit->setPosLimits(pl.minPos, pl.maxPos);
+        Vec2D minPos(pl.minPos.x + unit->getSize(), pl.minPos.y + unit->getSize());
+        Vec2D maxPos(pl.maxPos.x - unit->getSize(), pl.maxPos.y - unit->getSize());
+        unit->setPosLimits(minPos, maxPos);
     }
     pl.unitCount = pl.unitList.size ();
 

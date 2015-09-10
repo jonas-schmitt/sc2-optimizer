@@ -765,13 +765,14 @@ void BaseUnit::computeTemporaryValues()
     mMovementUpdateBackup = mMovementUpdate;
     mMovementUpdateDist = getSpeed()*mMovementUpdate*1e-3;
     tmp[0] = getMaxDist()*getPhenotype(0);
-    tmp[1] = 1e3*getPhenotype(1) + 1e1*getResources()*getPhenotype(2);
-    tmp[2] = 1e1*getPhenotype(4);
-    tmp[3] = 1e2*getPhenotype(6);
-    tmp[4] = 1e3*getPhenotype(7);
-    tmp[5] = 1e1*getPhenotype(9);
-    tmp[6] = 1e2*getPhenotype(11);
-    tmp[7] = 1e3*getPhenotype(12);
+    tmp[1] = getMaxDist()*getPhenotype(1) + getSize();
+    tmp[2] = 1e3*getPhenotype(2) + 1e1*getResources()*getPhenotype(3);
+    tmp[3] = 1e1*getPhenotype(5);
+    tmp[4] = 1e2*getPhenotype(7);
+    tmp[5] = 1e3*getPhenotype(8);
+    tmp[6] = 1e1*getPhenotype(11);
+    tmp[7] = 1e2*getPhenotype(12);
+    tmp[8] = 1e3*getPhenotype(13);
 }
 
 void BaseUnit::initUpgrades (vector<int> const& flags)
