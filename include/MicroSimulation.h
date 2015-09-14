@@ -49,7 +49,7 @@ private:
     PlayerState<T> pl1;
     PlayerState<U> pl2;
     bool mTracking = false;
-    long mTimeSteps = 10000;
+    long mTimeSteps = 6000;
     int mTimeSlice = 10;
 
     unsigned long mRuns = 0;

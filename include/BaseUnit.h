@@ -157,15 +157,12 @@ protected:
         if(dist < own.getSize () + buddy.getSize())
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
-            return Vec2D(-1e5*force.x, -1e5*force.y);
+            return Vec2D(-1e6*force.x, -1e6*force.y);
         }
 
-        // tmp[0] = own.getMaxDist()*own.getPhenotype(0)
-        // tmp[1] = own.getMaxDist()*own.getPhenotype(1)
         if(dist < own.tmp[0] && dist > own.tmp[1] + buddy.getSize())
         {
             Vec2D res = std::move(distVec.getNormedVec(dist));
-            // tmp[2] = 1e3*own.getPhenotype(2) + 1e1*own.getResources()*own.getPhenotype(3)
             res.x *= own.tmp[2];
             res.y *= own.tmp[2];
             return res;
@@ -185,57 +182,52 @@ protected:
         if(dist < own.getSize() + enemy.getSize())
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
-            return Vec2D(-1e5*force.x, -1e5*force.y);
+            return Vec2D(-1e6*force.x, -1e6*force.y);
         }
+
+        Vec2D normedDistVec = std::move(distVec.getNormedVec(dist));
 
         Vec2D res1;
         double const ownRange = own.computeRange (enemy);
-
-        int const enemyId = enemy.getIdentifier();
-        if(!own.mPossibleDamage[enemyId].valid)
-        {
-            own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
-        }
-        Vec2D normedDistVec = std::move(distVec.getNormedVec(dist));
-        Damage const& ownDamage = own.mPossibleDamage[enemyId];
-        double const enemyMovement = enemy.getMovementUpdateDist();
         if(dist > ownRange*own.getPhenotype(4))
         {
-            res1 = normedDistVec;
+            int const enemyId = enemy.getIdentifier();
+            if(!own.mPossibleDamage[enemyId].valid)
+            {
+                own.mPossibleDamage[enemyId] = own.computeDamage(enemy);
+            }
+            Damage const& ownDamage = own.mPossibleDamage[enemyId];
             double const a = enemy.getSumMaxHealthShield () - enemy.getHealth () - enemy.getShield ();
             double const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                              : std::max(own.getGACooldown () - own.getAttackTimer (),0);
-            // tmp[2] = 1e1*own.getPhenotype(4)
-            // tmp[3] = 1e2*own.getPhenotype(6)
-            // tmp[4] = 1e3*own.getPhenotype(7)
+            res1 = normedDistVec;
             double const val = a*own.tmp[3] + b * own.getPhenotype(6) + ownDamage.total*own.tmp[4] + own.tmp[5];
             res1.x *= val;
             res1.y *= val;
         }
 
+        Vec2D res2;
         double const enemyRange = enemy.computeRange(own);
-        int const ownId = own.getIdentifier();
-        if(!enemy.mPossibleDamage[ownId].valid)
-        {
-            enemy.mPossibleDamage[ownId] = enemy.computeDamage(own);
-        }
-        Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
-        double const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
-                                       : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
-
-        Vec2D res2(b*own.getPhenotype(9));
+        double const enemyMovement = enemy.getMovementUpdateDist();
         if(dist < own.getPhenotype (10)*(enemyRange+enemyMovement))
         {
+            res2 = normedDistVec;
+            int const ownId = own.getIdentifier();
+            if(!enemy.mPossibleDamage[ownId].valid)
+            {
+                enemy.mPossibleDamage[ownId] = enemy.computeDamage(own);
+            }
+            Damage const& enemyDamage = enemy.mPossibleDamage[ownId];
+
             double const a = own.getSumMaxHealthShield () - own.getHealth () - own.getShield ();
-            //tmp[5] = 1e1*getPhenotype(9);
-            //tmp[6] = 1e2*getPhenotype(11);
-            //tmp[7] = 1e3*getPhenotype(12);
-            double const val = a*own.tmp[6] + enemyDamage.total*own.tmp[7] + own.tmp[8];
-            res2.x += val;
-            res2.y += val;
+            double const b = own.isAirUnit () ? std::max(enemy.getAACooldown () - enemy.getAttackTimer(),0)
+                                           : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
+
+
+            double const val = a*own.tmp[6] + b*own.getPhenotype(9) + enemyDamage.total*own.tmp[7] + own.tmp[8];
+            res2.x *= val;
+            res2.y *= val;
         }
-        res2.x *= normedDistVec.x;
-        res2.y *= normedDistVec.y;
 
 
         return Vec2D(res1.x-res2.x, res1.y-res2.y);
