@@ -103,7 +103,7 @@ public:
     size_t getPlayer2ChromosomeLength() const;
 
     template<class W>
-    void choosePlayerStartPosition(PlayerState<W>& pl, double const x_start, double const radius);
+    void setUnitStartPositions(PlayerState<W>& pl, double const x_start);
     unsigned long getNumberOfRuns() const;
 };
 

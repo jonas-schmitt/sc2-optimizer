@@ -539,13 +539,19 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     pl.potentialList.emplace_back(pl.minPos,funcMinY);
     pl.potentialList.emplace_back(pl.maxPos,funcMaxY);
 
-    auto cmp = [] (typename Race::RUT *lhs, typename Race::RUT *rhs)
+    auto cmp_size = [] (typename Race::RUT *lhs, typename Race::RUT *rhs)
     {
-	return lhs->getSize() < rhs->getSize();
+        return lhs->getSize() < rhs->getSize();
     };
 	
-    auto it = std::max_element(pl.unitList.begin(), pl.unitList.end(), cmp);
+    auto it = std::max_element(pl.unitList.begin(), pl.unitList.end(), cmp_size);
     pl.maxUnitSize = (*it)->getSize();
+
+    auto cmp_speed = [] (typename Race::RUT *lhs, typename Race::RUT *rhs)
+    {
+        return lhs->getSpeed() < rhs->getSpeed();
+    };
+    std::sort(pl.unitList.begin(), pl.unitList.end(), cmp_speed);
 			 
 }
 

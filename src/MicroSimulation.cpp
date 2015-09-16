@@ -64,31 +64,45 @@ template <class T, class U>
 void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
 {
     init1.init(unitList, mInfoDirName1, pl1);
+    setUnitStartPositions(pl1, pl1.minPos.x + 15);
 }
 
 template <class T, class U>
 void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
 {
     init2.init(unitList, mInfoDirName2, pl2);
+    setUnitStartPositions(pl2, pl2.maxPos.x - 15);
+
 }
 
 template<class T, class U>
 template<class W>
-void MicroSimulation<T, U>::choosePlayerStartPosition(PlayerState<W>& pl, double const x_start, double const radius)
+void MicroSimulation<T, U>::setUnitStartPositions(PlayerState<W>& pl, double const x_start)
 {
 
     double const fieldSizeY = pl.maxPos.y-pl.minPos.y;
-    Vec2D startPos = Vec2D(x_start, pl.minPos.y + 0.5*fieldSizeY);
+    double const x = x_start;
+    double y1 = pl.minPos.y + 0.5*fieldSizeY;
+    double y2 = y1;
+
     int i = 0;
-    mt19937 generator (std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_real_distribution<double> distribution_x(-radius,radius);
-    std::bernoulli_distribution coin(0.5);
+
     for(auto unit : pl.unitList)
     {
-        double const x = distribution_x(generator);
-        std::uniform_real_distribution<double> distribution_y(0, coin(generator) ? radius - std::abs(x) : std::abs(x) - radius);
-        unit->setStartPos(Vec2D(startPos.x + distribution_x(generator), startPos.y + distribution_y(generator)));
+        if(i % 2 == 0)
+        {
+            y1 += 3.0*unit->getSize();
+            unit->setStartPos(Vec2D(x, y1));
+            y1 += 3.0*unit->getSize();
+        }
+        else
+        {
+            y2 -= 3.0*unit->getSize();
+            unit->setStartPos(Vec2D(x, y2));
+            y2 -= 3.0*unit->getSize();
+        }
         unit->resetPos();
+        ++i;
     }
 }
 
@@ -243,10 +257,6 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 {
 
     ++mRuns;
-    double radius = pl1.unitList.size() * pl1.maxUnitSize;
-    choosePlayerStartPosition(pl1, pl1.minPos.x + 10 + radius, radius);
-    radius = pl2.unitList.size() * pl2.maxUnitSize;
-    choosePlayerStartPosition(pl2, pl2.maxPos.x - 10 - radius, radius);
 
     if(mTracking)
     {

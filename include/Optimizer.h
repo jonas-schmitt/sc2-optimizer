@@ -225,18 +225,15 @@ public:
             vector<Individual> pop1(mGa1.getPopulation());
             vector<Individual> pop2(mGa2.getPopulation());
 
-            size_t const minSize = std::min(pop1.size(), pop2.size());
+            size_t const minSize = std::min(static_cast<size_t>(100), std::min(pop1.size(), pop2.size()));
 
             pop1.resize(minSize);
             pop2.resize(minSize);
-
-            auto cmp = [] (Individual const& lhs, Individual const& rhs)
+            for(size_t i = 0; i < minSize; ++i)
             {
-                return lhs.fitness.score > rhs.fitness.score;
-            };
-
-            std::sort(pop1.begin(), pop1.end(), cmp);
-            std::sort(pop2.begin(), pop2.end(), cmp);
+                pop1[i].fitness = 0;
+                pop2[i].fitness = 0;
+            }
 
             Fitness res;
             for(size_t i = 0; i < minSize; ++i)
@@ -245,20 +242,61 @@ public:
                 {
                     mSim.setPlayer1Chromosome(pop1[i].chromosome);
                     mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                    if(i < 5 && j < 5) mSim.enableTracking("./results/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt",
-                                                           "./results/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt");
-                    res += mSim.run(true, Player::first);
-                    if(i < 5 && j < 5) mSim.disableTracking();
+                    Fitness tmp1 = mSim.run(true, Player::first);
+                    res += tmp1;
+                    pop1[i].fitness += tmp1;
+                    Fitness tmp2;
+                    tmp2.damage = 1.0 - tmp1.health;
+                    tmp2.health = 1.0 - tmp1.damage;
+                    tmp2.score = 50.0*(tmp2.damage + tmp2.health);
+                    pop2[j].fitness += tmp2;
                 }
             }
+            for(size_t i = 0; i < minSize; ++i)
+            {
+                pop1[i].fitness /= minSize;
+                pop2[i].fitness /= minSize;
+            }
+
+            auto cmp = [] (Individual const& lhs, Individual const& rhs)
+            {
+                if(lhs.dominates(rhs))
+                {
+                    return true;
+                }
+                else if(rhs.dominates(lhs))
+                {
+                    return false;
+                }
+                else
+                {
+                    return lhs.fitness.score > rhs.fitness.score;
+                }
+            };
+            std::sort(pop1.begin(), pop1.end(), cmp);
+            std::sort(pop2.begin(), pop2.end(), cmp);
+
             double const damage1 = (res.damage/(minSize * minSize));
             double const damage2 = (1.0-(res.health/(minSize * minSize)));
             stream << "Comparison of the final populations" << std::endl;
             stream << "Damage caused by Player 1: " << damage1*100 << " %" << std::endl;
             stream << "Remaining health for Player 1: " << (1.0-damage2)*100 << " %" << std::endl;
             stream << "Damage caused by Player 2: " << damage2*100 << " %" << std::endl;
-            stream << "Remaining health of Player 2: " << (1.0-damage1)*100 << " %" << std::endl;
-            return damage1 > damage2;
+            stream << "Remaining health of Player 2: " << (1.0-damage1)*100 << " %" << std::endl << std::endl;
+
+            for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
+            {
+                for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
+                {
+                    mSim.setPlayer1Chromosome(pop1[i].chromosome);
+                    mSim.setPlayer2Chromosome(pop2[j].chromosome);
+                    mSim.enableTracking("./results/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt",
+                                        "./results/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt");
+                    mSim.run(true, Player::first);
+                    mSim.disableTracking();
+
+                }
+            }
         }
     }
 

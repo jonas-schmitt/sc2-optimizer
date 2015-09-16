@@ -61,10 +61,7 @@ struct Fitness final
 
     bool dominates(Fitness const& other) const
     {
-        bool const faster = this->timeSteps < other.timeSteps;
-        if((this->damage > other.damage || (std::abs(other.damage - this->damage) < EPS && faster))
-         && (this->health > other.health || (std::abs(other.health - this->health) < EPS && faster)))
-//        if(this->damage > other.damage && this->health > other.health && this->timeSteps < other.timeSteps)
+        if(this->damage > other.damage && this->health > other.health)
         {
             return true;
         }
