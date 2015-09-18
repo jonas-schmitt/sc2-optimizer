@@ -1,2 +1,2 @@
 #!/bin/bash
-qsub ./scripts/job.sh
+qsub ~/Repos/sc2-optimizer/scripts/job.sh
