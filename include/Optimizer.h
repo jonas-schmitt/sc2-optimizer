@@ -241,6 +241,7 @@ public:
             }
 
             Fitness res;
+            mSim.setTimeSteps(30000);
             for(size_t i = 0; i < minSize; ++i)
             {
                 for(size_t j = 0; j < minSize; ++j)
@@ -256,9 +257,6 @@ public:
                     tmp2.score = 50.0*(tmp2.damage + tmp2.health);
                     pop2[j].fitness += tmp2;
                 }
-            }
-            for(size_t i = 0; i < minSize; ++i)
-            {
                 pop1[i].fitness /= minSize;
                 pop2[i].fitness /= minSize;
             }
