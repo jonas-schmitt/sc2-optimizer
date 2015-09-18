@@ -8,6 +8,6 @@ make -j4
 cd ..
 export OMP_NUM_THREADS=8
 export OMP_SCHEDULE="dynamic,1"
-./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 3 50 10 
+./build/opt lists/TerranTest.txt lists/ProtossTest.txt 25 3 25 10 
 sh ./scripts/visualize.sh
 

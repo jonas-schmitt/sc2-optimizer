@@ -105,7 +105,12 @@ public:
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
             }
-            printStatistics();
+            if(rank == 0)
+            {
+                cout << "Iteration " << i << endl;
+                printStatistics();
+                cout << endl;
+            }
 
         }
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();

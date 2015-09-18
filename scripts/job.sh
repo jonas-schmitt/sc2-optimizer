@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N sc2-optimizer
-#PBS -l nodes=1:ppn=32
+#PBS -l nodes=4:ppn=32
 #PBS -l walltime=6:00:00
 #PBS -q normal
 #PBS -M jonas.schmitt@fau.de
@@ -16,6 +16,8 @@ make clean
 make -j4
 cd ..
 mkdir -p ./results
-OMP_NUM_THREADS=8 mpirun --npersocket 1 \
-    -mca orte_num_sockets 4 -mca orte_num_cores 8 \
-        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 100 50 10 > res.out
+#OMP_NUM_THREADS=8 mpirun --npersocket 1 \
+#    -mca orte_num_sockets 4 -mca orte_num_cores 8 \
+#        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 100 50 10 > res.out
+OMP_NUM_THREADS=8 mpirun -np 16 -bysocket --bind-to-socket \
+        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 50 50 10 > res.out
