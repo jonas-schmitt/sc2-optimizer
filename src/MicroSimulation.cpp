@@ -297,7 +297,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking)
+        if(mTracking && i < 10000)
         {
             for(auto const unitPtr : pl1.unitList)
             {
