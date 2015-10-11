@@ -5,13 +5,10 @@
 #include<cmath>
 
 
-using std::vector;
-using std::bitset;
-
 //static size_t const NBITS = 32;
 
-//typedef vector<bitset<NBITS>> Chromosome;
-typedef vector<double> Chromosome;
+//typedef std::vector<bitset<NBITS>> Chromosome;
+typedef std::vector<double> Chromosome;
 
 struct Fitness final
 {
@@ -83,7 +80,7 @@ struct Individual
     double total;
 
     int dominationCount;
-    vector<size_t> dominationSet;
+    std::vector<size_t> dominationSet;
     int rank;
     double distance;
     bool evaluated = false;

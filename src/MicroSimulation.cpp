@@ -12,16 +12,8 @@
 #include<chrono>
 
 
-using std::string;
-using std::vector;
-using std::shared_ptr;
-using std::list;
-using std::pair;
-using std::ios;
-using std::mt19937;
-
 template <class T, class U>
-MicroSimulation<T, U>::MicroSimulation(const Vec2D minPos, const Vec2D maxPos, const string& filePath1, const string& filePath2)
+MicroSimulation<T, U>::MicroSimulation(const Vec2D minPos, const Vec2D maxPos, const std::string& filePath1, const std::string& filePath2)
     : mMinPos(minPos), mMaxPos(maxPos), mInfoDirName1(filePath1), mInfoDirName2(filePath2), init1(filePath1), init2(filePath2)
 {
     pl1.minPos = minPos;
@@ -47,13 +39,13 @@ Vec2D MicroSimulation<T, U>::getMaxPos() const
 }
 
 template <class T, class U>
-string MicroSimulation<T, U>::getFilePath1() const
+std::string MicroSimulation<T, U>::getFilePath1() const
 {
     return mInfoDirName1;
 }
 
 template <class T, class U>
-string MicroSimulation<T, U>::getFilePath2() const
+std::string MicroSimulation<T, U>::getFilePath2() const
 {
     return mInfoDirName2;
 }
@@ -61,14 +53,14 @@ string MicroSimulation<T, U>::getFilePath2() const
 
 
 template <class T, class U>
-void MicroSimulation<T, U>::initPlayer1(const vector<string>& unitList)
+void MicroSimulation<T, U>::initPlayer1(const std::vector<std::string>& unitList)
 {
     init1.init(unitList, mInfoDirName1, pl1);
     setUnitStartPositions(pl1, pl1.minPos.x + 15);
 }
 
 template <class T, class U>
-void MicroSimulation<T, U>::initPlayer2(const vector<string>& unitList)
+void MicroSimulation<T, U>::initPlayer2(const std::vector<std::string>& unitList)
 {
     init2.init(unitList, mInfoDirName2, pl2);
     setUnitStartPositions(pl2, pl2.maxPos.x - 15);
@@ -109,7 +101,7 @@ void MicroSimulation<T, U>::setUnitStartPositions(PlayerState<W>& pl, double con
 
 
 template <class T, class U>
-void MicroSimulation<T, U>::initBothPlayers(const vector<string>& unitList1, const vector<string>& unitList2)
+void MicroSimulation<T, U>::initBothPlayers(const std::vector<std::string>& unitList1, const std::vector<std::string>& unitList2)
 {
     initPlayer1 (unitList1);
     initPlayer2 (unitList2);
@@ -284,9 +276,9 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         }
         mFile2 << std::endl;
 
-        mFile1.setf(ios::fixed,ios::floatfield);
+        mFile1.setf(std::ios::fixed,std::ios::floatfield);
         mFile1.precision(2);
-        mFile2.setf(ios::fixed,ios::floatfield);
+        mFile2.setf(std::ios::fixed,std::ios::floatfield);
         mFile2.precision(2);
     }
 
@@ -420,7 +412,7 @@ size_t MicroSimulation<T,U>::getPlayer2ChromosomeLength() const
 }
 
 template<class T, class U>
-void MicroSimulation<T,U>::enableTracking(string const& fileName1, string const& fileName2)
+void MicroSimulation<T,U>::enableTracking(std::string const& fileName1, std::string const& fileName2)
 {
     mTracking = true;
     mTrackingFileName1 = fileName1;

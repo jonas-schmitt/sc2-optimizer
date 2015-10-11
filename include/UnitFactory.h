@@ -15,34 +15,26 @@
 #include "PlayerState.h"
 
 
-using std::string;
-using std::ifstream;
-using std::stringstream;
-using std::vector;
-using std::list;
-using std::unordered_map;
-using std::pair;
-
 template <class Race> 
 class UnitFactory final : public Race
 {
 private:
-    unordered_map<string, UnitStats> mHashMap;
-    string mPath;
+    std::unordered_map<std::string, UnitStats> mHashMap;
+    std::string mPath;
 	
 public:
 	UnitFactory()
 	{}
 
-    UnitFactory(string const& path)
+    UnitFactory(std::string const& path)
         : mPath(path)
     {}
 
-    UnitFactory(unordered_map<string, UnitStats> const &hashMap)
+    UnitFactory(std::unordered_map<std::string, UnitStats> const &hashMap)
         : mHashMap(hashMap)
 	{}
 
-    UnitFactory(unordered_map<string, UnitStats> const &hashMap, string const& path)
+    UnitFactory(std::unordered_map<std::string, UnitStats> const &hashMap, std::string const& path)
         : mHashMap(hashMap), mPath(path)
     {}
 
@@ -50,22 +42,22 @@ public:
         : mHashMap(unitFactory.getHashMap()), mPath(mPath)
     {}
 
-    string getPath() const
+    std::string getPath() const
     {
         return mPath;
     }
 
-    void setPath(const string &path)
+    void setPath(const std::string &path)
     {
         mPath = path;
     }
 
-    unordered_map<string,UnitStats> const& getHashMap() const
+    std::unordered_map<std::string,UnitStats> const& getHashMap() const
     {
         return mHashMap;
     }
 
-    void setHashMap(const unordered_map<string, UnitStats> &hashMap)
+    void setHashMap(const std::unordered_map<std::string, UnitStats> &hashMap)
 	{
         mHashMap = hashMap;
 	}
@@ -77,19 +69,19 @@ public:
 	}
 
     template<typename T>
-    void createUnit(const string& name, vector<T>& unitListX, int x)
+    void createUnit(const std::string& name, std::vector<T>& unitListX, int x)
     {
         T unit;
         unit.setName(name);
         unit.setStats(mHashMap[name]);
-        ifstream file;
+        std::ifstream file;
         file.open(mPath+"/upgrades/"+name+".txt");
-        string buf;
+        std::string buf;
         std::getline(file, buf);
         std::getline(file, buf);
         int flag;
-        stringstream ss(buf);
-        vector<int> flags;
+        std::stringstream ss(buf);
+        std::vector<int> flags;
         while(ss >> flag)
         {
             flags.push_back (flag);
@@ -107,7 +99,7 @@ public:
     }
 
     template<typename T>
-    void setPointer(PlayerState<Race>& pl, vector<T>& unitListX)
+    void setPointer(PlayerState<Race>& pl, std::vector<T>& unitListX)
     {
         pl.unitList.reserve (pl.unitList.size() + unitListX.size());
         for(auto& unit : unitListX)
@@ -117,7 +109,7 @@ public:
         }
     }
 
-    void create(const string& name, PlayerState<Race>& pl)
+    void create(const std::string& name, PlayerState<Race>& pl)
 	{
         if (name == "ZergUnit" || name == "TerranUnit" || name == "ProtossUnit")
 		{
@@ -196,9 +188,9 @@ public:
             createUnit(name, pl.unitList17, 17);
 		}
 	}
-    void create(const vector<string>& names, PlayerState<Race>& pl)
+    void create(const std::vector<std::string>& names, PlayerState<Race>& pl)
 	{
-		for (const string& name : names)
+        for (const std::string& name : names)
 		{
             create(name, pl);
 		}

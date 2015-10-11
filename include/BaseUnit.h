@@ -4,7 +4,6 @@
 #include<utility>
 #include<functional>
 #include<cmath>
-#include<list>
 #include<chrono>
 #include<random>
 #include<string>
@@ -19,13 +18,6 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
-using std::pair;
-using std::tuple;
-using std::function;
-using std::pow;
-using std::sqrt;
-using std::list;
-using std::string;
 using std::vector;
 using std::array;
 using std::deque;
@@ -133,7 +125,7 @@ protected:
     double mDefenseSubtractor = 0.0;
 
 
-    string mName;
+    std::string mName;
 
     int mId;
 
@@ -251,7 +243,7 @@ public:
 
     BaseUnit();
 
-    BaseUnit(string name);
+    BaseUnit(std::string name);
 
     BaseUnit(const UnitStats& baseStats);
 
@@ -264,9 +256,9 @@ public:
 
     Vec2D computeEnemyForce(BaseUnit & other);
 
-    void setName(string name);
+    void setName(std::string name);
 
-    string getName() const;
+    std::string getName() const;
 
     // getter and setter
     void setStats(const UnitStats& newStats);
@@ -390,9 +382,9 @@ public:
 
     void setY(double const y);
 
-    void setFriendForce(function<Vec2D(BaseUnit &, BaseUnit &)> func);
+    void setFriendForce(std::function<Vec2D(BaseUnit &, BaseUnit &)> func);
 
-    void setEnemyForce(function<Vec2D(BaseUnit &, BaseUnit &)> func);
+    void setEnemyForce(std::function<Vec2D(BaseUnit &, BaseUnit &)> func);
 
     bool isDead() const;
 

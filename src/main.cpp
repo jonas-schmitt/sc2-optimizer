@@ -14,19 +14,16 @@
 #include "../include/OptimizerInterface.h"
 #include "../include/Race.h"
 
-using std::cout;
-using std::string;
-using std::ifstream;
 
 struct OptimizationParameter
 {
     Vec2D minPos;
     Vec2D maxPos;
-    string filePath1;
-    string filePath2;
+    std::string filePath1;
+    std::string filePath2;
     size_t popSize;
-    vector<string> const* buildOrder1;
-    vector<string> const* buildOrder2;
+    std::vector<std::string> const* buildOrder1;
+    std::vector<std::string> const* buildOrder2;
     size_t nGoals;
     size_t tournamentSize;
     size_t crossover;
@@ -74,9 +71,9 @@ int main(int argc, char *argv[])
     Protoss protoss;
 
 
-    ifstream file1(argv[1]), file2(argv[2]);
-    string buf;
-    vector<string> buildOrder1, buildOrder2;
+    std::ifstream file1(argv[1]), file2(argv[2]);
+    std::string buf;
+    std::vector<std::string> buildOrder1, buildOrder2;
     while(std::getline(file1, buf))
     {
         buildOrder1.push_back(buf);
@@ -87,7 +84,7 @@ int main(int argc, char *argv[])
     }
 
 
-    string race1, race2;
+    std::string race1, race2;
 
     if(std::find(terran.nameList.begin(), terran.nameList.end(), buildOrder1[0]) != terran.nameList.end())
     {
@@ -104,7 +101,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(p.rank == 0) cout << "Error: Couldn't determine first Race" << std::endl;
+        if(p.rank == 0) std::cout << "Error: Couldn't determine first Race" << std::endl;
         MPI_Finalize();
         return -1;
     }
@@ -124,7 +121,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(p.rank == 0) cout << "Error: Couldn't determine first Race" << std::endl;
+        if(p.rank == 0) std::cout << "Error: Couldn't determine first Race" << std::endl;
         MPI_Finalize();
         return -1;
     }

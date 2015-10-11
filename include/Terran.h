@@ -18,16 +18,6 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
-using std::pair;
-using std::tuple;
-using std::function;
-using std::pow;
-using std::sqrt;
-using std::list;
-using std::string;
-using std::vector;
-using std::array;
-using std::deque;
 
 
 class TerranUnit : public BaseUnit
@@ -122,7 +112,7 @@ class Marauder final : public TerranBioUnit
 {
 private:
     bool mCSAvail = false;
-    deque<pair<int,BaseUnit *>> mCSData;
+    std::deque<std::pair<int,BaseUnit *>> mCSData;
 
     void concussiveShells();
 

@@ -6,8 +6,6 @@
 
 #include "Unit.h"
 
-using std::string;
-using std::array;
 
 struct Terran
 {
@@ -31,7 +29,7 @@ struct Terran
     typedef TerranUnit UT15;
     typedef TerranUnit UT16;
     typedef TerranUnit UT17;
-    array<string, 18> nameList{{ "SCV", "Marine", "Marauder", "Reaper", "Ghost", "Hellion", "Hellbat", "SiegeTank", "WidowMine", "Thor",
+    std::array<std::string, 18> nameList{{ "SCV", "Marine", "Marauder", "Reaper", "Ghost", "Hellion", "Hellbat", "SiegeTank", "WidowMine", "Thor",
         "Viking", "Medivac", "Raven", "Banshee", "Battlecruiser", "TerranUnit", "TerranUnit", "TerranUnit" } };
 
 };
@@ -58,7 +56,7 @@ struct Zerg
     typedef ZergUnit UT15;
     typedef ZergUnit UT16;
     typedef ZergUnit UT17;
-    array<string, 18> nameList{{ "Drone", "Queen", "Zergling", "Baneling", "Roach", "Hydralisk", "Infestor", "SwarmHost", "Ultralisk",
+    std::array<std::string, 18> nameList{{ "Drone", "Queen", "Zergling", "Baneling", "Roach", "Hydralisk", "Infestor", "SwarmHost", "Ultralisk",
         "Overseer", "Mutalisk", "Corruptor", "BroodLord", "Viper", "ZergUnit", "ZergUnit", "ZergUnit", "ZergUnit" } };
     
 };
@@ -85,7 +83,7 @@ struct Protoss
 	typedef Tempest UT15;
 	typedef MothershipCore UT16;
 	typedef Mothership UT17;
-    array<string, 18> nameList{{ "Probe", "Zealot", "Stalker", "Sentry", "HighTemplar", "DarkTemplar", "Immortal", "Colossus", "Archon",
+    std::array<std::string, 18> nameList{{ "Probe", "Zealot", "Stalker", "Sentry", "HighTemplar", "DarkTemplar", "Immortal", "Colossus", "Archon",
 		"Observer", "WarpPrism", "Phoenix", "VoidRay", "Oracle", "Carrier", "Tempest", "MothershipCore", "Mothership" } };
     
 };

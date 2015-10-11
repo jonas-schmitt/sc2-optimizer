@@ -4,8 +4,6 @@
 #include <cstddef>
 #include <iostream>
 
-using std::cout;
-using std::endl;
 
 static double constexpr LIMIT = 10000;
 static double constexpr EPS = 1e-10;
@@ -180,12 +178,12 @@ struct Statistics
     size_t iteration = 0;
     void print()
     {
-        cout << "Total: " << sum << endl;
-        cout << "Average: " << mean*100.0 << " %" << endl;
-        cout << "Maximum: " << max*100.0 << " %" << endl;
-        cout << "Standard Deviation: " << stdev*100 << " %" << endl;
-        cout << "Online Performance: " << onlinePerformance*100.0/iteration << " %" << endl;
-        cout << "Offline Performance: " << offlinePerformance*100.0/iteration << " %" << endl;
+        std::cout << "Total: " << sum << std::endl;
+        std::cout << "Average: " << mean*100.0 << " %" << std::endl;
+        std::cout << "Maximum: " << max*100.0 << " %" << std::endl;
+        std::cout << "Standard Deviation: " << stdev*100 << " %" << std::endl;
+        std::cout << "Online Performance: " << onlinePerformance*100.0/iteration << " %" << std::endl;
+        std::cout << "Offline Performance: " << offlinePerformance*100.0/iteration << " %" << std::endl;
     }
 };
 

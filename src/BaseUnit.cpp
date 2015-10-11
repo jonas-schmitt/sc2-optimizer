@@ -1,16 +1,9 @@
 #include<utility>
 #include<functional>
 #include<cmath>
-#include<list>
+
 
 #include "../include/Unit.h"
-
-using std::pair;
-using std::function;
-using std::pow;
-using std::sqrt;
-using std::list;
-using std::string;
 
 
 BaseUnit::BaseUnit()
@@ -22,7 +15,7 @@ BaseUnit::BaseUnit()
     }
 }
 
-BaseUnit::BaseUnit(string name) : BaseUnit()
+BaseUnit::BaseUnit(std::string name) : BaseUnit()
 {
     mName = name;
 }
@@ -52,7 +45,7 @@ Vec2D BaseUnit::computeEnemyForce(BaseUnit & other)
 }
 
 
-void BaseUnit::setName(string name)
+void BaseUnit::setName(std::string name)
 {
     mName = name;
 }
@@ -62,7 +55,7 @@ UnitStats& BaseUnit::accessStats()
     return this->mStats;
 }
 
-string BaseUnit::getName() const
+std::string BaseUnit::getName() const
 {
     return mName;
 }
@@ -345,11 +338,11 @@ void BaseUnit::setPosLimits(Vec2D const minPos, Vec2D const maxPos)
     mMaxDist = std::sqrt(x*x+y*y);
 }
 
-void BaseUnit::setFriendForce(function<Vec2D(BaseUnit &, BaseUnit &)> func)
+void BaseUnit::setFriendForce(std::function<Vec2D(BaseUnit &, BaseUnit &)> func)
 {
     mFriendFunc = func;
 }
-void BaseUnit::setEnemyForce(function<Vec2D(BaseUnit &, BaseUnit &)> func)
+void BaseUnit::setEnemyForce(std::function<Vec2D(BaseUnit &, BaseUnit &)> func)
 {
     mEnemyFunc = func;
 }
