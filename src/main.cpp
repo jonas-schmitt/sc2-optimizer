@@ -36,18 +36,30 @@ struct OptimizationParameter
 };
 
 template<typename Race1, typename Race2>
-void runOptimization(OptimizationParameter const& p)
+PerformanceMetrics runOptimization(OptimizationParameter const& p)
 {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     OptimizerInterface<Race1,Race2> opt(p.minPos, p.maxPos, p.filePath1, p.filePath2, p.popSize, *p.buildOrder1, *p.buildOrder2, p.nGoals);
-    opt.optimize(p.tournamentSize, p.crossover, p.mutation, p.iterations, p.generations, p.rank, p.procs, p.migrants);
+    if(p.crossover == 0)
+    {
+        opt.optimize(p.tournamentSize, p.crossover, p.mutation, (3*p.iterations)/4, p.generations, p.rank, p.procs, p.migrants);
+    }
+    else
+    {
+        opt.optimize(p.tournamentSize, p.crossover, p.mutation, p.iterations, p.generations, p.rank, p.procs, p.migrants);
+    }
+
 
     end = std::chrono::system_clock::now();
     auto elapsed_min = std::chrono::duration_cast<std::chrono::minutes>(end - start);
     auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() << " sec" << std::endl;
-    opt.determineWinner(std::cout, p.rank, p.procs);
+    //if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() << " sec" << std::endl;
+    //opt.determineWinner(std::cout, p.rank, p.procs);
+    PerformanceMetrics res(opt.getPerformanceMetrics());
+    res.minutes = elapsed_min.count();
+    res.seconds = elapsed_sec.count() - elapsed_min.count()*60;
+    return res;
 }
 
 int main(int argc, char *argv[])
@@ -181,19 +193,46 @@ int main(int argc, char *argv[])
     else if(race1 == "Terran" && race2 == "Protoss")
     {
 
-
+        std::vector<std::string> crossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover"};
+        std::vector<std::string> mutationFuncNames = {"Gaussian Mutation", "Polynomial Mutation", "Uniform Mutation"};
+        std::vector<PerformanceMetrics> crossoverPerformance(crossoverFuncNames.size());
+        std::vector<PerformanceMetrics> mutationPerformance(mutationFuncNames.size());
         for(size_t i = 2; i < 3; i+=2)
         {
-            for(size_t j = 0; j < 1; ++j)
+            for(size_t j = 0; j < crossoverFuncNames.size(); ++j)
             {
-                for(size_t k = 0; k < 1; ++k)
+                for(size_t k = 0; k < mutationFuncNames.size(); ++k)
                 {
                     p.tournamentSize = i;
                     p.crossover = j;
                     p.mutation = k;
-                    runOptimization<Terran,Protoss>(p);
+                    PerformanceMetrics res(runOptimization<Terran,Protoss>(p));
+                    if(p.rank == 0)
+                    {
+                        //crossoverPerformance[j].crossoverOperator = res.crossoverOperator;
+                        crossoverPerformance[j] += res;
+                        //mutationPerformance[k].mutationOperator = res.mutationOperator;
+                        mutationPerformance[k] += res;
+                    }
                 }
             }
+        }
+        if(p.rank == 0)
+        {
+
+            for(size_t i = 0; i < crossoverPerformance.size(); ++i)
+            {
+                std::cout << crossoverFuncNames[i] << "\n";
+                crossoverPerformance[i].print();
+                std::cout << std::endl;
+            }
+            for(size_t i = 0; i < mutationPerformance.size(); ++i)
+            {
+                std::cout << mutationFuncNames[i] << "\n";
+                mutationPerformance[i].print();
+                std::cout << std::endl;
+            }
+
         }
     }
     else if(race1 == "Zerg" && race2 == "Terran")

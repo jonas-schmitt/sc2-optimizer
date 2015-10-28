@@ -187,6 +187,42 @@ struct Statistics
     }
 };
 
+struct PerformanceMetrics
+{
+    double online_damage = 0.0;
+    double online_health = 0.0;
+    double offline_damage = 0.0;
+    double offline_health = 0.0;
+    size_t evaluations = 0;
+    int minutes = 0;
+    int seconds = 0;
+    size_t count = 0;
+    PerformanceMetrics& operator+=(PerformanceMetrics const& rhs)
+    {
+        online_damage += rhs.online_damage;
+        online_health += rhs.online_health;
+        offline_damage += rhs.offline_damage;
+        offline_health += rhs.offline_health;
+        evaluations += rhs.evaluations;
+        minutes += rhs.minutes;
+        seconds += rhs.seconds;
+        if(seconds >= 60)
+        {
+            minutes += seconds/60;
+            seconds = seconds - 60*(seconds/60);
+        }
+        ++count;
+        return *this;
+    }
+    void print() const
+    {
+        std::cout << "Online Performance (Damage, Health): " << online_damage/count << ", " << online_health/count << "\n";
+        std::cout << "Offline Performance (Damage, Health): " << offline_damage/count << ", " << offline_health/count << "\n";
+        std::cout << "Number of Evaluations: " << evaluations << "\n";
+        std::cout << "Runtime: " << minutes << "min " << seconds << "sec" << std::endl;
+    }
+};
+
 enum class Player
 {
     first, second

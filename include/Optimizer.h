@@ -23,6 +23,7 @@ private:
     double mOnlinePerformance = 0.0;
     size_t mNGoals;
     bool mMPI;
+    PerformanceMetrics mPerf;
 
 
     MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
@@ -56,17 +57,16 @@ public:
         setMutation(mut);
 
         migrants = std::min(migrants, mPopSize);
-
-        if(rank == 0)
-        {
-            std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
-            std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
-            std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
-            std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
-            std::cout << "Population Size: " << mPopSize*procs << std::endl;
-            std::cout << "Number of Iterations: " << iterations << std::endl;
-            std::cout << "Generations per Iteration: " << genPerIt << std::endl;
-        }
+//        if(rank == 0)
+//        {
+//            std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
+//            std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
+//            std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
+//            std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
+//            std::cout << "Population Size: " << mPopSize*procs << std::endl;
+//            std::cout << "Number of Iterations: " << iterations << std::endl;
+//            std::cout << "Generations per Iteration: " << genPerIt << std::endl;
+//        }
 
         Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
         Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
@@ -103,12 +103,12 @@ public:
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
             }
-            if(rank == 0)
-            {
-                std::cout << "Iteration " << i << std::endl;
-                printStatistics();
-                std::cout << std::endl;
-            }
+//            if(rank == 0)
+//            {
+//                std::cout << "Iteration " << i << std::endl;
+//                printStatistics();
+//                std::cout << std::endl;
+//            }
 
         }
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
@@ -125,17 +125,27 @@ public:
                 evaluations = evaluations_tmp;
             }
 
-            std::cout << "Number of evaluations: " << evaluations << std::endl;
-            std::cout << std::endl;
-            std::cout << "Damage" << std::endl;
-            std::cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
-            std::cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
-            std::cout << std::endl;
-            std::cout << "Health" << std::endl;
-            std::cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
-            std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
-            std::cout << "\n" << std::endl;
+            //std::cout << "Number of evaluations: " << evaluations << std::endl;
+            mPerf.evaluations = evaluations;
+            //std::cout << std::endl;
+            mPerf.online_damage = (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0;
+            mPerf.online_health = (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0;
+            mPerf.offline_damage = (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0;
+            mPerf.offline_health = (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0;
+//            std::cout << "Damage" << std::endl;
+//            std::cout << "Overall Online Performance: " << mPerf.online_damage << std::endl;
+//            std::cout << "Overall Offline Performance: " << mPerf.offline_damage << std::endl;
+//            std::cout << std::endl;
+//            std::cout << "Health" << std::endl;
+//            std::cout << "Overall Online Performance: " << mPerf.online_health << std::endl;
+//            std::cout << "Overall Offline Performance: " << mPerf.offline_health << std::endl;
+//            std::cout << "\n" << std::endl;
         }
+    }
+
+    PerformanceMetrics getPerformanceMetrics()
+    {
+        return mPerf;
     }
 
     void printStatistics()

@@ -27,6 +27,11 @@ public:
         mOpt.determineWinner(stream, rank, procs);
     }
 
+    PerformanceMetrics getPerformanceMetrics()
+    {
+        return mOpt.getPerformanceMetrics();
+    }
+
 };
 
 #endif // OPTIMIZERINTERFACE
