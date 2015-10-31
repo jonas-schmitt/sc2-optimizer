@@ -1,0 +1,18 @@
+Gaussian Mutation
+Online Performance (Damage, Health): 56.7148, 66.5294
+Offline Performance (Damage, Health): 95.0384, 91.7713
+Number of Evaluations: 82118750
+Runtime: 105min 50sec
+
+Polynomial Mutation
+Online Performance (Damage, Health): 80.1246, 51.4809
+Offline Performance (Damage, Health): 98.5406, 74.2599
+Number of Evaluations: 84303770
+Runtime: 97min 31sec
+
+Uniform Mutation
+Online Performance (Damage, Health): 86.6363, 48.5285
+Offline Performance (Damage, Health): 99.2703, 74.94
+Number of Evaluations: 85594750
+Runtime: 95min 15sec
+

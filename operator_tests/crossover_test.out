@@ -1,0 +1,378 @@
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Self-Adaptive Simulated Binary Crossover
+Mutation Operator: Gaussian Mutation
+Population Size: 1600
+Number of Iterations: 33
+Generations per Iteration: 10
+Number of evaluations: 20071760
+
+Damage
+Overall Online Performance: 61.5801
+Overall Offline Performance: 97.8529
+
+Health
+Overall Online Performance: 65.44
+Overall Offline Performance: 90.9863
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Self-Adaptive Simulated Binary Crossover
+Mutation Operator: Polynomial Mutation
+Population Size: 1600
+Number of Iterations: 33
+Generations per Iteration: 10
+Number of evaluations: 20649310
+
+Damage
+Overall Online Performance: 83.7556
+Overall Offline Performance: 99.3944
+
+Health
+Overall Online Performance: 49.7423
+Overall Offline Performance: 75.7402
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Self-Adaptive Simulated Binary Crossover
+Mutation Operator: Uniform Mutation
+Population Size: 1600
+Number of Iterations: 33
+Generations per Iteration: 10
+Number of evaluations: 20881890
+
+Damage
+Overall Online Performance: 85.3727
+Overall Offline Performance: 98.5263
+
+Health
+Overall Online Performance: 48.2999
+Overall Offline Performance: 75.0038
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Simulated Binary Crossover
+Mutation Operator: Gaussian Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 40.2186
+Overall Offline Performance: 76.3604
+
+Health
+Overall Online Performance: 60.9916
+Overall Offline Performance: 79.1061
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Simulated Binary Crossover
+Mutation Operator: Polynomial Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 62.4765
+Overall Offline Performance: 87.5163
+
+Health
+Overall Online Performance: 44.2918
+Overall Offline Performance: 64.5176
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Simulated Binary Crossover
+Mutation Operator: Uniform Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 57.0583
+Overall Offline Performance: 88.1691
+
+Health
+Overall Online Performance: 48.5253
+Overall Offline Performance: 69.1817
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: N-Point Crossover
+Mutation Operator: Gaussian Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 49.4314
+Overall Offline Performance: 77.5972
+
+Health
+Overall Online Performance: 55.9885
+Overall Offline Performance: 82.9039
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: N-Point Crossover
+Mutation Operator: Polynomial Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 75.1366
+Overall Offline Performance: 97.8857
+
+Health
+Overall Online Performance: 35.3815
+Overall Offline Performance: 53.648
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: N-Point Crossover
+Mutation Operator: Uniform Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 75.9721
+Overall Offline Performance: 96.4261
+
+Health
+Overall Online Performance: 33.466
+Overall Offline Performance: 51.2599
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Uniform Crossover
+Mutation Operator: Gaussian Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 50.4215
+Overall Offline Performance: 78.9736
+
+Health
+Overall Online Performance: 51.3694
+Overall Offline Performance: 79.594
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Uniform Crossover
+Mutation Operator: Polynomial Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 78.5723
+Overall Offline Performance: 93.9694
+
+Health
+Overall Online Performance: 29.3451
+Overall Offline Performance: 43.7954
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Uniform Crossover
+Mutation Operator: Uniform Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 78.123
+Overall Offline Performance: 96.7012
+
+Health
+Overall Online Performance: 32.3038
+Overall Offline Performance: 49.0917
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Intermediate Crossover
+Mutation Operator: Gaussian Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 34.9484
+Overall Offline Performance: 67.102
+
+Health
+Overall Online Performance: 64.4149
+Overall Offline Performance: 84.2685
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Intermediate Crossover
+Mutation Operator: Polynomial Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 64.2761
+Overall Offline Performance: 79.2275
+
+Health
+Overall Online Performance: 44.9088
+Overall Offline Performance: 68.9586
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Intermediate Crossover
+Mutation Operator: Uniform Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 55.3771
+Overall Offline Performance: 83.7577
+
+Health
+Overall Online Performance: 46.511
+Overall Offline Performance: 66.3974
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Line Crossover
+Mutation Operator: Gaussian Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 38.5552
+Overall Offline Performance: 69.4703
+
+Health
+Overall Online Performance: 64.2006
+Overall Offline Performance: 86.9141
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Line Crossover
+Mutation Operator: Polynomial Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 57.9556
+Overall Offline Performance: 87.648
+
+Health
+Overall Online Performance: 50.4416
+Overall Offline Performance: 67.2969
+
+
+Performing Optimization with the following parameters
+
+Tournament Selection with a Tournament Size of: 2
+Crossover Operator: Line Crossover
+Mutation Operator: Uniform Mutation
+Population Size: 1600
+Number of Iterations: 50
+Generations per Iteration: 10
+Number of evaluations: 20016000
+
+Damage
+Overall Online Performance: 60.2013
+Overall Offline Performance: 89.3042
+
+Health
+Overall Online Performance: 43.6841
+Overall Offline Performance: 63.2838
+
+
+Self-Adaptive Simulated Binary Crossover
+Online Performance (Damage, Health): 76.9028, 54.4941
+Offline Performance (Damage, Health): 98.5912, 80.5768
+Number of Evaluations: 61602960
+Runtime: 62min 29sec
+
+Simulated Binary Crossover
+Online Performance (Damage, Health): 53.2511, 51.2696
+Offline Performance (Damage, Health): 84.0153, 70.9351
+Number of Evaluations: 60048000
+Runtime: 66min 17sec
+
+N-Point Crossover
+Online Performance (Damage, Health): 66.8467, 41.612
+Offline Performance (Damage, Health): 90.6363, 62.6039
+Number of Evaluations: 60048000
+Runtime: 68min 7sec
+
+Uniform Crossover
+Online Performance (Damage, Health): 69.0389, 37.6728
+Offline Performance (Damage, Health): 89.8814, 57.4937
+Number of Evaluations: 60048000
+Runtime: 64min 36sec
+
+Intermediate Crossover
+Online Performance (Damage, Health): 51.5339, 51.9449
+Offline Performance (Damage, Health): 76.6957, 73.2082
+Number of Evaluations: 60048000
+Runtime: 61min 33sec
+
+Line Crossover
+Online Performance (Damage, Health): 52.2374, 52.7754
+Offline Performance (Damage, Health): 82.1408, 72.4983
+Number of Evaluations: 60048000
+Runtime: 60min 12sec
+
