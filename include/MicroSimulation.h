@@ -4,7 +4,7 @@
 #include<memory>
 #include<string>
 #include<vector>
-#include<list>
+
 #include<utility>
 #include<functional>
 #include<fstream>
@@ -13,13 +13,6 @@
 #include "Unit.h"
 #include "InitPlayerUnits.h"
 #include "Utilities.h"
-
-using std::shared_ptr;
-using std::string;
-using std::vector;
-using std::list;
-using std::pair;
-using std::ofstream;
 
 struct PlayerStats final
 {
@@ -43,7 +36,7 @@ private:
 
 
     Vec2D mMinPos, mMaxPos;
-    string mInfoDirName1, mInfoDirName2;
+    std::string mInfoDirName1, mInfoDirName2;
     InitPlayerUnits<T> init1;
     InitPlayerUnits<U> init2;
     PlayerState<T> pl1;
@@ -54,23 +47,23 @@ private:
 
     unsigned long mRuns = 0;
 
-    string mTrackingFileName1, mTrackingFileName2;
+    std::string mTrackingFileName1, mTrackingFileName2;
 
-    ofstream mFile1, mFile2;
+    std::ofstream mFile1, mFile2;
 
 
 
 public:
     MicroSimulation(MicroSimulation const& microSim);
-    MicroSimulation(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2);
-    void initPlayer1(vector<string> const&);
-    void initPlayer2(vector<string> const&);
+    MicroSimulation(Vec2D const minPos, Vec2D const maxPos, std::string const& filePath1, std::string const& filePath2);
+    void initPlayer1(std::vector<std::string> const&);
+    void initPlayer2(std::vector<std::string> const&);
     template<typename V> void setPlayerChromosome(PlayerState<V>& pl, Chromosome const&);
     void setPlayer1Chromosome(Chromosome const&);
     void setPlayer2Chromosome(Chromosome const&);
     void setPlayer1Pos(Vec2D const pos);
     void setPlayer2Pos(Vec2D const pos);
-    void initBothPlayers(vector<string> const&, vector<string> const&);
+    void initBothPlayers(std::vector<std::string> const&, std::vector<std::string> const&);
     void clearPlayer1();
     void clearPlayer2();
     void clearBothPlayers();
@@ -81,8 +74,8 @@ public:
     PlayerState<U>const& getPlayer2() const;
     Vec2D getMinPos() const;
     Vec2D getMaxPos() const;
-    string getFilePath1() const;
-    string getFilePath2() const;
+    std::string getFilePath1() const;
+    std::string getFilePath2() const;
     bool run(int const steps);
     Fitness run(bool const reset, Player const player);
     void setTimeSteps(size_t timeSteps);
@@ -90,11 +83,11 @@ public:
 
     void timestep();
 
-    string determineWinner();
+    std::string determineWinner();
 
 
 
-    void enableTracking(string const& fileName1, string const& fileName2);
+    void enableTracking(std::string const& fileName1, std::string const& fileName2);
     void disableTracking();
 
     void clearUnitPaths();

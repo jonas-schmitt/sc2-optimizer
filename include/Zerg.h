@@ -19,16 +19,6 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
-using std::pair;
-using std::tuple;
-using std::function;
-using std::pow;
-using std::sqrt;
-using std::list;
-using std::string;
-using std::vector;
-using std::array;
-using std::deque;
 
 class ZergUnit : public BaseUnit
 {
@@ -51,7 +41,7 @@ public:
         BaseUnit::timestep(own, other);
         regenerate(own);
     }
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
 
 };
 
@@ -84,7 +74,7 @@ private:
             }
         }
     }
-    template<typename T> void transfuse(vector<T *>& unitList)
+    template<typename T> void transfuse(std::vector<T *>& unitList)
     {
         if(mTransfusionTimer <= 0 && mStats.energy >= 50)
         {
@@ -136,7 +126,7 @@ public:
 class Zergling final : public ZergUnit
 {
 public:
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
 };
 
 class Baneling final : public ZergUnit
@@ -144,7 +134,7 @@ class Baneling final : public ZergUnit
 public:
     int const mNGenes = ZergUnit::mNGenes + 2;
 
-    void initUpgrades (vector<int> const& flags);
+    void initUpgrades (std::vector<int> const& flags);
     template<typename U, typename T> bool attack(PlayerState<U>& own, PlayerState<T>& other)
     {
         if(this->getHealth() < EPS || other.unitList.empty())
@@ -153,7 +143,7 @@ public:
         }
         double sum = 0.0;
         double const threshold = this->getGroundAttack ();
-        vector<pair<Damage,typename T::RUT *>> targets;
+        std::vector<std::pair<Damage,typename T::RUT *>> targets;
         for(auto enemy : other.unitList)
         {
             Damage damage;
@@ -206,7 +196,7 @@ public:
 class Roach final : public ZergUnit
 {
 public:
-    void initUpgrades (vector<int> const& flags);
+    void initUpgrades (std::vector<int> const& flags);
 };
 
 class Hydralisk final : public ZergUnit

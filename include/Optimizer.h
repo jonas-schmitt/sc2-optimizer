@@ -9,8 +9,6 @@
 #include "moga.h"
 #include "Chromosome.h"
 
-using std::cout;
-using std::endl;
 
 template <typename GA1, typename GA2>
 class Optimizer
@@ -31,7 +29,7 @@ private:
 
 
 public:
-    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals)
         : mPopSize(popSize),
           mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
           mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
@@ -43,7 +41,7 @@ public:
 
     void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
     {
-        static mt19937 generator;
+        static std::mt19937 generator;
 
         #pragma omp threadprivate(generator)
         #pragma omp parallel
@@ -61,13 +59,13 @@ public:
 
         if(rank == 0)
         {
-            cout << "Performing Optimization with the following parameters" << endl << endl;
-            cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << endl;
-            cout << "Crossover Operator: " << getCrossoverOperatorName() << endl;
-            cout << "Mutation Operator: " << getMutationOperatorName() << endl;
-            cout << "Population Size: " << mPopSize*procs << endl;
-            cout << "Number of Iterations: " << iterations << endl;
-            cout << "Generations per Iteration: " << genPerIt << endl;
+            std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
+            std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
+            std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
+            std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
+            std::cout << "Population Size: " << mPopSize*procs << std::endl;
+            std::cout << "Number of Iterations: " << iterations << std::endl;
+            std::cout << "Generations per Iteration: " << genPerIt << std::endl;
         }
 
         Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
@@ -78,7 +76,7 @@ public:
             /*
             if(rank == 0)
             {
-                std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << endl;
+                std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << std::endl;
                 //std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
                 //printf("%c[2K", 27);
             }*/
@@ -89,8 +87,8 @@ public:
                 migrate(buf2, migrants, mGa2, rank, procs);
             }
 
-            vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
-            vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
+            std::vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
+            std::vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
             mGa1.optimize(optima2, genPerIt, generator);
             mGa2.optimize(optima1, genPerIt, generator);
@@ -107,9 +105,9 @@ public:
             }
             if(rank == 0)
             {
-                cout << "Iteration " << i << endl;
+                std::cout << "Iteration " << i << std::endl;
                 printStatistics();
-                cout << endl;
+                std::cout << std::endl;
             }
 
         }
@@ -127,36 +125,36 @@ public:
                 evaluations = evaluations_tmp;
             }
 
-            cout << "Number of evaluations: " << evaluations << endl;
-            cout << endl;
-            cout << "Damage" << endl;
-            cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << endl;
-            cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << endl;
-            cout << endl;
-            cout << "Health" << endl;
-            cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << endl;
-            cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << endl;
-            cout << "\n" << endl;
+            std::cout << "Number of evaluations: " << evaluations << std::endl;
+            std::cout << std::endl;
+            std::cout << "Damage" << std::endl;
+            std::cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
+            std::cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
+            std::cout << std::endl;
+            std::cout << "Health" << std::endl;
+            std::cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
+            std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
+            std::cout << "\n" << std::endl;
         }
     }
 
     void printStatistics()
     {
-        string separator;
+        std::string separator;
         for(int i = 0; i < 50; ++i) separator += "-";
         separator += '\n';
-        cout << separator << "Statistics Player 1:" << endl;
-        cout << "Damage" << endl;
+        std::cout << separator << "Statistics Player 1:" << std::endl;
+        std::cout << "Damage" << std::endl;
         mStats1.first.print();
-        cout << "Health" << endl;
+        std::cout << "Health" << std::endl;
         mStats1.second.print();
-        cout << separator << endl;
-        cout << separator << "Statistics Player 2:" << endl;
-        cout << "Damage" << endl;
+        std::cout << separator << std::endl;
+        std::cout << separator << "Statistics Player 2:" << std::endl;
+        std::cout << "Damage" << std::endl;
         mStats2.first.print();
-        cout << "Health" << endl;
+        std::cout << "Health" << std::endl;
         mStats2.second.print();
-        cout << separator << endl;
+        std::cout << separator << std::endl;
     }
 
     GA1 const& getGA1() const
@@ -208,11 +206,11 @@ public:
     {
         return mGa1.getTournamentSize();
     }
-    string getCrossoverOperatorName()
+    std::string getCrossoverOperatorName()
     {
         return mGa1.getCrossoverOperatorName();
     }
-    string getMutationOperatorName()
+    std::string getMutationOperatorName()
     {
         return mGa1.getMutationOperatorName();
     }
@@ -227,8 +225,8 @@ public:
 
         if(rank == 0)
         {
-            vector<Individual> pop1(mGa1.getPopulation());
-            vector<Individual> pop2(mGa2.getPopulation());
+            std::vector<Individual> pop1(mGa1.getPopulation());
+            std::vector<Individual> pop2(mGa2.getPopulation());
 
             size_t const minSize = std::min(static_cast<size_t>(100), std::min(pop1.size(), pop2.size()));
 

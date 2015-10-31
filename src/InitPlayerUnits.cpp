@@ -3,11 +3,7 @@
 #include<algorithm>
 #include<fstream>
 #include "../include/InitPlayerUnits.h"
-using std::string;
-using std::stringstream;
-using std::vector;
-using std::sort;
-using std::ifstream;
+
 
 template<class Race>
 InitPlayerUnits<Race>::InitPlayerUnits()
@@ -18,15 +14,15 @@ InitPlayerUnits<Race>::InitPlayerUnits(const std::string& path) : mFactory(path)
 {
     if (path.empty())
 	{
-		throw std::invalid_argument("InitPlayerUnits::InitPlayerUnits(const string&): The file path passed as argument is an empty string.");
+        throw std::invalid_argument("InitPlayerUnits::InitPlayerUnits(const std::string&): The file path passed as argument is an empty string.");
 	}
     mPath = path;
 	readStats();
 }
 template<class Race>
-vector<string>& InitPlayerUnits<Race>::split(const string &s, char delim, vector<string> &tokens) {
-    stringstream ss(s);
-    string token;
+std::vector<std::string>& InitPlayerUnits<Race>::split(const std::string &s, char delim, std::vector<std::string> &tokens) {
+    std::stringstream ss(s);
+    std::string token;
     while (getline(ss, token, delim)) {
         tokens.push_back(token);
     }
@@ -34,8 +30,8 @@ vector<string>& InitPlayerUnits<Race>::split(const string &s, char delim, vector
 }
 
 template<class Race>
-vector<string> InitPlayerUnits<Race>::split(string const &s, char delim) {
-    vector<string> tokens;
+std::vector<std::string> InitPlayerUnits<Race>::split(std::string const &s, char delim) {
+    std::vector<std::string> tokens;
     split(s, delim, tokens);
     return tokens;
 }
@@ -45,7 +41,7 @@ void InitPlayerUnits<Race>::setPath(const std::string& path)
 {
     if (path.empty())
 	{
-        throw std::invalid_argument("InitPlayerUnits::setpath(const string&): The file path passed as argument is an empty string.");
+        throw std::invalid_argument("InitPlayerUnits::setpath(const std::string&): The file path passed as argument is an empty string.");
 	}
     mPath = path;
     mFactory.setPath (path);
@@ -62,7 +58,7 @@ template <class Race>
 void InitPlayerUnits<Race>::readStats()
 {
 
-    ifstream file;
+    std::ifstream file;
     file.open (mPath+"/stats.txt");
 	std::string line;
 	std::string name;
@@ -77,7 +73,7 @@ void InitPlayerUnits<Race>::readStats()
 
 		}
         UnitStats stats;
-        string str;
+        std::string str;
         if (!(stream
               >> stats.minerals
               >> stats.gas
@@ -99,8 +95,8 @@ void InitPlayerUnits<Race>::readStats()
         }
 
         // parse attributes
-        vector<string> attributes = split(str, ',');
-        for(string const& attr : attributes)
+        std::vector<std::string> attributes = split(str, ',');
+        for(std::string const& attr : attributes)
         {
             if(attr == "L")
             {
@@ -132,7 +128,7 @@ void InitPlayerUnits<Race>::readStats()
                 stats.airUnit = true;
             }
         }
-        sort(stats.attributes.begin (), stats.attributes.end ());
+        std::sort(stats.attributes.begin (), stats.attributes.end ());
         if(!(stream
              >> stats.groundAttack
              >> stats.gaUpgrade
@@ -150,20 +146,20 @@ void InitPlayerUnits<Race>::readStats()
         //parse bonuses
         if(str != "-")
         {
-            vector<string> bonusStrs = split(str, ',');
-            for(string const& bonusStr : bonusStrs)
+            std::vector<std::string> bonusStrs = split(str, ',');
+            for(std::string const& bonusStr : bonusStrs)
             {
                 Bonus bonus;
-                vector<string> tokens = split(bonusStr, ':');
+                std::vector<std::string> tokens = split(bonusStr, ':');
 
-                stringstream ss(tokens.back ());
+                std::stringstream ss(tokens.back ());
                 if(!(ss >> bonus.base))
                 {
                     bonus.base = 0.f;
                 }
 
-                vector<string> attributes = split(tokens.front(), '&');
-                for(string const& attr : attributes)
+                std::vector<std::string> attributes = split(tokens.front(), '&');
+                for(std::string const& attr : attributes)
                 {
 
                     if(attr == "L")
@@ -195,7 +191,7 @@ void InitPlayerUnits<Race>::readStats()
                         bonus.attributes.push_back (Attribute::air);
                     }
                 }
-                sort(bonus.attributes.begin (), bonus.attributes.end());
+                std::sort(bonus.attributes.begin (), bonus.attributes.end());
                 stats.bonuses.push_back(bonus);
             }
         }
@@ -206,13 +202,13 @@ void InitPlayerUnits<Race>::readStats()
         }
         if(str != "-")
         {
-            vector<string> bonusStrs = split(str,',');
-            for(string const& bonusStr : bonusStrs)
+            std::vector<std::string> bonusStrs = split(str,',');
+            for(std::string const& bonusStr : bonusStrs)
             {
                 Bonus bonus;
-                vector<string> tokens = split(bonusStr, ':');
-                vector<string> attributes = split(tokens.front(), '&');
-                for(string const& attr : attributes)
+                std::vector<std::string> tokens = split(bonusStr, ':');
+                std::vector<std::string> attributes = split(tokens.front(), '&');
+                for(std::string const& attr : attributes)
                 {
                     if(attr == "L")
                     {
@@ -243,7 +239,7 @@ void InitPlayerUnits<Race>::readStats()
                         bonus.attributes.push_back (Attribute::air);
                     }
                 }
-                sort(bonus.attributes.begin (), bonus.attributes.end());
+                std::sort(bonus.attributes.begin (), bonus.attributes.end());
                 bool matched = false;
                 for(Bonus& b : stats.bonuses)
                 {
@@ -251,7 +247,7 @@ void InitPlayerUnits<Race>::readStats()
                     if(bonus.attributes.size () == b.attributes.size ()
                             && std::mismatch(bonus.attributes.begin(), bonus.attributes.end(), b.attributes.begin()).first == bonus.attributes.end ())
                     {
-                        stringstream ss(*tokens.rbegin ());
+                        std::stringstream ss(*tokens.rbegin ());
                         if(!(ss >> b.upgrade))
                         {
                             b.upgrade = 0.f;
@@ -263,7 +259,7 @@ void InitPlayerUnits<Race>::readStats()
                 // if there is no base but just an upgrade, add this as an additional bonus
                 if(!matched)
                 {
-                    stringstream ss(*tokens.rbegin ());
+                    std::stringstream ss(*tokens.rbegin ());
                     if(!(ss >> bonus.upgrade))
                     {
                         bonus.upgrade = 0.f;
@@ -314,11 +310,11 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, Player
 {
     if (mPath.empty())
 	{
-		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&): The file path currently stored is an empty string.");
+        throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&): The file path currently stored is an empty string.");
 	}
 	if (unitVec.empty())
 	{
-		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&): The vector containing the names of all units to create is empty");
+        throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&): The vector containing the names of all units to create is empty");
 	}
     if (mFactory.isHashMapEmpty())
 	{
@@ -344,11 +340,11 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 {
     if (path.empty())
 	{
-		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&, const string&): The file path passed as argument is an empty string.");
+        throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&, const std::string&): The file path passed as argument is an empty string.");
 	}
 	if (unitVec.empty())
 	{
-		throw std::invalid_argument("InitPlayerUnits::init(const vector<string>&, const string&): The vector containing the names of all units to create is empty");
+        throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&, const std::string&): The vector containing the names of all units to create is empty");
 	}
     setPath(path);
 	readStats();

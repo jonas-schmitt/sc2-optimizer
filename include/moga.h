@@ -21,32 +21,22 @@
 #include "MicroSimulation.h"
 #include "Utilities.h"
 
-using std::vector;
-using std::mt19937;
-using std::bernoulli_distribution;
-using std::string;
-using std::pair;
-using std::unordered_set;
-using std::set;
-using std::function;
-using std::cout;
-using std::endl;
 
 struct CrossoverParameter
 {
-    CrossoverParameter(vector<Individual> const& parents_, mt19937& generator_, size_t crossoverPoints_)
+    CrossoverParameter(std::vector<Individual> const& parents_, std::mt19937& generator_, size_t crossoverPoints_)
         : parents(&parents_), generator(&generator_), crossoverPoints(crossoverPoints_) {}
-    vector<Individual> const * parents;
-    mt19937 *generator;
+    std::vector<Individual> const * parents;
+    std::mt19937 *generator;
     size_t crossoverPoints;
 };
 
 struct MutationParameter
 {
-    MutationParameter(Individual& individual_, mt19937& generator_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
+    MutationParameter(Individual& individual_, std::mt19937& generator_, size_t geneToMutate_, size_t currentGeneration_, size_t maxGenerations_)
         : individual(&individual_), generator(&generator_), geneToMutate(geneToMutate_), currentGeneration(currentGeneration_), maxGenerations(maxGenerations_){}
     Individual* individual;
-    mt19937* generator;
+    std::mt19937* generator;
     size_t geneToMutate;
     size_t currentGeneration;
     size_t maxGenerations;
@@ -67,15 +57,15 @@ private:
 
     std::uniform_real_distribution<double> mDistribution;
 
-    vector<Individual> mPop;
+    std::vector<Individual> mPop;
 
-    vector<vector<MicroSimulation<T,U>>> mSims;
+    std::vector<std::vector<MicroSimulation<T,U>>> mSims;
 
 
 
-    //vector<string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
-    vector<string> mCrossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
-    vector<string> mMutationFuncNames = {"Polynomial Mutation", "Gaussian Mutation", "Uniform Mutation"};
+    //std::vector<std::string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
+    std::vector<std::string> mCrossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
+    std::vector<std::string> mMutationFuncNames = {"Gaussian Mutation", "Polynomial Mutation", "Uniform Mutation"};
 
     //size_t mSelectionChoice = 0;
     size_t mCrossoverChoice = 0;
@@ -94,10 +84,10 @@ private:
     // Crossover methods
 
 
-    function<pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
@@ -129,10 +119,10 @@ private:
 
     };
 
-    function<pair<Individual, Individual>(CrossoverParameter)> adaptiveSBX = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> adaptiveSBX = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
@@ -523,10 +513,10 @@ private:
     };
 
 
-    function<pair<Individual, Individual>(CrossoverParameter)> nPointCrossover = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> nPointCrossover = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
         size_t const crossoverPoints = params.crossoverPoints;
 
@@ -534,8 +524,8 @@ private:
         Individual const& parent2 = parents.at(1);
         std::uniform_int_distribution<size_t> dist(1,NGenes-2);
 
-        vector<size_t> posArray(crossoverPoints);
-        unordered_set<size_t> positions;
+        std::vector<size_t> posArray(crossoverPoints);
+        std::unordered_set<size_t> positions;
         for(size_t& pos : posArray)
         {
             do {
@@ -574,10 +564,10 @@ private:
     };
 
 
-    function<pair<Individual, Individual>(CrossoverParameter)> uniformCrossover = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> uniformCrossover = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
@@ -601,10 +591,10 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(CrossoverParameter)> intermediateCrossover = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> intermediateCrossover = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
@@ -620,10 +610,10 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(CrossoverParameter)> lineCrossover = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> lineCrossover = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
         Individual const& parent2 = parents.at(1);
@@ -642,10 +632,10 @@ private:
         return std::make_pair(child1, child2);
     };
 
-    function<pair<Individual, Individual>(CrossoverParameter)> arithmeticCrossover = [&] (CrossoverParameter params)
+    std::function<std::pair<Individual, Individual>(CrossoverParameter)> arithmeticCrossover = [&] (CrossoverParameter params)
     {
-        vector<Individual> const& parents = *params.parents;
-        mt19937 &generator = *params.generator;
+        std::vector<Individual> const& parents = *params.parents;
+        std::mt19937 &generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const NGenes = mNGenes;
         Individual const& parent1 = parents.at(0);
@@ -665,10 +655,10 @@ private:
     };
 
 
-    function<void(MutationParameter)> polynomialMutation = [&] (MutationParameter params)
+    std::function<void(MutationParameter)> polynomialMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
-        mt19937& generator = *params.generator;
+        std::mt19937& generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const i = params.geneToMutate;
 
@@ -708,10 +698,10 @@ private:
 
     };
 
-    function<void(MutationParameter)> gaussianMutation = [&] (MutationParameter params)
+    std::function<void(MutationParameter)> gaussianMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
-        mt19937& generator = *params.generator;
+        std::mt19937& generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const i = params.geneToMutate;
         double constexpr sigma = 0.375/(MAX - MIN);
@@ -734,20 +724,20 @@ private:
     };
 
 
-    function<void(MutationParameter)> uniformMutation = [&] (MutationParameter params)
+    std::function<void(MutationParameter)> uniformMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
-        mt19937& generator = *params.generator;
+        std::mt19937& generator = *params.generator;
         size_t const i = params.geneToMutate;
         std::uniform_real_distribution<double> valueDist(MIN,MAX);
         individual.chromosome[i] = valueDist(generator);
     };
 
 
-    vector<function<pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
-    vector<function<void(MutationParameter) > > mutationFuncs = {polynomialMutation, gaussianMutation, uniformMutation};
+    std::vector<std::function<std::pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
+    std::vector<std::function<void(MutationParameter) > > mutationFuncs = {gaussianMutation, polynomialMutation, uniformMutation};
 
-    void mutationClock(mt19937& generator)
+    void mutationClock(std::mt19937& generator)
     {
         double const u = mDistribution(generator);
         double const l = mNGenes * (-std::log(1-u));
@@ -757,15 +747,15 @@ private:
     }
 
 
-    vector<Individual *> binaryTournamentSelection(size_t const N, mt19937& generator)
+    std::vector<Individual *> binaryTournamentSelection(size_t const N, std::mt19937& generator)
     {
         std::uniform_int_distribution<size_t> dist(0, mPop.size()-1);
-        vector<Individual *> res;
+        std::vector<Individual *> res;
         res.reserve(N);
 
         #pragma omp parallel
         {
-            vector<Individual *> res_local;
+            std::vector<Individual *> res_local;
             res_local.reserve(N / omp_get_num_threads() + N % omp_get_max_threads());
 
             #pragma omp for schedule(static)
@@ -794,16 +784,16 @@ private:
         return res;
     }
 
-    vector<Individual *> tournamentSelection(size_t const N, mt19937& generator)
+    std::vector<Individual *> tournamentSelection(size_t const N, std::mt19937& generator)
     {
         std::uniform_int_distribution<size_t> dist(0,mPop.size()-1);
-        vector<Individual *> res;
+        std::vector<Individual *> res;
         res.reserve(N);
         #pragma omp parallel
         {
-            vector<Individual *> res_local;
+            std::vector<Individual *> res_local;
             res_local.reserve(N / omp_get_num_threads() + N % omp_get_max_threads());
-            vector<size_t> positions;
+            std::vector<size_t> positions;
             positions.reserve(mTournamentSize);
             #pragma omp for schedule(static)
             for(size_t i = 0; i < N; ++i)
@@ -833,7 +823,7 @@ private:
         return res;
     }
 
-    void evaluate(vector<Individual>& pop)
+    void evaluate(std::vector<Individual>& pop)
     {
 
 
@@ -878,7 +868,7 @@ private:
         }
     }
 
-    void setGoals(vector<Chromosome> const& goals)
+    void setGoals(std::vector<Chromosome> const& goals)
     {
         if(goals.size() != mNGoals)
         {
@@ -901,7 +891,7 @@ private:
     }
 
 
-    void computeStatistics(Statistics& stats, vector<double> const& v)
+    void computeStatistics(Statistics& stats, std::vector<double> const& v)
     {
         double sum = std::accumulate(v.begin(), v.end(), 0.0);
         double mean = sum / v.size();
@@ -923,7 +913,7 @@ private:
     void nondominatedSort()
     {
         // nondominated fronts
-        vector<vector<size_t>> fronts(1);
+        std::vector<std::vector<size_t>> fronts(1);
 
         // determine the domination count and set of dominated individuals for all members of the population
         for(size_t i = 0; i < mPop.size(); ++i)
@@ -977,7 +967,7 @@ private:
         }
 
 
-        vector<Individual> newPop;
+        std::vector<Individual> newPop;
         newPop.reserve(mPopSize);
         fronts.pop_back();
 
@@ -998,7 +988,7 @@ private:
 
 
         // diversity preservation
-        for(vector<size_t>& front : fronts)
+        for(std::vector<size_t>& front : fronts)
         {
 
             // compute crowding distance for damage
@@ -1068,9 +1058,9 @@ private:
         mPop = newPop;
     }
 
-    size_t countUnitTypes(vector<string> buildOrder)
+    size_t countUnitTypes(std::vector<std::string> buildOrder)
     {
-        set<string> strSet(buildOrder.begin(), buildOrder.end());
+        std::set<std::string> strSet(buildOrder.begin(), buildOrder.end());
         return strSet.size();
     }
 
@@ -1080,7 +1070,7 @@ public:
     typedef T race1;
     typedef U race2;
 
-    MOGA(Vec2D const minPos, Vec2D const maxPos, string const& filePath1, string const& filePath2, size_t popSize, vector<string> const & buildList1, vector<string> const & buildList2, size_t const nGoals)
+    MOGA(Vec2D const minPos, Vec2D const maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals)
         :  mPopSize(popSize), mDistribution(0,1.0), mNGoals(nGoals)
     {
 
@@ -1106,7 +1096,7 @@ public:
                 #pragma omp barrier
             }
         }
-        mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+        std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
         generator.discard(1000);
 
         if(player == Player::first)
@@ -1124,7 +1114,7 @@ public:
 
         if(mNCrossoverPoints > 1) --mNCrossoverPoints;
         std::uniform_real_distribution<double> valueDist(MIN, MAX);
-        vector<Chromosome> initChroms(mNGoals);
+        std::vector<Chromosome> initChroms(mNGoals);
         for(auto& chrom : initChroms)
         {
             chrom.resize(mNGenes);
@@ -1164,7 +1154,7 @@ public:
 
     }
 
-    void optimize(vector<Chromosome> const& goals, size_t const iterations, mt19937& generator)
+    void optimize(std::vector<Chromosome> const& goals, size_t const iterations, std::mt19937& generator)
     {
         mMutationCount = 0;
         mIndividualToMutate = 0;
@@ -1173,7 +1163,7 @@ public:
         setGoals(goals);
         evaluate(mPop);
 
-        vector<double> v(mPop.size());
+        std::vector<double> v(mPop.size());
         for(size_t i = 0; i < v.size(); ++i)
         {
             v[i] = mPop[i].fitness.damage;
@@ -1191,21 +1181,21 @@ public:
             mutationClock(generator);
             // apply genetic algorithm
 
-            vector<Individual> newPop;
+            std::vector<Individual> newPop;
             newPop.reserve(mPopSize);
-            vector<Individual *> selected;
+            std::vector<Individual *> selected;
 
             selected = tournamentSelection(mPopSize, generator);
             if(selected.size() == 0) break; // Just for safety
             #pragma omp parallel
             {
 
-                vector<Individual> newPop_local;
+                std::vector<Individual> newPop_local;
                 newPop_local.reserve(selected.size() / 2 / omp_get_num_threads());
                 #pragma omp for schedule(dynamic,1) nowait
                 for(size_t j = 0; j < selected.size()-1; j += 2)
                 {
-                    pair<Individual, Individual> children;
+                    std::pair<Individual, Individual> children;
                     children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNCrossoverPoints));
                     newPop_local.push_back(children.first);
                     newPop_local.push_back(children.second);
@@ -1238,7 +1228,7 @@ public:
                 mPop.pop_back();
             }
 
-            vector<double> v(mPop.size());
+            std::vector<double> v(mPop.size());
             for(size_t i = 0; i < v.size(); ++i)
             {
                 v[i] = mPop[i].fitness.damage;
@@ -1281,16 +1271,16 @@ public:
         mMutationChoice = value < mutationFuncs.size() ? value : mMutationChoice;
     }
 
-    string getCrossoverOperatorName()
+    std::string getCrossoverOperatorName()
     {
         return mCrossoverFuncNames[mCrossoverChoice];
     }
-    string getMutationOperatorName()
+    std::string getMutationOperatorName()
     {
         return mMutationFuncNames[mMutationChoice];
     }
 
-    vector<Chromosome> getBestChromosomes(size_t const n)
+    std::vector<Chromosome> getBestChromosomes(size_t const n)
     {
         auto cmp = [&] (Individual const& lhs, Individual const& rhs)
         {
@@ -1310,7 +1300,7 @@ public:
 
         size_t const sz = std::min(n, mPop.size());
         std::partial_sort(mPop.begin(), mPop.begin() + sz, mPop.end(), cmp);
-        vector<Chromosome> res;
+        std::vector<Chromosome> res;
         res.reserve(sz);
         for(size_t i = 0; i < sz; ++i)
         {
@@ -1319,7 +1309,7 @@ public:
         return res;
     }
 
-    vector<Individual> const& getPopulation() const
+    std::vector<Individual> const& getPopulation() const
     {
         return mPop;
     }
@@ -1359,7 +1349,7 @@ public:
 
     void includeDecodedChromosomes(Chromosome const& data, size_t const migrants, int const rank, int const procs)
     {
-        vector<Individual> newPop;
+        std::vector<Individual> newPop;
         newPop.reserve((procs-1)*migrants);
         for(int i = 0; i < procs; ++i)
         {

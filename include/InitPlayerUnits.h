@@ -14,7 +14,7 @@
 #include "Unit.h"
 #include "UnitFactory.h"
 #include "Utilities.h"
-using std::string;
+
 
 
 template<class Race>
@@ -70,8 +70,8 @@ private:
 
     UnitFactory<Race> mFactory;
     std::string mPath;
-    vector<string>& split(const string &s, char delim, vector<string> &tokens);
-    vector<string> split(string const &s, char delim);
+    std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &tokens);
+    std::vector<std::string> split(std::string const &s, char delim);
 public:
 	InitPlayerUnits();
     InitPlayerUnits(const std::string& path);

@@ -1,8 +1,7 @@
 #ifndef _PLAYERSTATE_H_
 #define _PLAYERSTATE_H_
 
-#include<list>
-#include<string>
+
 #include<utility>
 #include<algorithm>
 #include<functional>
@@ -12,16 +11,13 @@
 #include"Utilities.h"
 #include"Chromosome.h"
 
-using std::string;
-using std::list;
-using std::pair;
-using std::function;
+
 using std::vector;
 using std::deque;
 
 template<typename Race> struct PotentialField final : public Race
 {
-    PotentialField(Vec2D p, function<Vec2D(Vec2D const&,typename Race::BUT const&)> f)
+    PotentialField(Vec2D p, std::function<Vec2D(Vec2D const&,typename Race::BUT const&)> f)
         : pos(p), func(f)
     {}
     Vec2D computeForce(typename Race::BUT const& unit) const
@@ -31,7 +27,7 @@ template<typename Race> struct PotentialField final : public Race
 
 private:
     Vec2D pos;
-    function<Vec2D(Vec2D const&,typename Race::BUT const&)> func;
+    std::function<Vec2D(Vec2D const&,typename Race::BUT const&)> func;
 
 };
 
@@ -42,7 +38,7 @@ struct SimulationResult final
     double damagePercent = 0;
     double minerals = 0, gas = 0;
     size_t survivors = 0;
-    vector<vector<Vec2Df>> paths;
+    std::vector<std::vector<Vec2Df>> paths;
 };
 
 template <class Race> struct PlayerState final : public Race
@@ -56,32 +52,32 @@ template <class Race> struct PlayerState final : public Race
     Vec2D fieldSize;
     double maxUnitSize;
 
-    vector<PotentialField<Race>> potentialList;
-    deque<pair<int,PotentialField<Race>>> forceFieldQueue;
+    std::vector<PotentialField<Race>> potentialList;
+    std::deque<std::pair<int,PotentialField<Race>>> forceFieldQueue;
 
     Chromosome chromosome;
 
 
-    vector<typename Race::UT0> unitList0;
-    vector<typename Race::UT1> unitList1;
-    vector<typename Race::UT2> unitList2;
-    vector<typename Race::UT3> unitList3;
-    vector<typename Race::UT4> unitList4;
-    vector<typename Race::UT5> unitList5;
-    vector<typename Race::UT6> unitList6;
-    vector<typename Race::UT7> unitList7;
-    vector<typename Race::UT8> unitList8;
-    vector<typename Race::UT9> unitList9;
-    vector<typename Race::UT10> unitList10;
-    vector<typename Race::UT11> unitList11;
-    vector<typename Race::UT12> unitList12;
-    vector<typename Race::UT13> unitList13;
-    vector<typename Race::UT14> unitList14;
-    vector<typename Race::UT15> unitList15;
-    vector<typename Race::UT16> unitList16;
-    vector<typename Race::UT17> unitList17;
+    std::vector<typename Race::UT0> unitList0;
+    std::vector<typename Race::UT1> unitList1;
+    std::vector<typename Race::UT2> unitList2;
+    std::vector<typename Race::UT3> unitList3;
+    std::vector<typename Race::UT4> unitList4;
+    std::vector<typename Race::UT5> unitList5;
+    std::vector<typename Race::UT6> unitList6;
+    std::vector<typename Race::UT7> unitList7;
+    std::vector<typename Race::UT8> unitList8;
+    std::vector<typename Race::UT9> unitList9;
+    std::vector<typename Race::UT10> unitList10;
+    std::vector<typename Race::UT11> unitList11;
+    std::vector<typename Race::UT12> unitList12;
+    std::vector<typename Race::UT13> unitList13;
+    std::vector<typename Race::UT14> unitList14;
+    std::vector<typename Race::UT15> unitList15;
+    std::vector<typename Race::UT16> unitList16;
+    std::vector<typename Race::UT17> unitList17;
 
-    vector<typename Race::RUT*>unitList;
+    std::vector<typename Race::RUT*>unitList;
     size_t unitCount;
 
     int timeSlice = 10;
@@ -251,7 +247,7 @@ template <class Race> struct PlayerState final : public Race
             res.paths.push_back(unit->getPath());
         }
         res.damagePercent = res.damage*100. / maxDamage;
-        auto cmp = [] (vector<Vec2Df> const& a, vector<Vec2Df> const& b)
+        auto cmp = [] (std::vector<Vec2Df> const& a, std::vector<Vec2Df> const& b)
         {
             return a.size() > b.size();
         };
