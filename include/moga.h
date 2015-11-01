@@ -140,6 +140,7 @@ private:
         double const tmp2 = 1.0 / (2.0 * (1.0 - u));
 
         double const a = contraction ? std::pow(tmp1, exp) : std::pow(tmp2, exp);
+        double const beta_old = a;
 
         for(size_t i = 0; i < NGenes; ++i)
         {
@@ -309,18 +310,16 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+                    double n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+                    double const exp = 1.0 / (n_c12 + 1.0);
+                    double const a = std::pow(tmp2, exp);
+
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-
-
-                        double const exp = 1.0 / (n_c12 + 1.0);
-                        double const a = std::pow(tmp2, exp);
-
 
                         double const avg = 0.5 * (x1 + x2);
                         double const shift = a * 0.5 * diff;
@@ -334,24 +333,24 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+                    double const log_beta = std::log(beta);
+                    double constexpr alpha_inv = 1.0/alpha;
+                    double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
+
+                    double const exp1 = 1.0 / (n_c1 + 1.0);
+                    double const a1 = std::pow(tmp2, exp1);
+
+                    double const exp2 = 1.0 / (n_c2 + 1.0);
+                    double const a2 = std::pow(tmp2, exp2);
+
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const log_beta = std::log(beta);
-                        double constexpr alpha_inv = 1.0/alpha;
-                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
-
-                        double const exp1 = 1.0 / (n_c1 + 1.0);
-                        double const a1 = std::pow(tmp2, exp1);
-
-                        double const exp2 = 1.0 / (n_c2 + 1.0);
-                        double const a2 = std::pow(tmp2, exp2);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y1 = avg - a1 * 0.5 * diff;
@@ -364,16 +363,16 @@ private:
                 else
                 {
                     child1.alternative = child1.chromosome;
+                    double const beta = beta_old;
+                    double n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+                    double const exp = 1.0 / (n_c1 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-
-                        double const exp = 1.0 / (n_c1 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
 
@@ -388,25 +387,25 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+
+                    double const log_beta = std::log(beta);
+                    double constexpr alpha_inv = 1.0/alpha;
+
+                    double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
+
+                    double const exp1 = 1.0 / (n_c1 + 1.0);
+                    double const a1 = std::pow(tmp2, exp1);
+
+                    double const exp2 = 1.0 / (n_c2 + 1.0);
+                    double const a2 = std::pow(tmp2, exp2);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const log_beta = std::log(beta);
-                        double constexpr alpha_inv = 1.0/alpha;
-
-                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
-
-                        double const exp1 = 1.0 / (n_c1 + 1.0);
-                        double const a1 = std::pow(tmp2, exp1);
-
-                        double const exp2 = 1.0 / (n_c2 + 1.0);
-                        double const a2 = std::pow(tmp2, exp2);
 
 
                         double const avg = 0.5 * (x1 + x2);
@@ -421,17 +420,16 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+                    double const n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                    double const exp = 1.0 / (n_c12 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double const n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-
-                        double const exp = 1.0 / (n_c12 + 1.0);
-                        double const a = std::pow(tmp2, exp);
-
 
                         double const avg = 0.5 * (x1 + x2);
                         double const shift = a * 0.5 * diff;
@@ -444,17 +442,17 @@ private:
                 }
                 else
                 {
+                    double const beta = beta_old;
+                    double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                    double const exp = 1.0 / (n_c1 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     child1.alternative = child1.chromosome;
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-
-                        double const exp = 1.0 / (n_c1 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y1 = avg - a * 0.5 * diff;
@@ -467,17 +465,17 @@ private:
                 if(better2)
                 {
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+                    double const exp = 1.0 / (n_c2 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-
-                        double const exp = 1.0 / (n_c2 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y2 = avg + a * 0.5* diff;
@@ -487,17 +485,17 @@ private:
                 else if(worse2)
                 {
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                    double const exp = 1.0 / (n_c2 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-
-                        double const exp = 1.0 / (n_c2 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y2 = avg + 0.5 * a * diff;
