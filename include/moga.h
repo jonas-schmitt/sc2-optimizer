@@ -914,6 +914,7 @@ private:
         std::vector<std::vector<size_t>> fronts(1);
 
         // determine the domination count and set of dominated individuals for all members of the population
+        #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < mPop.size(); ++i)
         {
             mPop[i].dominationCount = 0;
@@ -934,7 +935,10 @@ private:
             // if the individual is not dominated by any other individuals, include it in the first nondominated front
             if(mPop[i].dominationCount == 0)
             {
-                fronts[0].push_back(i);
+                #pragma omp critical
+                {
+                    fronts[0].push_back(i);
+                }
                 mPop[i].rank = 1;
             }
         }
