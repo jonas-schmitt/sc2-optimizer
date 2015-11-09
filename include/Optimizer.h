@@ -228,7 +228,7 @@ public:
             std::vector<Individual> pop1(mGa1.getPopulation());
             std::vector<Individual> pop2(mGa2.getPopulation());
 
-            size_t const minSize = std::min(static_cast<size_t>(10), std::min(pop1.size(), pop2.size()));
+            size_t const minSize = std::min(static_cast<size_t>(100), std::min(pop1.size(), pop2.size()));
 
             pop1.resize(minSize);
             pop2.resize(minSize);
