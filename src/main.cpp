@@ -46,7 +46,7 @@ void runOptimization(OptimizationParameter const& p)
     end = std::chrono::system_clock::now();
     auto elapsed_min = std::chrono::duration_cast<std::chrono::minutes>(end - start);
     auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() << " sec" << std::endl;
+    if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() - elapsed_min.count()*60 << " sec" << std::endl;
     opt.determineWinner(std::cout, p.rank, p.procs);
 }
 
