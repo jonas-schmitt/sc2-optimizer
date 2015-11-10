@@ -829,7 +829,7 @@ private:
     {
 
 
-        #pragma omp parallel for schedule(dynamic,1)
+        #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < pop.size(); ++i)
         {
             if(!pop[i].evaluated)
@@ -978,70 +978,49 @@ private:
         fronts.pop_back();
 
 
-        auto cmp_damage = [&] (size_t const p, size_t const q)
+        auto cmp_damage = [&] (Individual const& lhs, Individual const& rhs)
         {
-            return mPop[p].fitness.damage < mPop[q].fitness.damage;
+            return lhs.fitness.damage < rhs.fitness.damage;
         };
-        auto cmp_health = [&] (size_t const p, size_t const q)
+        auto cmp_health = [&] (Individual const& lhs, Individual const& rhs)
         {
-            return mPop[p].fitness.health < mPop[q].fitness.health;
+            return lhs.fitness.health < rhs.fitness.health;
         };
 
         auto cmp_time = [&] (size_t const p, size_t const q)
         {
             return mPop[p].fitness.timeSteps < mPop[q].fitness.timeSteps;
         };
+        // compute crowding distance for damage
+        std::sort(mPop.begin(), mPop.end(), cmp_damage);
+        mPop.front().distance = INF;
+        mPop[mPop.size()-1].distance = INF;
+
+        #pragma omp parallel for schedule(static)
+        for(size_t i = 1; i < mPop.size()-1; ++i)
+        {
+            mPop[i].distance += mPop[i+1].fitness.damage - mPop[i-1].fitness.damage;
+        }
+
+
+
+
+        // compute crowding distance for health
+        std::sort(mPop.begin(), mPop.end(), cmp_health);
+        mPop.front().distance = INF;
+        mPop[mPop.size()-1].distance = INF;
+
+        #pragma omp parallel for schedule(static)
+        for(size_t i = 1; i < mPop.size()-1; ++i)
+        {
+            mPop[i].distance += mPop[i+1].fitness.health - mPop[i-1].fitness.health;
+        }
+
 
 
         // diversity preservation
         for(std::vector<size_t>& front : fronts)
         {
-
-            // compute crowding distance for damage
-            std::sort(front.begin(), front.end(), cmp_damage);
-            mPop[front.front()].distance = INF;
-            mPop[front.back()].distance = INF;
-            if(front.size() > 2)
-            {
-                for(size_t i = 1; i < front.size()-2; ++i)
-                {
-                    mPop[front[i]].distance += mPop[front[i+1]].fitness.damage - mPop[front[i-1]].fitness.damage;
-                }
-            }
-
-
-
-            // compute crowding distance for health
-            std::sort(front.begin(), front.end(), cmp_health);
-            mPop[front.front()].distance = INF;
-            mPop[front.back()].distance = INF;
-            if(front.size() > 2)
-            {
-                for(size_t i = 1; i < front.size()-2; ++i)
-                {
-                    if(mPop[front[i]].distance < INF)
-                    {
-                        mPop[front[i]].distance += mPop[front[i+1]].fitness.health - mPop[front[i-1]].fitness.health;
-                    }
-                }
-            }
-
-            // compute crowding distance for health
-            std::sort(front.begin(), front.end(), cmp_time);
-            mPop[front.front()].distance = INF;
-            mPop[front.back()].distance = INF;
-            if(front.size() > 2)
-            {
-                for(size_t i = 1; i < front.size()-2; ++i)
-                {
-                    if(mPop[front[i]].distance < INF)
-                    {
-                        mPop[front[i]].distance += mPop[front[i+1]].fitness.timeSteps - mPop[front[i-1]].fitness.timeSteps;
-                    }
-                }
-            }
-
-
             // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
             if(newPop.size() + front.size() > mPopSize)
             {
@@ -1215,16 +1194,29 @@ public:
 
             mMutationCount += newPop.size();
             size_t pos = 0, pos_old;
+
+            std::vector<size_t> individualPositions;
+            std::vector<size_t> genePositions;
             while(mIndividualToMutate < mMutationCount)
             {
                 pos_old = pos;
                 size_t const offset = mMutationCount - mIndividualToMutate;
                 pos = newPop.size() > offset ? newPop.size() - offset : 0;
+                individualPositions.push_back(pos);
+                genePositions.push_back(mGeneToMutate);
                 mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], generator, mGeneToMutate, i, iterations));
                 mutationClock(generator);
                 size_t const pos_diff = pos - pos_old;
                 mMutationCount = mMutationCount > pos_diff ? mMutationCount - pos_diff : 0;
             }
+            size_t limit = std::min(individualPositions.size(), genePositions.size());
+
+            #pragma omp parallel for schedule(static)
+            for(size_t j = 0; j < limit; ++j)
+            {
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[individualPositions[j]], generator, genePositions[j], i, iterations));
+            }
+
             evaluate(newPop);
             mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
@@ -1246,16 +1238,18 @@ public:
             }
             computeStatistics(mStats.second, v);
 
-            if(procs > 1)
+            if(mAvgFile != nullptr && mStdevFile != nullptr)
             {
-                computeGlobalStatistics(mStats.first, rank, procs);
-                computeGlobalStatistics(mStats.second, rank, procs);
-            }
-
-            if(mAvgFile != nullptr && mStdevFile != nullptr && rank == 0)
-            {
-                *mAvgFile << mStats.first.iteration << "\t" << mStats.first.mean << "\t" << mStats.second.mean << std::endl;
-                *mStdevFile << mStats.first.iteration << "\t" << mStats.first.stdev << "\t" << mStats.second.stdev << std::endl;
+                if(procs > 1)
+                {
+                    computeGlobalStatistics(mStats.first, rank, procs);
+                    computeGlobalStatistics(mStats.second, rank, procs);
+                }
+                if(rank == 0)
+                {
+                    *mAvgFile << mStats.first.iteration << "\t" << mStats.first.mean << "\t" << mStats.second.mean << std::endl;
+                    *mStdevFile << mStats.first.iteration << "\t" << mStats.first.stdev << "\t" << mStats.second.stdev << std::endl;
+                }
             }
         }
 
