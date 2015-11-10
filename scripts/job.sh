@@ -18,4 +18,4 @@ cd ..
 mkdir -p ./results
 OMP_NUM_THREADS=8 mpirun --npersocket 1 \
     -mca orte_num_sockets 4 -mca orte_num_cores 8 \
-        ./build/opt lists/Terran.txt lists/Zerg.txt 100 20 10 10 > terran_zerg.out
+        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 100 50 10 10 > test.out

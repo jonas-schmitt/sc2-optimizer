@@ -1,2 +1,2 @@
 Attack-Upgrade  Armor-Upgrade   Shield-Upgrade  Blink 
-0               0               0              	0 
+0               0               0              	1 

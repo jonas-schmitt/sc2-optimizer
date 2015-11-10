@@ -83,6 +83,10 @@ private:
 
     // Crossover methods
 
+    size_t mGeneration = 0;
+    std::ofstream* mAvgFile = nullptr;
+    std::ofstream* mStdevFile = nullptr;
+
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
     {
@@ -1156,7 +1160,7 @@ public:
 
     }
 
-    void optimize(std::vector<Chromosome> const& goals, size_t const iterations, std::mt19937& generator)
+    void optimize(std::vector<Chromosome> const& goals, size_t const iterations, std::mt19937& generator, int rank, int procs)
     {
         mMutationCount = 0;
         mIndividualToMutate = 0;
@@ -1241,6 +1245,18 @@ public:
                 v[i] = mPop[i].fitness.health;
             }
             computeStatistics(mStats.second, v);
+
+            if(procs > 1)
+            {
+                computeGlobalStatistics(mStats.first, rank, procs);
+                computeGlobalStatistics(mStats.second, rank, procs);
+            }
+
+            if(mAvgFile != nullptr && mStdevFile != nullptr && rank == 0)
+            {
+                *mAvgFile << mStats.first.iteration << "\t" << mStats.first.mean << "\t" << mStats.second.mean << std::endl;
+                *mStdevFile << mStats.first.iteration << "\t" << mStats.first.stdev << "\t" << mStats.second.stdev << std::endl;
+            }
         }
 
 
@@ -1398,6 +1414,40 @@ public:
     {
         return mTournamentSize;
     }
+
+    void writeOutStatistics(std::ofstream& avgFile , std::ofstream& stdevFile)
+    {
+        mAvgFile = &avgFile;
+        mStdevFile = &stdevFile;
+    }
+
+    void stopWriteOutStatistics()
+    {
+        mAvgFile = nullptr;
+        mStdevFile = nullptr;
+    }
+
+    void computeGlobalStatistics(Statistics& stats, int const rank, int const procs)
+    {
+        Statistics tmp;
+        MPI_Reduce (&stats.mean, &tmp.mean, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.max, &tmp.max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.sum, &tmp.sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.stdev, &tmp.stdev, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.onlinePerformance, &tmp.onlinePerformance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.offlinePerformance, &tmp.offlinePerformance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+        if(rank == 0)
+        {
+            stats.mean = tmp.mean / procs;
+            stats.max = tmp.max;
+            stats.sum = tmp.sum;
+            stats.stdev = tmp.stdev / procs;
+            stats.onlinePerformance = tmp.onlinePerformance / procs;
+            stats.offlinePerformance = tmp.offlinePerformance / procs;
+        }
+    }
+
 
 
 

@@ -59,17 +59,24 @@ public:
 
         if(rank == 0)
         {
-            std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
-            std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
-            std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
-            std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
-            std::cout << "Population Size: " << mPopSize*procs << std::endl;
-            std::cout << "Number of Iterations: " << iterations << std::endl;
-            std::cout << "Generations per Iteration: " << genPerIt << std::endl;
+            //std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
+            //std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
+            //std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
+            //std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
+            //std::cout << "Population Size: " << mPopSize*procs << std::endl;
+            //std::cout << "Number of Iterations: " << iterations << std::endl;
+            //std::cout << "Generations per Iteration: " << genPerIt << std::endl;
         }
 
         Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
         Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
+        std::ofstream avgFile1("avgPlayer1.dat");
+        std::ofstream avgFile2("avgPlayer2.dat");
+        std::ofstream stdevFile1("stdevPlayer1.dat");
+        std::ofstream stdevFile2("stdevPlayer2.dat");
+        mGa1.writeOutStatistics(avgFile1, stdevFile1);
+        mGa2.writeOutStatistics(avgFile2, stdevFile2);
+
 
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -78,7 +85,7 @@ public:
             {
                 std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << std::endl;
                 //std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
-                //printf("%c[2K", 27);
+                printf("%c[2K", 27);
             }*/
 
             if(mMPI)
@@ -90,8 +97,8 @@ public:
             std::vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
             std::vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
-            mGa1.optimize(optima2, genPerIt, generator);
-            mGa2.optimize(optima1, genPerIt, generator);
+            mGa1.optimize(optima2, genPerIt, generator, rank, procs);
+            mGa2.optimize(optima1, genPerIt, generator, rank, procs);
 
             mStats1 = mGa1.getStatistics();
             mStats2 = mGa2.getStatistics();
@@ -105,9 +112,9 @@ public:
             }
             if(rank == 0)
             {
-                std::cout << "Iteration " << i << std::endl;
-                printStatistics();
-                std::cout << std::endl;
+                //std::cout << "Iteration " << i << std::endl;
+                //printStatistics();
+                //std::cout << std::endl;
             }
 
         }
@@ -125,17 +132,23 @@ public:
                 evaluations = evaluations_tmp;
             }
 
-            std::cout << "Number of evaluations: " << evaluations << std::endl;
-            std::cout << std::endl;
-            std::cout << "Damage" << std::endl;
-            std::cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
-            std::cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
-            std::cout << std::endl;
-            std::cout << "Health" << std::endl;
-            std::cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
-            std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
-            std::cout << "\n" << std::endl;
+            //std::cout << "Number of evaluations: " << evaluations << std::endl;
+            //std::cout << std::endl;
+            //std::cout << "Damage" << std::endl;
+            //std::cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
+            //std::cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
+            //std::cout << std::endl;
+            //std::cout << "Health" << std::endl;
+            //std::cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
+            //std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
+            //std::cout << "\n" << std::endl;
         }
+        mGa1.stopWriteOutStatistics();
+        mGa2.stopWriteOutStatistics();
+        avgFile1.close();
+        avgFile2.close();
+        stdevFile1.close();
+        stdevFile2.close();
     }
 
     void printStatistics()
