@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N sc2-optimizer
+#PBS -N ...sc2-optimizer
 #PBS -l nodes=4:ppn=32
 #PBS -l walltime=8:00:00
 #PBS -q normal 
@@ -18,4 +18,4 @@ cd ..
 mkdir -p ./results
 OMP_NUM_THREADS=8 mpirun --npersocket 1 \
     -mca orte_num_sockets 4 -mca orte_num_cores 8 \
-        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 50 10 10 > test_operators.out
+        ./build/opt lists/Terran.txt lists/Zerg.txt 100 20 10 10 > terran_zerg.out
