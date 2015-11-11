@@ -987,13 +987,9 @@ private:
             return lhs.fitness.health < rhs.fitness.health;
         };
 
-        auto cmp_time = [&] (size_t const p, size_t const q)
-        {
-            return mPop[p].fitness.timeSteps < mPop[q].fitness.timeSteps;
-        };
         // compute crowding distance for damage
         std::sort(mPop.begin(), mPop.end(), cmp_damage);
-        mPop.front().distance = INF;
+        mPop[0].distance = INF;
         mPop[mPop.size()-1].distance = INF;
 
         #pragma omp parallel for schedule(static)
@@ -1003,11 +999,9 @@ private:
         }
 
 
-
-
-        // compute crowding distance for health
+        // compute crowding distance for damage
         std::sort(mPop.begin(), mPop.end(), cmp_health);
-        mPop.front().distance = INF;
+        mPop[0].distance = INF;
         mPop[mPop.size()-1].distance = INF;
 
         #pragma omp parallel for schedule(static)
@@ -1016,10 +1010,7 @@ private:
             mPop[i].distance += mPop[i+1].fitness.health - mPop[i-1].fitness.health;
         }
 
-
-
-        // diversity preservation
-        for(std::vector<size_t>& front : fronts)
+        for(auto& front : fronts)
         {
             // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
             if(newPop.size() + front.size() > mPopSize)
@@ -1037,7 +1028,6 @@ private:
                 if(newPop.size() == mPopSize) break;
                 newPop.push_back(mPop[p]);
             }
-
         }
         // replace the old population with the new one
         mPop = newPop;
@@ -1191,7 +1181,6 @@ public:
                 }
             }
 
-
             mMutationCount += newPop.size();
             size_t pos = 0, pos_old;
 
@@ -1204,7 +1193,6 @@ public:
                 pos = newPop.size() > offset ? newPop.size() - offset : 0;
                 individualPositions.push_back(pos);
                 genePositions.push_back(mGeneToMutate);
-                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], generator, mGeneToMutate, i, iterations));
                 mutationClock(generator);
                 size_t const pos_diff = pos - pos_old;
                 mMutationCount = mMutationCount > pos_diff ? mMutationCount - pos_diff : 0;
