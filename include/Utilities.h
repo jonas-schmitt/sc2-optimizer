@@ -42,7 +42,7 @@ struct Vec2D final
 
     Vec2D getNormedVec(double const len) const
     {
-        if(len < EPS)
+        /*if(len < EPS)
         {
             Vec2D result;
             if(x > 0.0)
@@ -62,7 +62,7 @@ struct Vec2D final
                 result.y = -STDLEN;
             }
             return result;
-        }
+        }*/
         double const tmp = 1.0/len;
         double const x_res = tmp * x;
         double const y_res = tmp * y;

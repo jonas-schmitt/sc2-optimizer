@@ -978,36 +978,38 @@ private:
         fronts.pop_back();
 
 
-        auto cmp_damage = [&] (Individual const& lhs, Individual const& rhs)
-        {
-            return lhs.fitness.damage < rhs.fitness.damage;
-        };
-        auto cmp_health = [&] (Individual const& lhs, Individual const& rhs)
-        {
-            return lhs.fitness.health < rhs.fitness.health;
-        };
 
-        // compute crowding distance for damage
-        std::sort(mPop.begin(), mPop.end(), cmp_damage);
-        mPop[0].distance = INF;
-        mPop[mPop.size()-1].distance = INF;
+        auto cmp_damage = [&] (size_t const p, size_t const q)
+        {
+            return mPop[p].fitness.damage < mPop[q].fitness.damage;
+        };
+        auto cmp_health = [&] (size_t const p, size_t const q)
+        {
+            return mPop[p].fitness.health < mPop[q].fitness.health;
+        };
+        vector<size_t> popPos(mPop.size());
 
         #pragma omp parallel for schedule(static)
-        for(size_t i = 1; i < mPop.size()-1; ++i)
+        for(size_t i = 0; i < popPos.size(); ++i)
         {
-            mPop[i].distance += mPop[i+1].fitness.damage - mPop[i-1].fitness.damage;
+            popPos[i] = i;
         }
 
-
         // compute crowding distance for damage
-        std::sort(mPop.begin(), mPop.end(), cmp_health);
-        mPop[0].distance = INF;
-        mPop[mPop.size()-1].distance = INF;
-
-        #pragma omp parallel for schedule(static)
-        for(size_t i = 1; i < mPop.size()-1; ++i)
+        std::sort(popPos.begin(), popPos.end(), cmp_damage);
+        mPop[popPos.front()].distance = INF;
+        mPop[popPos.back()].distance = INF;
+        for(size_t i = 1; i < popPos.size()-1; ++i)
         {
-            mPop[i].distance += mPop[i+1].fitness.health - mPop[i-1].fitness.health;
+            mPop[popPos[i]].distance += mPop[popPos[i+1]].fitness.damage - mPop[popPos[i-1]].fitness.damage;
+        }
+
+        std::sort(popPos.begin(), popPos.end(), cmp_health);
+        mPop[popPos.front()].distance = INF;
+        mPop[popPos.back()].distance = INF;
+        for(size_t i = 1; i < popPos.size()-1; ++i)
+        {
+            mPop[popPos[i]].distance += mPop[popPos[i+1]].fitness.health - mPop[popPos[i-1]].fitness.health;
         }
 
         for(auto& front : fronts)
