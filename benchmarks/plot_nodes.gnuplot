@@ -6,6 +6,7 @@ set ylabel 'Efficiency (%)'
 set xrange [4:32]
 set xtics 4,4,32   # set an increment of 2
 set yrange [0:100]
+set ytics 0,10,100   # set an increment of 2
 set nokey
 set style data line
 first(x) = ($0 > 0 ? base : base = x)
