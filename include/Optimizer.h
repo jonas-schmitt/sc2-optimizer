@@ -39,7 +39,7 @@ public:
         mSim.initBothPlayers(buildList1, buildList2);
     }
 
-    void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
+    void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants, bool saveStatistics)
     {
         static std::mt19937 generator;
 
@@ -57,26 +57,32 @@ public:
 
         migrants = std::min(migrants, mPopSize);
 
-        if(rank == 0)
-        {
-            std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
-            std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
-            std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
-            std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
-            std::cout << "Population Size: " << mPopSize*procs << std::endl;
-            std::cout << "Number of Iterations: " << iterations << std::endl;
-            std::cout << "Generations per Iteration: " << genPerIt << std::endl;
-        }
+//        if(rank == 0)
+//        {
+//            std::cout << "Performing Optimization with the following parameters" << std::endl << std::endl;
+//            std::cout << "Tournament Selection with a Tournament Size of: " << getTournamentSize() << std::endl;
+//            std::cout << "Crossover Operator: " << getCrossoverOperatorName() << std::endl;
+//            std::cout << "Mutation Operator: " << getMutationOperatorName() << std::endl;
+//            std::cout << "Population Size: " << mPopSize*procs << std::endl;
+//            std::cout << "Number of Iterations: " << iterations << std::endl;
+//            std::cout << "Generations per Iteration: " << genPerIt << std::endl;
+//        }
 
         Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
         Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
-//        std::ofstream avgFile1("avgPlayer1.dat");
-//        std::ofstream avgFile2("avgPlayer2.dat");
-//        std::ofstream stdevFile1("stdevPlayer1.dat");
-//        std::ofstream stdevFile2("stdevPlayer2.dat");
-//        mGa1.writeOutStatistics(avgFile1, stdevFile1);
-//        mGa2.writeOutStatistics(avgFile2, stdevFile2);
-
+        std::ofstream avgFile1;
+        std::ofstream avgFile2;
+        std::ofstream stdevFile1;
+        std::ofstream stdevFile2;
+        if(saveStatistics)
+        {
+            avgFile1.open("./results/avgPlayer1.dat");
+            avgFile2.open("./results/avgPlayer2.dat");
+            stdevFile1.open("./results/stdevPlayer1.dat");
+            stdevFile2.open("./results/stdevPlayer2.dat");
+            mGa1.writeOutStatistics(avgFile1, stdevFile1);
+            mGa2.writeOutStatistics(avgFile2, stdevFile2);
+        }
 
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -110,12 +116,12 @@ public:
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
             }
-            if(rank == 0)
-            {
-                std::cout << "Iteration " << i << std::endl;
-                printStatistics();
-                std::cout << std::endl;
-            }
+//            if(rank == 0)
+//            {
+//                std::cout << "Iteration " << i << std::endl;
+//                printStatistics();
+//                std::cout << std::endl;
+//            }
 
         }
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
@@ -125,30 +131,33 @@ public:
             MPI_Reduce (&evaluations, &evaluations_tmp, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
         }
 
-        if(rank == 0)
-        {
-            if(mMPI)
-            {
-                evaluations = evaluations_tmp;
-            }
+//        if(rank == 0)
+//        {
+//            if(mMPI)
+//            {
+//                evaluations = evaluations_tmp;
+//            }
 
-            std::cout << "Number of evaluations: " << evaluations << std::endl;
-            std::cout << std::endl;
-            std::cout << "Damage" << std::endl;
-            std::cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
-            std::cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
-            std::cout << std::endl;
-            std::cout << "Health" << std::endl;
-            std::cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
-            std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
-            std::cout << "\n" << std::endl;
+//            std::cout << "Number of evaluations: " << evaluations << std::endl;
+//            std::cout << std::endl;
+//            std::cout << "Damage" << std::endl;
+//            std::cout << "Overall Online Performance: " << (mStats1.first.onlinePerformance + mStats2.first.onlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
+//            std::cout << "Overall Offline Performance: " << (mStats1.first.offlinePerformance + mStats2.first.offlinePerformance)/(mStats1.first.iteration + mStats2.first.iteration)*100.0 << std::endl;
+//            std::cout << std::endl;
+//            std::cout << "Health" << std::endl;
+//            std::cout << "Overall Online Performance: " << (mStats1.second.onlinePerformance + mStats2.second.onlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
+//            std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
+//            std::cout << "\n" << std::endl;
+//        }
+        if(saveStatistics)
+        {
+            mGa1.stopWriteOutStatistics();
+            mGa2.stopWriteOutStatistics();
+            avgFile1.close();
+            avgFile2.close();
+            stdevFile1.close();
+            stdevFile2.close();
         }
-//        mGa1.stopWriteOutStatistics();
-//        mGa2.stopWriteOutStatistics();
-//        avgFile1.close();
-//        avgFile2.close();
-//        stdevFile1.close();
-//        stdevFile2.close();
     }
 
     void printStatistics()
@@ -228,7 +237,7 @@ public:
         return mGa1.getMutationOperatorName();
     }
 
-    bool determineWinner(std::ostream& stream, int const rank, int const procs)
+    bool determineWinner(std::ostream& stream, int const rank, int const procs, bool saveStatistics)
     {
         if(mMPI)
         {
@@ -298,17 +307,19 @@ public:
             stream << "Damage caused by Player 2: " << damage2*100 << " %" << std::endl;
             stream << "Remaining health of Player 2: " << (1.0-damage1)*100 << " %" << std::endl << std::endl;
 
-            for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
+            if(saveStatistics)
             {
-                for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
+                for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
                 {
-                    mSim.setPlayer1Chromosome(pop1[i].chromosome);
-                    mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                    mSim.enableTracking("./results/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt",
-                                        "./results/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt");
-                    mSim.run(true, Player::first);
-                    mSim.disableTracking();
-
+                    for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
+                    {
+                        mSim.setPlayer1Chromosome(pop1[i].chromosome);
+                        mSim.setPlayer2Chromosome(pop2[j].chromosome);
+                        mSim.enableTracking("./results/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt",
+                                            "./results/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt");
+                        mSim.run(true, Player::first);
+                        mSim.disableTracking();
+                    }
                 }
             }
         }
