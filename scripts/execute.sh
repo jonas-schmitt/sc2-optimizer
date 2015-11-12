@@ -1,5 +1,4 @@
 #!/bin/bash
-export OMP_NUM_THREADS=4
-export OMP_SCHEDULE="dynamic,1"
-./build/opt lists/TerranTest.txt lists/ProtossTest.txt 20 10 10 5
-sh ./scripts/visualize.sh
+export OMP_NUM_THREADS=8
+./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 20 10 10 
+./scripts/visualize.sh

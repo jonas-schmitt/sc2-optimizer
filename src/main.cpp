@@ -38,16 +38,33 @@ struct OptimizationParameter
 template<typename Race1, typename Race2>
 void runOptimization(OptimizationParameter const& p)
 {
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    OptimizerInterface<Race1,Race2> opt(p.minPos, p.maxPos, p.filePath1, p.filePath2, p.popSize, *p.buildOrder1, *p.buildOrder2, p.nGoals);
-    opt.optimize(p.tournamentSize, p.crossover, p.mutation, p.iterations, p.generations, p.rank, p.procs, p.migrants);
 
-    end = std::chrono::system_clock::now();
+//    double runtime = 0.0;
+//    for(int i = 0; i < 5; ++i)
+//    {
+            std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
+        OptimizerInterface<Race1,Race2> opt(p.minPos, p.maxPos, p.filePath1, p.filePath2, p.popSize, *p.buildOrder1, *p.buildOrder2, p.nGoals);
+        opt.optimize(p.tournamentSize, p.crossover, p.mutation, p.iterations, p.generations, p.rank, p.procs, p.migrants);
+
+        end = std::chrono::system_clock::now();
+//        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+//        runtime += elapsed.count()/5.0;
+//    }
     auto elapsed_min = std::chrono::duration_cast<std::chrono::minutes>(end - start);
     auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() << " sec" << std::endl;
+    if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() - elapsed_min.count()*60 << " sec" << std::endl;
     opt.determineWinner(std::cout, p.rank, p.procs);
+//    if(p.rank == 0)
+//    {
+//        #pragma omp parallel
+//        {
+//            #pragma omp single
+//            {
+//                std::cout << omp_get_num_threads() << "\t" << runtime << std::endl;
+//            }
+//        }
+//    }
 }
 
 int main(int argc, char *argv[])

@@ -70,6 +70,13 @@ public:
 
         Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
         Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
+//        std::ofstream avgFile1("avgPlayer1.dat");
+//        std::ofstream avgFile2("avgPlayer2.dat");
+//        std::ofstream stdevFile1("stdevPlayer1.dat");
+//        std::ofstream stdevFile2("stdevPlayer2.dat");
+//        mGa1.writeOutStatistics(avgFile1, stdevFile1);
+//        mGa2.writeOutStatistics(avgFile2, stdevFile2);
+
 
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -78,7 +85,7 @@ public:
             {
                 std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << std::endl;
                 //std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
-                //printf("%c[2K", 27);
+                printf("%c[2K", 27);
             }*/
 
             if(mMPI)
@@ -90,8 +97,8 @@ public:
             std::vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
             std::vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
-            mGa1.optimize(optima2, genPerIt, generator);
-            mGa2.optimize(optima1, genPerIt, generator);
+            mGa1.optimize(optima2, genPerIt, generator, rank, procs);
+            mGa2.optimize(optima1, genPerIt, generator, rank, procs);
 
             mStats1 = mGa1.getStatistics();
             mStats2 = mGa2.getStatistics();
@@ -136,6 +143,12 @@ public:
             std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
             std::cout << "\n" << std::endl;
         }
+//        mGa1.stopWriteOutStatistics();
+//        mGa2.stopWriteOutStatistics();
+//        avgFile1.close();
+//        avgFile2.close();
+//        stdevFile1.close();
+//        stdevFile2.close();
     }
 
     void printStatistics()

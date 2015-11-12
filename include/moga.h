@@ -83,6 +83,10 @@ private:
 
     // Crossover methods
 
+    size_t mGeneration = 0;
+    std::ofstream* mAvgFile = nullptr;
+    std::ofstream* mStdevFile = nullptr;
+
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
     {
@@ -140,6 +144,7 @@ private:
         double const tmp2 = 1.0 / (2.0 * (1.0 - u));
 
         double const a = contraction ? std::pow(tmp1, exp) : std::pow(tmp2, exp);
+        double const beta_old = a;
 
         for(size_t i = 0; i < NGenes; ++i)
         {
@@ -309,18 +314,16 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+                    double n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+                    double const exp = 1.0 / (n_c12 + 1.0);
+                    double const a = std::pow(tmp2, exp);
+
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-
-
-                        double const exp = 1.0 / (n_c12 + 1.0);
-                        double const a = std::pow(tmp2, exp);
-
 
                         double const avg = 0.5 * (x1 + x2);
                         double const shift = a * 0.5 * diff;
@@ -334,24 +337,24 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+                    double const log_beta = std::log(beta);
+                    double constexpr alpha_inv = 1.0/alpha;
+                    double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
+
+                    double const exp1 = 1.0 / (n_c1 + 1.0);
+                    double const a1 = std::pow(tmp2, exp1);
+
+                    double const exp2 = 1.0 / (n_c2 + 1.0);
+                    double const a2 = std::pow(tmp2, exp2);
+
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const log_beta = std::log(beta);
-                        double constexpr alpha_inv = 1.0/alpha;
-                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
-
-                        double const exp1 = 1.0 / (n_c1 + 1.0);
-                        double const a1 = std::pow(tmp2, exp1);
-
-                        double const exp2 = 1.0 / (n_c2 + 1.0);
-                        double const a2 = std::pow(tmp2, exp2);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y1 = avg - a1 * 0.5 * diff;
@@ -364,16 +367,16 @@ private:
                 else
                 {
                     child1.alternative = child1.chromosome;
+                    double const beta = beta_old;
+                    double n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+                    double const exp = 1.0 / (n_c1 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-
-                        double const exp = 1.0 / (n_c1 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
 
@@ -388,25 +391,25 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+
+                    double const log_beta = std::log(beta);
+                    double constexpr alpha_inv = 1.0/alpha;
+
+                    double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
+
+                    double const exp1 = 1.0 / (n_c1 + 1.0);
+                    double const a1 = std::pow(tmp2, exp1);
+
+                    double const exp2 = 1.0 / (n_c2 + 1.0);
+                    double const a2 = std::pow(tmp2, exp2);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const log_beta = std::log(beta);
-                        double constexpr alpha_inv = 1.0/alpha;
-
-                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha_inv*(beta - 1))));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * log_beta/std::log(1 + alpha*(beta - 1))));
-
-                        double const exp1 = 1.0 / (n_c1 + 1.0);
-                        double const a1 = std::pow(tmp2, exp1);
-
-                        double const exp2 = 1.0 / (n_c2 + 1.0);
-                        double const a2 = std::pow(tmp2, exp2);
 
 
                         double const avg = 0.5 * (x1 + x2);
@@ -421,17 +424,16 @@ private:
                 {
                     child1.alternative = child1.chromosome;
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+                    double const n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                    double const exp = 1.0 / (n_c12 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double const n_c12 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-
-                        double const exp = 1.0 / (n_c12 + 1.0);
-                        double const a = std::pow(tmp2, exp);
-
 
                         double const avg = 0.5 * (x1 + x2);
                         double const shift = a * 0.5 * diff;
@@ -444,17 +446,17 @@ private:
                 }
                 else
                 {
+                    double const beta = beta_old;
+                    double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                    double const exp = 1.0 / (n_c1 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     child1.alternative = child1.chromosome;
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-                        double const n_c1 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-
-                        double const exp = 1.0 / (n_c1 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y1 = avg - a * 0.5 * diff;
@@ -467,17 +469,17 @@ private:
                 if(better2)
                 {
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
+
+                    double const exp = 1.0 / (n_c2 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + alpha*(beta - 1))));
-
-                        double const exp = 1.0 / (n_c2 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y2 = avg + a * 0.5* diff;
@@ -487,17 +489,17 @@ private:
                 else if(worse2)
                 {
                     child2.alternative = child2.chromosome;
+                    double const beta = beta_old;
+
+                    double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
+
+                    double const exp = 1.0 / (n_c2 + 1.0);
+                    double const a = std::pow(tmp2, exp);
                     for(size_t i = 0; i < NGenes; ++i)
                     {
                         double const x1 = parent1.chromosome[i];
                         double const x2 = parent2.chromosome[i];
                         double const diff = x2 - x1;
-                        double const beta = std::abs((child2.chromosome[i] - child1.chromosome[i])/(diff));
-
-                        double const n_c2 = std::max(0.0, std::min(50.0, -1 + (n_c + 1) * std::log(beta)/std::log(1 + (beta - 1)/alpha)));
-
-                        double const exp = 1.0 / (n_c2 + 1.0);
-                        double const a = std::pow(tmp2, exp);
 
                         double const avg = 0.5 * (x1 + x2);
                         double const y2 = avg + 0.5 * a * diff;
@@ -827,7 +829,7 @@ private:
     {
 
 
-        #pragma omp parallel for schedule(dynamic,1)
+        #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < pop.size(); ++i)
         {
             if(!pop[i].evaluated)
@@ -916,6 +918,7 @@ private:
         std::vector<std::vector<size_t>> fronts(1);
 
         // determine the domination count and set of dominated individuals for all members of the population
+        #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < mPop.size(); ++i)
         {
             mPop[i].dominationCount = 0;
@@ -936,7 +939,10 @@ private:
             // if the individual is not dominated by any other individuals, include it in the first nondominated front
             if(mPop[i].dominationCount == 0)
             {
-                fronts[0].push_back(i);
+                #pragma omp critical
+                {
+                    fronts[0].push_back(i);
+                }
                 mPop[i].rank = 1;
             }
         }
@@ -972,6 +978,7 @@ private:
         fronts.pop_back();
 
 
+
         auto cmp_damage = [&] (size_t const p, size_t const q)
         {
             return mPop[p].fitness.damage < mPop[q].fitness.damage;
@@ -980,62 +987,33 @@ private:
         {
             return mPop[p].fitness.health < mPop[q].fitness.health;
         };
+        vector<size_t> popPos(mPop.size());
 
-        auto cmp_time = [&] (size_t const p, size_t const q)
+        #pragma omp parallel for schedule(static)
+        for(size_t i = 0; i < popPos.size(); ++i)
         {
-            return mPop[p].fitness.timeSteps < mPop[q].fitness.timeSteps;
-        };
+            popPos[i] = i;
+        }
 
-
-        // diversity preservation
-        for(std::vector<size_t>& front : fronts)
+        // compute crowding distance for damage
+        std::sort(popPos.begin(), popPos.end(), cmp_damage);
+        mPop[popPos.front()].distance = INF;
+        mPop[popPos.back()].distance = INF;
+        for(size_t i = 1; i < popPos.size()-1; ++i)
         {
+            mPop[popPos[i]].distance += mPop[popPos[i+1]].fitness.damage - mPop[popPos[i-1]].fitness.damage;
+        }
 
-            // compute crowding distance for damage
-            std::sort(front.begin(), front.end(), cmp_damage);
-            mPop[front.front()].distance = INF;
-            mPop[front.back()].distance = INF;
-            if(front.size() > 2)
-            {
-                for(size_t i = 1; i < front.size()-2; ++i)
-                {
-                    mPop[front[i]].distance += mPop[front[i+1]].fitness.damage - mPop[front[i-1]].fitness.damage;
-                }
-            }
+        std::sort(popPos.begin(), popPos.end(), cmp_health);
+        mPop[popPos.front()].distance = INF;
+        mPop[popPos.back()].distance = INF;
+        for(size_t i = 1; i < popPos.size()-1; ++i)
+        {
+            mPop[popPos[i]].distance += mPop[popPos[i+1]].fitness.health - mPop[popPos[i-1]].fitness.health;
+        }
 
-
-
-            // compute crowding distance for health
-            std::sort(front.begin(), front.end(), cmp_health);
-            mPop[front.front()].distance = INF;
-            mPop[front.back()].distance = INF;
-            if(front.size() > 2)
-            {
-                for(size_t i = 1; i < front.size()-2; ++i)
-                {
-                    if(mPop[front[i]].distance < INF)
-                    {
-                        mPop[front[i]].distance += mPop[front[i+1]].fitness.health - mPop[front[i-1]].fitness.health;
-                    }
-                }
-            }
-
-            // compute crowding distance for health
-            std::sort(front.begin(), front.end(), cmp_time);
-            mPop[front.front()].distance = INF;
-            mPop[front.back()].distance = INF;
-            if(front.size() > 2)
-            {
-                for(size_t i = 1; i < front.size()-2; ++i)
-                {
-                    if(mPop[front[i]].distance < INF)
-                    {
-                        mPop[front[i]].distance += mPop[front[i+1]].fitness.timeSteps - mPop[front[i-1]].fitness.timeSteps;
-                    }
-                }
-            }
-
-
+        for(auto& front : fronts)
+        {
             // if the front does not fit completely in the population, sort the individuals according to the crowded comparison operator
             if(newPop.size() + front.size() > mPopSize)
             {
@@ -1052,7 +1030,6 @@ private:
                 if(newPop.size() == mPopSize) break;
                 newPop.push_back(mPop[p]);
             }
-
         }
         // replace the old population with the new one
         mPop = newPop;
@@ -1154,7 +1131,7 @@ public:
 
     }
 
-    void optimize(std::vector<Chromosome> const& goals, size_t const iterations, std::mt19937& generator)
+    void optimize(std::vector<Chromosome> const& goals, size_t const iterations, std::mt19937& generator, int rank, int procs)
     {
         mMutationCount = 0;
         mIndividualToMutate = 0;
@@ -1206,19 +1183,30 @@ public:
                 }
             }
 
-
             mMutationCount += newPop.size();
             size_t pos = 0, pos_old;
+
+            std::vector<size_t> individualPositions;
+            std::vector<size_t> genePositions;
             while(mIndividualToMutate < mMutationCount)
             {
                 pos_old = pos;
                 size_t const offset = mMutationCount - mIndividualToMutate;
                 pos = newPop.size() > offset ? newPop.size() - offset : 0;
-                mutationFuncs[mMutationChoice](MutationParameter(newPop[pos], generator, mGeneToMutate, i, iterations));
+                individualPositions.push_back(pos);
+                genePositions.push_back(mGeneToMutate);
                 mutationClock(generator);
                 size_t const pos_diff = pos - pos_old;
                 mMutationCount = mMutationCount > pos_diff ? mMutationCount - pos_diff : 0;
             }
+            size_t limit = std::min(individualPositions.size(), genePositions.size());
+
+            #pragma omp parallel for schedule(static)
+            for(size_t j = 0; j < limit; ++j)
+            {
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[individualPositions[j]], generator, genePositions[j], i, iterations));
+            }
+
             evaluate(newPop);
             mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
@@ -1239,6 +1227,20 @@ public:
                 v[i] = mPop[i].fitness.health;
             }
             computeStatistics(mStats.second, v);
+
+            if(mAvgFile != nullptr && mStdevFile != nullptr)
+            {
+                if(procs > 1)
+                {
+                    computeGlobalStatistics(mStats.first, rank, procs);
+                    computeGlobalStatistics(mStats.second, rank, procs);
+                }
+                if(rank == 0)
+                {
+                    *mAvgFile << mStats.first.iteration << "\t" << mStats.first.mean << "\t" << mStats.second.mean << std::endl;
+                    *mStdevFile << mStats.first.iteration << "\t" << mStats.first.stdev << "\t" << mStats.second.stdev << std::endl;
+                }
+            }
         }
 
 
@@ -1396,6 +1398,40 @@ public:
     {
         return mTournamentSize;
     }
+
+    void writeOutStatistics(std::ofstream& avgFile , std::ofstream& stdevFile)
+    {
+        mAvgFile = &avgFile;
+        mStdevFile = &stdevFile;
+    }
+
+    void stopWriteOutStatistics()
+    {
+        mAvgFile = nullptr;
+        mStdevFile = nullptr;
+    }
+
+    void computeGlobalStatistics(Statistics& stats, int const rank, int const procs)
+    {
+        Statistics tmp;
+        MPI_Reduce (&stats.mean, &tmp.mean, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.max, &tmp.max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.sum, &tmp.sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.stdev, &tmp.stdev, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.onlinePerformance, &tmp.onlinePerformance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce (&stats.offlinePerformance, &tmp.offlinePerformance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+        if(rank == 0)
+        {
+            stats.mean = tmp.mean / procs;
+            stats.max = tmp.max;
+            stats.sum = tmp.sum;
+            stats.stdev = tmp.stdev / procs;
+            stats.onlinePerformance = tmp.onlinePerformance / procs;
+            stats.offlinePerformance = tmp.offlinePerformance / procs;
+        }
+    }
+
 
 
 

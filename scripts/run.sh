@@ -6,4 +6,4 @@ cmake . -DCMAKE_CXX_COMPILER=g++
 make clean
 make -j4
 cd ..
-nohup nice -n 19 sh ./scripts/execute.sh > res.out 2> test.err < /dev/null &
+./scripts/execute.sh
