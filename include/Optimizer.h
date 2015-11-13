@@ -317,9 +317,9 @@ public:
 
             if(saveStatistics)
             {
-                for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
+                for(size_t i = 0; i < std::min(static_cast<size_t>(5), minSize); ++i)
                 {
-                    for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
+                    for(size_t j = 0; j < std::min(static_cast<size_t>(5), minSize); ++j)
                     {
                         mSim.setPlayer1Chromosome(pop1[i].chromosome);
                         mSim.setPlayer2Chromosome(pop2[j].chromosome);

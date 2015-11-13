@@ -255,24 +255,13 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         mFile1.open(mTrackingFileName1);
         for(auto const unitPtr : pl1.unitList)
         {
-            mFile1 << unitPtr->getName() << "\t\t\t";
+            mFile1 << unitPtr->getName() << "\t\t";
         }
         mFile1 << std::endl;
         mFile2.open(mTrackingFileName2);
         for(auto const unitPtr : pl2.unitList)
         {
-            mFile2 << unitPtr->getName() << "\t\t\t";
-        }
-        mFile2 << std::endl;
-
-        for(auto const unitPtr : pl1.unitList)
-        {
-            mFile1 << unitPtr->getSize() << "\t\t\t";
-        }
-        mFile1 << std::endl;
-        for(auto const unitPtr : pl2.unitList)
-        {
-            mFile2 << unitPtr->getSize() << "\t\t\t";
+            mFile2 << unitPtr->getName() << "\t\t";
         }
         mFile2 << std::endl;
 
@@ -289,17 +278,17 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking && i < 10000)
+        if(mTracking)
         {
             for(auto const unitPtr : pl1.unitList)
             {
                 if(unitPtr->isDead())
                 {
-                    mFile1 << "-" << "\t\t\t";
+                    mFile1 << -100 << "\t" << -100 << "\t";
                 }
                 else
                 {
-                    mFile1 << unitPtr->getX() << "," << unitPtr->getY() << "," << (unitPtr->getHealth()+unitPtr->getShield())/(unitPtr->getMaxHealth() + unitPtr->getMaxShield()) << "\t\t\t";
+                    mFile1 << unitPtr->getX() << "\t" << unitPtr->getY() << "\t";
                 }
             }
             mFile1 << std::endl;
@@ -308,11 +297,11 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             {
                 if(unitPtr->isDead())
                 {
-                    mFile2 << "-" << "\t\t\t";
+                    mFile2 << -100 << "\t" << -100 << "\t";
                 }
                 else
                 {
-                    mFile2 << unitPtr->getX() << "," << unitPtr->getY() << "," << (unitPtr->getHealth()+unitPtr->getShield())/(unitPtr->getMaxHealth() + unitPtr->getMaxShield()) << "\t\t\t";
+                    mFile2 << unitPtr->getX() << "\t" << unitPtr->getY() << "\t";
                 }
             }
             mFile2 << std::endl;
