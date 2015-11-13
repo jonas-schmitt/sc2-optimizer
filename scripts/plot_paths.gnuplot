@@ -3,17 +3,12 @@ set output 'paths.svg'
 set encoding iso_8859_1
 set xrange [0:100]
 set yrange [0:100]
+unset xtics
+unset ytics
 set nokey
 set style data dots 
-plot "pl1_paths_0_0.txt" u 1:2 lc 3, \
-"pl1_paths_0_0.txt" u 3:4 lc 3, \
-"pl1_paths_0_0.txt" u 5:6 lc 3, \
-"pl1_paths_0_0.txt" u 7:8 lc 3, \
-"pl1_paths_0_0.txt" u 9:10 lc 3, \
-"pl1_paths_0_0.txt" u 11:12 lc 3, \
-"pl2_paths_0_0.txt" u 1:2 lc 1, \
-"pl2_paths_0_0.txt" u 3:4 lc 1, \
-"pl2_paths_0_0.txt" u 5:6 lc 1, \
-"pl2_paths_0_0.txt" u 7:8 lc 1
-"pl2_paths_0_0.txt" u 9:10 lc 1, \
-"pl2_paths_0_0.txt" u 11:12 lc 1
+set multiplot
+call "./scripts/col_counter.gnuplot" "./results/pl1_paths_0_0.txt"
+plot for [i=1:col_count:2] "./results/pl1_paths_0_0.txt" u i:i+1 lc 3 
+call "./scripts/col_counter.gnuplot" "./results/pl2_paths_0_0.txt"
+plot for [i=1:col_count:2] "./results/pl2_paths_0_0.txt" u i:i+1 lc 1 
