@@ -8,4 +8,4 @@ inkscape --export-area-drawing --export-png=avg_damage.png --export-dpi=300 avg_
 inkscape --export-area-drawing --export-png=avg_health.png --export-dpi=300 avg_health.svg
 inkscape --export-area-drawing --export-png=stdev_damage.png --export-dpi=300 stdev_damage.svg
 inkscape --export-area-drawing --export-png=stdev_health.png --export-dpi=300 stdev_health.svg
-inkscape --export-area-drawing --export-png=paths.png --export-dpi=300 paths.svg
+#inkscape --export-area-drawing --export-png=paths.png --export-dpi=300 paths.svg
