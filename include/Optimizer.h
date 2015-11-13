@@ -301,11 +301,19 @@ public:
 
             double const damage1 = (res.damage/(minSize * minSize));
             double const damage2 = (1.0-(res.health/(minSize * minSize)));
+            stream << "Average of Player 1: " << "\n";
+            stream << "Damage: " << mStats1.first.mean << "\n";
+            stream << "Health: " << mStats1.second.mean << "\n";
+            stream << "Average of Player 2: " << "\n";
+            stream << "Damage: " << mStats2.first.mean << "\n";
+            stream << "Health: " << mStats2.second.mean << "\n";
             stream << "Comparison of the final populations" << std::endl;
             stream << "Damage caused by Player 1: " << damage1*100 << " %" << std::endl;
             stream << "Remaining health for Player 1: " << (1.0-damage2)*100 << " %" << std::endl;
             stream << "Damage caused by Player 2: " << damage2*100 << " %" << std::endl;
             stream << "Remaining health of Player 2: " << (1.0-damage1)*100 << " %" << std::endl << std::endl;
+
+
 
             if(saveStatistics)
             {

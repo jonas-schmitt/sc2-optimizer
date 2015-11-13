@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
     p.iterations = atoi(argv[4]);
     p.generations = atoi(argv[5]);
     p.nGoals = std::min(p.popSize, static_cast<size_t>(atoi(argv[6])));
-    p.migrants = std::max(static_cast<size_t>(10), p.popSize / 10);
+    p.migrants = std::max(static_cast<size_t>(10), 2*p.popSize / p.procs);
     size_t constexpr minFieldSize = 100;
     size_t const fieldSize = std::max(minFieldSize, 10 * std::max(buildOrder1.size(), buildOrder2.size()));
     p.minPos = Vec2D(0.0);
