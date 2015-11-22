@@ -23,23 +23,25 @@ private:
     double mOnlinePerformance = 0.0;
     size_t mNGoals;
     bool mMPI;
+    std::string mDirPath;
 
 
     MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
 
 
 public:
-    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals)
+    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals, std::string const& dirPath)
         : mPopSize(popSize),
           mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
           mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
           mNGoals(nGoals),
-          mSim(minPos, maxPos, filePath1, filePath2)
+          mSim(minPos, maxPos, filePath1, filePath2),
+          mDirPath(dirPath)
     {
         mSim.initBothPlayers(buildList1, buildList2);
     }
 
-    void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants)
+    void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants, bool saveStatistics)
     {
         static std::mt19937 generator;
 
@@ -70,24 +72,22 @@ public:
 
         Chromosome buf1(procs*migrants*mGa1.getNumberOfGenes());
         Chromosome buf2(procs*migrants*mGa2.getNumberOfGenes());
-//        std::ofstream avgFile1("avgPlayer1.dat");
-//        std::ofstream avgFile2("avgPlayer2.dat");
-//        std::ofstream stdevFile1("stdevPlayer1.dat");
-//        std::ofstream stdevFile2("stdevPlayer2.dat");
-//        mGa1.writeOutStatistics(avgFile1, stdevFile1);
-//        mGa2.writeOutStatistics(avgFile2, stdevFile2);
-
+        std::ofstream avgFile1;
+        std::ofstream avgFile2;
+        std::ofstream stdevFile1;
+        std::ofstream stdevFile2;
+        if(saveStatistics)
+        {
+            avgFile1.open(mDirPath+"/avgPlayer1.dat");
+            avgFile2.open(mDirPath+"/avgPlayer2.dat");
+            stdevFile1.open(mDirPath+"/stdevPlayer1.dat");
+            stdevFile2.open(mDirPath+"/stdevPlayer2.dat");
+            mGa1.writeOutStatistics(avgFile1, stdevFile1);
+            mGa2.writeOutStatistics(avgFile2, stdevFile2);
+        }
 
         for(size_t i = 0; i < iterations; ++i)
         {
-            /*
-            if(rank == 0)
-            {
-                std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << std::endl;
-                //std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << "%" << "\r" << std::flush;
-                printf("%c[2K", 27);
-            }*/
-
             if(mMPI)
             {
                 migrate(buf1, migrants, mGa1, rank, procs);
@@ -110,12 +110,12 @@ public:
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
             }
-            if(rank == 0)
-            {
-                std::cout << "Iteration " << i << std::endl;
-                printStatistics();
-                std::cout << std::endl;
-            }
+//            if(rank == 0)
+//            {
+//                std::cout << "Iteration " << i << std::endl;
+//                printStatistics();
+//                std::cout << std::endl;
+//            }
 
         }
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
@@ -143,12 +143,15 @@ public:
             std::cout << "Overall Offline Performance: " << (mStats1.second.offlinePerformance + mStats2.second.offlinePerformance)/(mStats1.second.iteration + mStats2.second.iteration)*100.0 << std::endl;
             std::cout << "\n" << std::endl;
         }
-//        mGa1.stopWriteOutStatistics();
-//        mGa2.stopWriteOutStatistics();
-//        avgFile1.close();
-//        avgFile2.close();
-//        stdevFile1.close();
-//        stdevFile2.close();
+        if(saveStatistics)
+        {
+            mGa1.stopWriteOutStatistics();
+            mGa2.stopWriteOutStatistics();
+            avgFile1.close();
+            avgFile2.close();
+            stdevFile1.close();
+            stdevFile2.close();
+        }
     }
 
     void printStatistics()
@@ -194,14 +197,11 @@ public:
         return mGa1.getNumberOfMutationOperators();
     }
 
-
-
     void setTournamentSize(size_t const value)
     {
         mGa1.setTournamentSize(value);
         mGa2.setTournamentSize(value);
     }
-
 
     void setCrossover(size_t const value)
     {
@@ -228,7 +228,7 @@ public:
         return mGa1.getMutationOperatorName();
     }
 
-    bool determineWinner(std::ostream& stream, int const rank, int const procs)
+    bool determineWinner(std::ostream& stream, int const rank, int const procs, bool saveStatistics)
     {
         if(mMPI)
         {
@@ -292,23 +292,33 @@ public:
 
             double const damage1 = (res.damage/(minSize * minSize));
             double const damage2 = (1.0-(res.health/(minSize * minSize)));
+            stream << "Average of Player 1: " << "\n";
+            stream << "Damage: " << mStats1.first.mean << "\n";
+            stream << "Health: " << mStats1.second.mean << "\n";
+            stream << "Average of Player 2: " << "\n";
+            stream << "Damage: " << mStats2.first.mean << "\n";
+            stream << "Health: " << mStats2.second.mean << "\n";
             stream << "Comparison of the final populations" << std::endl;
             stream << "Damage caused by Player 1: " << damage1*100 << " %" << std::endl;
             stream << "Remaining health for Player 1: " << (1.0-damage2)*100 << " %" << std::endl;
             stream << "Damage caused by Player 2: " << damage2*100 << " %" << std::endl;
             stream << "Remaining health of Player 2: " << (1.0-damage1)*100 << " %" << std::endl << std::endl;
 
-            for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
-            {
-                for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
-                {
-                    mSim.setPlayer1Chromosome(pop1[i].chromosome);
-                    mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                    mSim.enableTracking("./results/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt",
-                                        "./results/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".txt");
-                    mSim.run(true, Player::first);
-                    mSim.disableTracking();
 
+
+            if(saveStatistics)
+            {
+                for(size_t i = 0; i < std::min(static_cast<size_t>(5), minSize); ++i)
+                {
+                    for(size_t j = 0; j < std::min(static_cast<size_t>(5), minSize); ++j)
+                    {
+                        mSim.setPlayer1Chromosome(pop1[i].chromosome);
+                        mSim.setPlayer2Chromosome(pop2[j].chromosome);
+                        mSim.enableTracking(mDirPath+"/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat",
+                                            mDirPath+"/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat");
+                        mSim.run(true, Player::first);
+                        mSim.disableTracking();
+                    }
                 }
             }
         }

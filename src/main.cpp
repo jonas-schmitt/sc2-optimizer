@@ -9,6 +9,8 @@
 #include <fstream>
 #include <thread>
 #include <omp.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "../include/TemplateInit.h"
 #include "../include/OptimizerInterface.h"
@@ -21,6 +23,7 @@ struct OptimizationParameter
     Vec2D maxPos;
     std::string filePath1;
     std::string filePath2;
+    std::string dirPath;
     size_t popSize;
     std::vector<std::string> const* buildOrder1;
     std::vector<std::string> const* buildOrder2;
@@ -33,38 +36,23 @@ struct OptimizationParameter
     int rank;
     int procs;
     int migrants;
+    bool saveStatistics = false;
 };
 
 template<typename Race1, typename Race2>
 void runOptimization(OptimizationParameter const& p)
 {
-
-//    double runtime = 0.0;
-//    for(int i = 0; i < 5; ++i)
-//    {
-            std::chrono::time_point<std::chrono::system_clock> start, end;
-        start = std::chrono::system_clock::now();
-        OptimizerInterface<Race1,Race2> opt(p.minPos, p.maxPos, p.filePath1, p.filePath2, p.popSize, *p.buildOrder1, *p.buildOrder2, p.nGoals);
-        opt.optimize(p.tournamentSize, p.crossover, p.mutation, p.iterations, p.generations, p.rank, p.procs, p.migrants);
-
-        end = std::chrono::system_clock::now();
-//        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-//        runtime += elapsed.count()/5.0;
-//    }
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+    OptimizerInterface<Race1,Race2> opt(p.minPos, p.maxPos, p.filePath1, p.filePath2, p.popSize, *p.buildOrder1, *p.buildOrder2, p.nGoals, p.dirPath);
+    opt.optimize(p.tournamentSize, p.crossover, p.mutation, p.iterations, p.generations, p.rank, p.procs, p.migrants, p.saveStatistics);
+    std::ofstream resFile(p.dirPath+"/res.dat");
+    opt.determineWinner(resFile, p.rank, p.procs, p.saveStatistics);
+    end = std::chrono::system_clock::now();
     auto elapsed_min = std::chrono::duration_cast<std::chrono::minutes>(end - start);
     auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     if(p.rank == 0) std::cout << "Elapsed time: " << elapsed_min.count() << " min " << elapsed_sec.count() - elapsed_min.count()*60 << " sec" << std::endl;
-    opt.determineWinner(std::cout, p.rank, p.procs);
-//    if(p.rank == 0)
-//    {
-//        #pragma omp parallel
-//        {
-//            #pragma omp single
-//            {
-//                std::cout << omp_get_num_threads() << "\t" << runtime << std::endl;
-//            }
-//        }
-//    }
+    resFile.close();
 }
 
 int main(int argc, char *argv[])
@@ -76,13 +64,24 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &p.rank);
     MPI_Comm_size(MPI_COMM_WORLD, &p.procs);
 
-    if(argc < 7)
+    if(argc < 7 || argc > 9)
     {
-        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals" << std::endl;
+        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
         MPI_Finalize();
         return -1;
     }
 
+    if(argc >= 8)
+    {
+        std::string arg(argv[7]);
+        if(arg != "-stats")
+        {
+            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
+            MPI_Finalize();
+            return -1;
+        }
+        p.saveStatistics = true;
+    }
     Terran terran;
     Zerg zerg;
     Protoss protoss;
@@ -118,7 +117,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(p.rank == 0) std::cout << "Error: Couldn't determine first Race" << std::endl;
+        if(p.rank == 0) std::cerr << "Error: Couldn't determine first Race" << std::endl;
+        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
         MPI_Finalize();
         return -1;
     }
@@ -138,7 +138,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(p.rank == 0) std::cout << "Error: Couldn't determine first Race" << std::endl;
+        if(p.rank == 0) std::cerr << "Error: Couldn't determine second Race" << std::endl;
+        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
         MPI_Finalize();
         return -1;
     }
@@ -152,7 +153,30 @@ int main(int argc, char *argv[])
     p.iterations = atoi(argv[4]);
     p.generations = atoi(argv[5]);
     p.nGoals = std::min(p.popSize, static_cast<size_t>(atoi(argv[6])));
-    p.migrants = std::max(static_cast<size_t>(10), p.popSize / 10);
+    p.migrants = std::max(static_cast<size_t>(10), 2*p.popSize / p.procs);
+    p.dirPath = "./";
+    if(argc == 9)
+    {
+        struct stat info;
+        if(stat(argv[8], &info ) != 0)
+        {
+            if(p.rank == 0) std::cerr << "Error: Invalid directory\n";
+            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
+            MPI_Finalize();
+            return -1;
+        }
+        else if(info.st_mode & S_IFDIR)
+        {
+            p.dirPath = std::string(argv[8]);
+        }
+        else
+        {
+            if(p.rank == 0) std::cerr << "Error: Invalid directory\n";
+            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
+            MPI_Finalize();
+            return -1;
+        }
+    }
     size_t constexpr minFieldSize = 100;
     size_t const fieldSize = std::max(minFieldSize, 10 * std::max(buildOrder1.size(), buildOrder2.size()));
     p.minPos = Vec2D(0.0);
