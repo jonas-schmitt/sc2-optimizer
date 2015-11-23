@@ -6,37 +6,7 @@
 #include "../include/Terran.h"
 
 
-
-//TerranUnit::TerranUnit()
-//    : BaseUnit()
-//{}
-
-//TerranUnit::TerranUnit(string name)
-//    : BaseUnit(name)
-//{}
-
-//TerranUnit::TerranUnit(const UnitStats& baseStats)
-//    : BaseUnit(baseStats)
-//{}
-
-//TerranUnit::TerranUnit(const UnitStats& baseStats, Vec2D min, Vec2D max)
-//    : BaseUnit(baseStats,min,max)
-//{}
-
-//TerranUnit::TerranUnit(TerranUnit const& terranUnit)
-// : BaseUnit(terranUnit)
-//{}
-
-//TerranUnit::TerranUnit(BaseUnit const& baseUnit)
-//    : BaseUnit(baseUnit)
-//{}
-
-//void TerranUnit::initUpgrades (vector<int> const &flags)
-//{
-//    BaseUnit::initUpgrades (flags);
-//}
-
-void TerranBioUnit::initUpgrades (vector<int> const& flags)
+void TerranBioUnit::initUpgrades (std::vector<int> const& flags)
 {
     TerranUnit::initUpgrades(flags);
     if(flags.size() < 3)
@@ -49,7 +19,7 @@ void TerranBioUnit::initUpgrades (vector<int> const& flags)
     }
 }
 
-void Marine::initUpgrades(vector<int> const &flags)
+void Marine::initUpgrades(std::vector<int> const &flags)
 {
     TerranBioUnit::initUpgrades (flags);
     if(flags.size () < 4)
@@ -89,7 +59,7 @@ void Marauder::concussiveShells ()
     }
 }
 
-void Marauder::initUpgrades(const vector<int> &flags)
+void Marauder::initUpgrades(const std::vector<int> &flags)
 {
     TerranBioUnit::initUpgrades (flags);
     if(flags.size () < 4)
@@ -138,7 +108,7 @@ void Reaper::subHealth(double const value)
     TerranUnit::subHealth(value);
 }
 
-void Hellion::initUpgrades (vector<int> const& flags)
+void Hellion::initUpgrades (std::vector<int> const& flags)
 {
     TerranUnit::initUpgrades(flags);
     if(flags.size() < 3)
@@ -157,7 +127,7 @@ void Hellion::initUpgrades (vector<int> const& flags)
     }
 }
 
-void Hellbat::initUpgrades (vector<int> const& flags)
+void Hellbat::initUpgrades (std::vector<int> const& flags)
 {
     TerranUnit::initUpgrades(flags);
     if(flags.size() < 3)

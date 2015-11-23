@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -N ...sc2-optimizer
-#PBS -l nodes=5:ppn=32
-#PBS -l walltime=24:00:00
-#PBS -q normal 
+#PBS -l nodes=2:ppn=32
+#PBS -l walltime=1:00:00
+#PBS -q express
 #PBS -M jonas.schmitt@fau.de
 #PBS -o $PBS_JOBNAME.out -e $PBS_JOBNAME.err
 . /etc/profile.d/modules.sh
@@ -19,4 +19,4 @@ cd ..
 mkdir -p ./results
 OMP_NUM_THREADS=8 mpirun --npersocket 1 \
     -mca orte_num_sockets 4 -mca orte_num_cores 8 \
-        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 250 20 10 10 -stats ./results > debug.out
+        ./build/opt lists/TerranTest.txt lists/ProtossTest.txt 50 10 5 5 -stats ./results > debug.out

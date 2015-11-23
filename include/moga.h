@@ -42,51 +42,64 @@ struct MutationParameter
     size_t maxGenerations;
 };
 
+
+// Class implementing the multi-objective genetic algorithm
 template <typename T, typename U, Player const player>
 class MOGA final
 {
 private:
     double mMutationProbability;
 
+    // Statistical information for both objectives
     std::pair<Statistics,Statistics> mStats;
 
+    // Population size
     size_t mPopSize;
 
+    // Length of the chromosome
     size_t mNGenes;
 
 
     std::uniform_real_distribution<double> mDistribution;
 
+    // Population
     std::vector<Individual> mPop;
 
+    // Simulations used for fitness evaluations
     std::vector<std::vector<MicroSimulation<T,U>>> mSims;
 
 
 
     //std::vector<std::string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
+    // Names of the available crossover and mutation operators
     std::vector<std::string> mCrossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
     std::vector<std::string> mMutationFuncNames = {"Gaussian Mutation", "Polynomial Mutation", "Uniform Mutation"};
 
     //size_t mSelectionChoice = 0;
+
+    // Choices for crossover and mutation
     size_t mCrossoverChoice = 0;
     size_t mMutationChoice = 0;
 
+    // Number of strategies used for fitness evaluation
     size_t mNGoals;
 
-    size_t mTournamentSize = 4;
+    size_t mTournamentSize = 2;
+
+    // Number of crossove points used for N-Point-Crossover
     size_t mNCrossoverPoints;
 
+    // Variables used for the mutation clock scheme
     size_t mIndividualToMutate;
     size_t mGeneToMutate;
-
     size_t mMutationCount = 0;
 
-    // Crossover methods
-
     size_t mGeneration = 0;
+    // File streams for storing statistical information
     std::ofstream* mAvgFile = nullptr;
     std::ofstream* mStdevFile = nullptr;
 
+    // Crossover operators
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
     {
@@ -657,6 +670,8 @@ private:
     };
 
 
+
+    // Mutation operators
     std::function<void(MutationParameter)> polynomialMutation = [&] (MutationParameter params)
     {
         Individual& individual = *params.individual;
@@ -736,6 +751,7 @@ private:
     };
 
 
+    // Vectors for dynamically choosing the crossover and mutation operators
     std::vector<std::function<std::pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
     std::vector<std::function<void(MutationParameter) > > mutationFuncs = {gaussianMutation, polynomialMutation, uniformMutation};
 
@@ -786,6 +802,7 @@ private:
         return res;
     }
 
+    // General tournament selection
     std::vector<Individual *> tournamentSelection(size_t const N, std::mt19937& generator)
     {
         std::uniform_int_distribution<size_t> dist(0,mPop.size()-1);
@@ -827,8 +844,6 @@ private:
 
     void evaluate(std::vector<Individual>& pop)
     {
-
-
         #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < pop.size(); ++i)
         {
@@ -870,6 +885,7 @@ private:
         }
     }
 
+    // Set the strategies for fitness evaluations
     void setGoals(std::vector<Chromosome> const& goals)
     {
         if(goals.size() != mNGoals)
@@ -893,6 +909,7 @@ private:
     }
 
 
+    // Compute statistics locally
     void computeStatistics(Statistics& stats, std::vector<double> const& v)
     {
         double sum = std::accumulate(v.begin(), v.end(), 0.0);
@@ -912,7 +929,8 @@ private:
 
     }
 
-    void nondominatedSort()
+    // This function combines non-dominated sorting, crowding-distance assignment and elitism
+    void sortAndRestrict()
     {
         // nondominated fronts
         std::vector<std::vector<size_t>> fronts(1);
@@ -987,7 +1005,7 @@ private:
         {
             return mPop[p].fitness.health < mPop[q].fitness.health;
         };
-        vector<size_t> popPos(mPop.size());
+        std::vector<size_t> popPos(mPop.size());
 
         #pragma omp parallel for schedule(static)
         for(size_t i = 0; i < popPos.size(); ++i)
@@ -1035,6 +1053,7 @@ private:
         mPop = newPop;
     }
 
+    // Count number of different units in the build order
     size_t countUnitTypes(std::vector<std::string> buildOrder)
     {
         std::set<std::string> strSet(buildOrder.begin(), buildOrder.end());
@@ -1047,11 +1066,12 @@ public:
     typedef T race1;
     typedef U race2;
 
+    // Initialize the population and the simulations used for fitness evaluation
     MOGA(Vec2D const minPos, Vec2D const maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals)
         :  mPopSize(popSize), mDistribution(0,1.0), mNGoals(nGoals)
     {
 
-
+        // Initialize the simulations
         mSims.reserve(omp_get_num_threads());
         #pragma omp parallel
         {
@@ -1073,6 +1093,7 @@ public:
                 #pragma omp barrier
             }
         }
+        // Additional random number generator, only used here
         std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
         generator.discard(1000);
 
@@ -1091,6 +1112,8 @@ public:
 
         if(mNCrossoverPoints > 1) --mNCrossoverPoints;
         std::uniform_real_distribution<double> valueDist(MIN, MAX);
+
+        // Create initial strategies for fitness evaluation randomly
         std::vector<Chromosome> initChroms(mNGoals);
         for(auto& chrom : initChroms)
         {
@@ -1103,15 +1126,10 @@ public:
         setGoals(initChroms);
 
 
+
+        // Create the initial population
         mPop.reserve(2*popSize);
         mPop.resize(popSize);
-
-
-        mStats.first.sum = 0.0;
-        mStats.first.max = 0.0;
-        mStats.second.sum = 0.0;
-        mStats.second.max = 0.0;
-
         for(size_t i = 0; i < popSize; ++i)
         {
             Chromosome& chrom = mPop[i].chromosome;
@@ -1124,6 +1142,12 @@ public:
 
         }
         evaluate(mPop);
+
+
+        mStats.first.sum = 0.0;
+        mStats.first.max = 0.0;
+        mStats.second.sum = 0.0;
+        mStats.second.max = 0.0;
         mStats.first.onlinePerformance = 0.0;
         mStats.first.offlinePerformance = 0.0;
         mStats.second.onlinePerformance = 0.0;
@@ -1131,7 +1155,7 @@ public:
 
     }
 
-    void optimize(std::vector<Chromosome> const& goals, size_t const iterations, std::mt19937& generator, int rank, int procs)
+    void optimize(std::vector<Chromosome> const& goals, size_t const generations, std::mt19937& generator, int rank, int procs)
     {
         mMutationCount = 0;
         mIndividualToMutate = 0;
@@ -1139,6 +1163,7 @@ public:
 
         setGoals(goals);
         evaluate(mPop);
+
 
         std::vector<double> v(mPop.size());
         for(size_t i = 0; i < v.size(); ++i)
@@ -1152,18 +1177,20 @@ public:
         }
         computeStatistics(mStats.second, v);
 
-        for(size_t i = 0; i < iterations; ++i)
+        // Run the genetic algorithm for a number of generations
+        for(size_t i = 0; i < generations; ++i)
         {
-
             mutationClock(generator);
-            // apply genetic algorithm
 
             std::vector<Individual> newPop;
             newPop.reserve(mPopSize);
             std::vector<Individual *> selected;
 
+            // Selection
             selected = tournamentSelection(mPopSize, generator);
             if(selected.size() == 0) break; // Just for safety
+
+            // Crossover
             #pragma omp parallel
             {
 
@@ -1183,9 +1210,9 @@ public:
                 }
             }
 
+            // Mutation
             mMutationCount += newPop.size();
             size_t pos = 0, pos_old;
-
             std::vector<size_t> individualPositions;
             std::vector<size_t> genePositions;
             while(mIndividualToMutate < mMutationCount)
@@ -1204,13 +1231,15 @@ public:
             #pragma omp parallel for schedule(static)
             for(size_t j = 0; j < limit; ++j)
             {
-                mutationFuncs[mMutationChoice](MutationParameter(newPop[individualPositions[j]], generator, genePositions[j], i, iterations));
+                mutationFuncs[mMutationChoice](MutationParameter(newPop[individualPositions[j]], generator, genePositions[j], i, generations));
             }
 
+            // Fitness Evaluation
             evaluate(newPop);
             mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
-            nondominatedSort();
+            // Non-dominated sorting, crowding-distance assignment and elitism
+            sortAndRestrict();
             while(mPop.size() > mPopSize)
             {
                 mPop.pop_back();
@@ -1230,6 +1259,7 @@ public:
 
             if(mAvgFile != nullptr && mStdevFile != nullptr)
             {
+                // In case that additional informationm about the optimization should be saved, compute the global statistics
                 if(procs > 1)
                 {
                     computeGlobalStatistics(mStats.first, rank, procs);
@@ -1282,6 +1312,8 @@ public:
         return mMutationFuncNames[mMutationChoice];
     }
 
+    // Get the chromosomes of the n best individuals according to rank and crowding-distance
+    // This method is used for the final comparison of both players
     std::vector<Chromosome> getBestChromosomes(size_t const n)
     {
         auto cmp = [&] (Individual const& lhs, Individual const& rhs)
@@ -1321,6 +1353,8 @@ public:
         return mPop.size();
     }
 
+    // Concatenate the first migrants chromosomes in one instance
+    // This method is used for migration
     Chromosome getChromosomes(size_t const migrants)
     {
         Chromosome res;
@@ -1349,6 +1383,7 @@ public:
         mNGoals = value;
     }
 
+    // Include migrants into the population
     void includeDecodedChromosomes(Chromosome const& data, size_t const migrants, int const rank, int const procs)
     {
         std::vector<Individual> newPop;
@@ -1369,7 +1404,7 @@ public:
         evaluate(newPop);
         mPop.insert(mPop.begin(), newPop.begin(), newPop.end());
 
-        nondominatedSort();
+        sortAndRestrict();
         do
         {
             mPop.pop_back();

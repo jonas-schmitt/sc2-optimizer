@@ -18,7 +18,7 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
-
+// Terran specific unit implementations
 
 class TerranUnit : public BaseUnit
 {};
@@ -31,7 +31,7 @@ private:
     bool mStimpackActive = false;
     int mStimpackDurationTimer = 0;
 
-    template<typename T> void stimpack(vector<T *> const & unitList)
+    template<typename T> void stimpack(std::vector<T *> const & unitList)
     {
         if(mStimpackDurationTimer <= 0)
         {
@@ -83,7 +83,7 @@ private:
 
 public:
     int const mNGenes = TerranUnit::mNGenes + 2;
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(mStimpackAvail)
@@ -105,7 +105,7 @@ class SCV final : public TerranUnit
 class Marine final : public TerranBioUnit
 {
 public:
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
 };
 
 class Marauder final : public TerranBioUnit
@@ -117,7 +117,7 @@ private:
     void concussiveShells();
 
 public:
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         TerranBioUnit::timestep(own, other);
@@ -180,7 +180,7 @@ class Ghost final : public TerranUnit
 class Hellion final : public TerranUnit
 {
 public:
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
     template<typename T> bool attack(PlayerState<T>& other)
     {
         if(this->mAttackTimer > 0 || this->isDead() || other.unitList.empty())
@@ -248,7 +248,7 @@ public:
         double const c = x2*y1 - y2*x1;
         double const d = 1.0/std::sqrt(a*a + b*b);
 
-        vector<typename T::RUT *> targets;
+        std::vector<typename T::RUT *> targets;
         for(typename T::RUT *enemy : other.unitList)
         {
             if(mainTarget == enemy)
@@ -302,7 +302,7 @@ public:
 class Hellbat final : public TerranUnit
 {
 public:
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
 };
 
 class SiegeTank final : public TerranUnit

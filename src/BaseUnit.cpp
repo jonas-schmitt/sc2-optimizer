@@ -400,12 +400,12 @@ int BaseUnit::getArmorUpgrade() const
     return mArmorUpgrade;
 }
 
-vector<Attribute> const& BaseUnit::getAttributes() const
+std::vector<Attribute> const& BaseUnit::getAttributes() const
 {
     return mStats.attributes;
 }
 
-vector<Bonus> const& BaseUnit::getBonuses() const
+std::vector<Bonus> const& BaseUnit::getBonuses() const
 {
     return mStats.bonuses;
 }
@@ -553,7 +553,7 @@ Damage BaseUnit::computeDamage(BaseUnit const& other) const
     }
     for(Bonus const& bonus : mStats.bonuses)
     {
-        vector<Attribute> const& attributes = other.getAttributes();
+        std::vector<Attribute> const& attributes = other.getAttributes();
         if(std::includes(attributes.begin(), attributes.end(), bonus.attributes.begin(), bonus.attributes.end()))
         {
             totalDamage += mAttackUpgrade * bonus.upgrade + bonus.base;
@@ -711,7 +711,7 @@ void BaseUnit::reservePathStorage(size_t const sz)
     mPath.reserve(sz);
 }
 
-vector<Vec2Df> BaseUnit::getPath() const
+std::vector<Vec2Df> BaseUnit::getPath() const
 {
     return mPath;
 }
@@ -768,7 +768,7 @@ void BaseUnit::computeTemporaryValues()
     tmp[8] = 1e3*getPhenotype(13);
 }
 
-void BaseUnit::initUpgrades (vector<int> const& flags)
+void BaseUnit::initUpgrades (std::vector<int> const& flags)
 {
     mAttackUpgrade = flags[0];
     mArmorUpgrade = flags[1];

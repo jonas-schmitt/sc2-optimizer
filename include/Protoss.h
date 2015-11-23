@@ -18,7 +18,7 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
-
+// Protoss specific unit implementations
 
 class ProtossUnit : public BaseUnit
 {
@@ -52,7 +52,7 @@ public:
         ProtossUnit::regenerate(own);
     }
 
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
 };
 
 
@@ -73,7 +73,7 @@ private:
     double const mApplyChargeFactor = 2.2;
     double const mRemoveChargeFactor = 1.0/mApplyChargeFactor;
 
-    template<typename T> void charge(vector<T *> const & unitList)
+    template<typename T> void charge(std::vector<T *> const & unitList)
     {
 
         if(mChargeAvailTimer <= 0 && !mChargeActive)
@@ -121,7 +121,7 @@ private:
 
 public:
     int const mNGenes = ProtossUnit::mNGenes + 1;
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(mChargeAvail)
@@ -139,7 +139,7 @@ private:
     int mBlinkTimer = 0;
     bool mBlinkAvail = false;
 
-    template<typename T> void blink(vector<T *> const & unitList)
+    template<typename T> void blink(std::vector<T *> const & unitList)
     {
         int const threshold = mStats.shield * getPhenotype(mNGenes - 1);
 
@@ -172,7 +172,7 @@ private:
 
 public:
     int const mNGenes = ProtossUnit::mNGenes + 1;
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(mBlinkAvail)

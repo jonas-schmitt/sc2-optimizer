@@ -53,7 +53,7 @@ std::string InitPlayerUnits<Race>::getPath() const
     return mPath;
 }
 
-
+// Obtain the stats for all units of the player's race
 template <class Race>
 void InitPlayerUnits<Race>::readStats()
 {
@@ -306,36 +306,6 @@ void InitPlayerUnits<Race>::readStats()
 
 
 template <class Race>
-void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, PlayerState<Race>& pl)
-{
-    if (mPath.empty())
-	{
-        throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&): The file path currently stored is an empty string.");
-	}
-	if (unitVec.empty())
-	{
-        throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&): The vector containing the names of all units to create is empty");
-	}
-    if (mFactory.isHashMapEmpty())
-	{
-		readStats();
-	}
-    mFactory.create(unitVec, pl);
-    for(auto unit : pl.unitList)
-    {
-        Vec2D minPos(pl.minPos.x + unit->getSize(), pl.minPos.y + unit->getSize());
-        Vec2D maxPos(pl.maxPos.x - unit->getSize(), pl.maxPos.y - unit->getSize());
-        unit->setPosLimits(minPos, maxPos);
-    }
-    pl.unitCount = pl.unitList.size ();
-
-    pl.potentialList.emplace_back(pl.minPos,funcMinX);
-    pl.potentialList.emplace_back(pl.maxPos,funcMaxX);
-    pl.potentialList.emplace_back(pl.minPos,funcMinY);
-    pl.potentialList.emplace_back(pl.maxPos,funcMaxY);
-}
-
-template <class Race>
 void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const std::string& path, PlayerState<Race>& pl)
 {
     if (path.empty())
@@ -346,8 +316,12 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 	{
         throw std::invalid_argument("InitPlayerUnits::init(const std::vector<std::string>&, const std::string&): The vector containing the names of all units to create is empty");
 	}
+    // Set the path to the directory containing the unit stats
     setPath(path);
+    // Obtain the statistics
 	readStats();
+
+    // Create all units
     mFactory.create(unitVec, pl);
 
     for(auto unit : pl.unitList)
@@ -358,6 +332,7 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
 
     size_t pos = 0;
 
+    // Create the combined chromosome of all units of all players and set the chromosome for each unit accordingly
     if(!pl.unitList0.empty())
     {
         pl.NGenes += pl.unitList0.front().mNGenes;
@@ -528,18 +503,17 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
     }
 
 
-
-
     pl.potentialList.emplace_back(pl.minPos,funcMinX);
     pl.potentialList.emplace_back(pl.maxPos,funcMaxX);
     pl.potentialList.emplace_back(pl.minPos,funcMinY);
     pl.potentialList.emplace_back(pl.maxPos,funcMaxY);
 
+    // The following is required for the dynamic adjustment of the playground size and the initial placement of the units
+    // Compute the maximal size
     auto cmp_size = [] (typename Race::RUT *lhs, typename Race::RUT *rhs)
     {
         return lhs->getSize() < rhs->getSize();
     };
-	
     auto it = std::max_element(pl.unitList.begin(), pl.unitList.end(), cmp_size);
     pl.maxUnitSize = (*it)->getSize();
 

@@ -8,7 +8,6 @@
 #include <memory>
 #include <sstream>
 
-#include "DataReader.h"
 #include "PlayerState.h"
 #include "Race.h"
 #include "Unit.h"
@@ -16,12 +15,15 @@
 #include "Utilities.h"
 
 
+// Class for initialising the units of a certain player
 
 template<class Race>
 class InitPlayerUnits final : public Race
 {
 
 private:
+
+    // Potential fields that force units to avoid the borders of the playground
     std::function<Vec2D(Vec2D const& pos,typename Race::BUT const& unit)> funcMinX = [](Vec2D const& pos,typename Race::BUT const& unit)
     {
         double const dist = fabs(pos.x-unit.getX());
@@ -68,17 +70,28 @@ private:
     };
 
 
+    // Factory for the creation of units
     UnitFactory<Race> mFactory;
+
+    // Path to the files containing the different unit stats
     std::string mPath;
+
+    // Helper functions for parsing
     std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &tokens);
     std::vector<std::string> split(std::string const &s, char delim);
 public:
 	InitPlayerUnits();
     InitPlayerUnits(const std::string& path);
+
+    // Obtain all statistics for all units of the player's race
     void readStats();
     std::string getPath() const;
     void setPath(const std::string& path);
-    void init(const std::vector<std::string> &unitVec, PlayerState<Race>& pl);
+
+    // Initialize the state of the player according to a certain build order
+    // unitVec: Names of the units to create
+    // path: Path to the directory containing the unit stats
+    // pl: State of the player
     void init (const std::vector<std::string>& unitVec, const std::string& path, PlayerState<Race>& pl);
 	
 };

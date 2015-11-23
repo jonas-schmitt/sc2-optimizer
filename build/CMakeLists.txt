@@ -21,6 +21,8 @@ ADD_EXECUTABLE(opt ${PROJ_SOURCES} ${PROJ_HEADERS})
 
 TARGET_LINK_LIBRARIES( opt ${MPI_LIBRARIES} )
 
-
+# If not supported by the compiler, remove -D_GLIBCXX_PARALLEL
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -march=native -D_GLIBCXX_PARALLEL")
+
+# Debugging flags
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -g -std=c++11")

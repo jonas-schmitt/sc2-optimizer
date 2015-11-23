@@ -18,10 +18,8 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
-using std::vector;
-using std::array;
-using std::deque;
 
+// Unit attributes
 enum Attribute
 {
     light = 0, armored = 1, biological = 2, mechanical = 3, psyonic = 4, massive = 5, air = 6
@@ -31,7 +29,7 @@ struct Bonus
 {
     double base;
     double upgrade;
-    vector<Attribute> attributes;
+    std::vector<Attribute> attributes;
     Bonus() : base(0.0), upgrade(0.0)
     {}
     Bonus(Bonus const& other) : base(other.base), upgrade(other.upgrade), attributes(other.attributes)
@@ -49,7 +47,6 @@ struct Damage
     Damage(double const s, double const h, double const t) : shield(s), health(h), total(t), valid(true) {}
     Damage(Damage const& damage) : shield(damage.shield), health(damage.health), total(damage.total), valid(damage.valid) {}
 };
-
 
 struct UnitStats
 {
@@ -82,18 +79,21 @@ struct UnitStats
 
     double creepMultiplier = 1.0;
 
-
-    vector<Attribute> attributes;
-    vector<Bonus> bonuses;
-
+    std::vector<Attribute> attributes;
+    std::vector<Bonus> bonuses;
 };
+
+
+// Basic Unit class that contains all shared functionality
 
 class BaseUnit
 {  
 protected:
 
+    // Pointer to the combined chromosome of all units (stored in PlayerState)
     double const* mChromosome;
-    vector<double> mPhenotype;
+
+    // Start position of the units actual chromosome in the combined one
     size_t mChromosomeStartPosition;
 
     UnitStats mStats;
@@ -104,13 +104,20 @@ protected:
     Vec2D mMaxPos;
     double mMaxDist;
     Vec2D mStartPos;
-    bool mTracking = false;
-    vector<Vec2Df> mPath;
-    vector<BaseUnit *> mInRange;
 
+    // Should the path of the unit be saved
+    bool mTracking = false;
+    std::vector<Vec2Df> mPath;
+
+    std::vector<BaseUnit *> mInRange;
+
+    // Length of the time step
     int mTimeSlice = 10;
 
+    // Timer for ensuring that the unit only repeatedly attacks after the cooldown hast passed
     int mAttackTimer = 0;
+
+    // Timer for recomputing the movement direction
     int mMovementTimer = 0;
 
     int mMovementUpdate = 100;
@@ -127,25 +134,27 @@ protected:
 
     std::string mName;
 
+    // Identifier for fast identification of specific units
     int mId;
 
     double mMoveDist;
     double mMovementUpdateDist;
 
+    // Last attack target of the unit
     BaseUnit *mTarget = nullptr;
 
     bool mHasAttacked = false;
 
 
 
-
-
-
+    // Computes the force resulting from the attractive potential of friendly units
 
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mFriendFunc = [] (BaseUnit & own, BaseUnit & buddy)
     {
         Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
         double const dist = distVec.computeLength();
+
+        // Collision avoidance
         if(dist < own.getSize () + buddy.getSize())
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
@@ -166,11 +175,13 @@ protected:
     };
 
 
+    // Computes the force resulting from the attractive and repulsive potential of enemy units
 
     std::function<Vec2D(BaseUnit & own, BaseUnit & buddy)> mEnemyFunc = [] (BaseUnit & own, BaseUnit & enemy)
     {
         Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
         double const dist = distVec.computeLength ();
+        // Collision avoidance
         if(dist < own.getSize() + enemy.getSize())
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
@@ -181,6 +192,8 @@ protected:
 
         Vec2D res1;
         double const ownRange = own.computeRange (enemy);
+
+        // Attraction
         if(dist > ownRange*own.getPhenotype(4))
         {
             int const enemyId = enemy.getIdentifier();
@@ -201,6 +214,8 @@ protected:
         Vec2D res2;
         double const enemyRange = enemy.computeRange(own);
         double const enemyMovement = enemy.getMovementUpdateDist();
+
+        // Repulsion
         if(dist < own.getPhenotype (10)*(enemyRange+enemyMovement))
         {
             res2 = normedDistVec;
@@ -225,20 +240,26 @@ protected:
         return Vec2D(res1.x-res2.x, res1.y-res2.y);
     };
 
+    // Compute the damage the unit could theoretically cause to a unit
     Damage computeDamage(BaseUnit const& unit) const;
 
+    // Attack a specific unit
     bool attack(BaseUnit& unit);
 
 public:
 
+    // Length of the chromosome
     int const mNGenes = 14;
 
+    // Possible damage that can be applied to units with identifier = position in array
     Damage mPossibleDamage[18];
 
+    // Intermediate results of the potenial field computation
     double tmp[10];
 
     int mMovementUpdateBackup;
 
+    // Is the unit affected by Concussive Shells (Marauder ability)
     bool mCSAffected = false;
 
     BaseUnit();
@@ -350,9 +371,9 @@ public:
 
     int getAttackUpgrade() const;
 
-    vector<Attribute> const& getAttributes() const;
+    std::vector<Attribute> const& getAttributes() const;
 
-    vector<Bonus> const& getBonuses() const;
+    std::vector<Bonus> const& getBonuses() const;
 
     void computeTemporaryValues();
 
@@ -392,7 +413,7 @@ public:
     double computeAirRange(BaseUnit const& other) const;
     double computeGroundRange(BaseUnit const& other) const;
 
-    void initUpgrades(vector<int> const& flags);
+    void initUpgrades(std::vector<int> const& flags);
 
 
     template<typename T> double computeDistance(T const& unit)
@@ -411,6 +432,8 @@ public:
 
 
 
+    // Main method used for executing the actions of the next time step
+    // Overloaded in subclasses that represent specific units
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(!(attack(other)))
@@ -422,7 +445,7 @@ public:
     }
 
 
-
+    // Method that emulates the movement of a unit
     template <typename T, typename U> void move(PlayerState<T>& own, PlayerState<U>& other)
     {
         if(this->getHealth () < EPS)
@@ -481,6 +504,7 @@ public:
 
     bool attackPossible(BaseUnit const& enemy);
 
+    // Method that emulates that the unit attacks
     template<typename T> bool attack(PlayerState<T>& other)
     {
         if(this->mAttackTimer > 0 || this->isDead() || other.unitList.empty())
@@ -544,16 +568,20 @@ public:
         return true;
     }
 
+    // Methods for manipulating the chromosome of the unit
     double getPhenotype(size_t const pos) const;
-
+    size_t getChromosomeStartPosition() const;
     void setChromosomeStartPosition(size_t const pos);
     void setChromosome(Chromosome const & chromosome, size_t const pos);
     void setChromosome(Chromosome const & chromosome);
 
+    // Methods for enabling the tracking of unit paths
+    // currently not used
     void setTracking(bool const tracking);
     void reservePathStorage(size_t const sz);
-    vector<Vec2Df> getPath() const;
+    std::vector<Vec2Df> getPath() const;
     void clearPath();
+
 
     int getAttackTimer() const;
     void setAttackTimer(int value);
@@ -565,6 +593,7 @@ public:
     int getTimeSlice() const;
     void setTimeSlice(int value);
 
+
     int getShieldUpgrade() const;
     void setShieldUpgrade(int value);
     double getAttackMultiplier() const;
@@ -573,6 +602,7 @@ public:
     void setDefenseMultiplier(double value);
     double getDefenseSubtractor() const;
     void setDefenseSubtractor(double value);
+
     int getIdentifier() const;
     void setIdentifier(int value);
 
@@ -587,12 +617,14 @@ public:
 
     double getMoveDist() const;
     double getMovementUpdateDist() const;
+
+    // Change the speed of a unit by a certain factor
     void multSpeed(double value);
 
-    size_t getChromosomeStartPosition() const;
-
+    // Has the unit attacked at least once
     bool hasAttacked() const;
 
+    // Reset the unit to the initial state
     void reset();
 };
 

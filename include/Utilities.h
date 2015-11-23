@@ -4,7 +4,9 @@
 #include <cstddef>
 #include <iostream>
 
+// Utilities required in several modules
 
+// Definitions
 static double constexpr LIMIT = 10000;
 static double constexpr EPS = 1e-12;
 static double constexpr GASTOMINERALS = 1.5;
@@ -18,7 +20,7 @@ static double constexpr MAX_INV = 1.0/MAX;
 
 static double constexpr INF = std::numeric_limits<double>::max();
 
-
+// Struct for storing a 2D-Vector
 struct Vec2D final
 {
 
@@ -95,6 +97,8 @@ struct Vec2D final
         return getNormedVec (computeLength ());
     }
 };
+
+// Alternative using float
 struct Vec2Df final
 {
 
@@ -167,6 +171,8 @@ struct Vec2Df final
     }
 };
 
+
+// Population statistics
 struct Statistics
 {
     double mean;

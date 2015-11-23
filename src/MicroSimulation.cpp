@@ -131,6 +131,7 @@ void MicroSimulation<T,U>::setPlayer2Chromosome(Chromosome const& chromosome)
     setPlayerChromosome(pl2, chromosome);
 }
 
+
 template<class T, class U>
 void MicroSimulation<T,U>::clearPlayer1()
 {
@@ -196,20 +197,6 @@ PlayerState<U>const& MicroSimulation<T,U>::getPlayer2() const
 }
 
 
-template<class T, class U>
-bool MicroSimulation<T, U>::run(int const steps)
-{
-    for(int i = 0; i < steps; ++i)
-    {
-        timestep();
-    }
-    if(pl1.unitCount == 0 || pl2.unitCount == 0)
-    {
-        return true;
-    }
-    return false;
-}
-
 template <class T, class U>
 void MicroSimulation<T, U>::setTimeSteps(size_t timeSteps)
 {
@@ -252,6 +239,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 
     if(mTracking)
     {
+        // Save the unit names
         mFile1.open(mTrackingFileName1);
         for(auto const unitPtr : pl1.unitList)
         {
@@ -284,6 +272,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 
     for(int i = 0; i < mTimeSteps; ++i)
     {
+        // If all units of one player are dead, stop the simulation
         if(pl1.unitCount == 0 || pl2.unitCount == 0)
         {
             break;
@@ -291,6 +280,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         timestep();
         if(mTracking && i < 15000)
         {
+            // Save paths and sum of health and shield
             for(auto const unitPtr : pl1.unitList)
             {
                 if(unitPtr->isDead())
@@ -324,6 +314,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         mFile2.close();
     }
 
+    // Evaluate the outcome
     Fitness res;
     double maxDamage = 0;
     double maxHealth = 0;
@@ -359,18 +350,9 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
     }
 
     res.damage /= maxDamage;
-
-//    if(res.damage < 0.1)
-//    {
-//        res.health = 0.0;
-//    }
-//    else
-//    {
     res.health /= maxHealth;
-//    }
 
-
-
+    // Can be used as approximation for multiple objectives as single objective
     res.score = (res.damage + res.health) * 50.0;
 
     res.timeSteps = std::max(pl1.time / pl1.timeSlice, pl2.time / pl2.timeSlice);

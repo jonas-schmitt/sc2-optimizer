@@ -9,36 +9,48 @@
 #include "moga.h"
 #include "Chromosome.h"
 
+// Class implementing the optimization algorithm
+// Not intended for direct use
 
 template <typename GA1, typename GA2>
 class Optimizer
 {
 private:
     size_t mPopSize;
+
+    // Genetic algorithm objects
     GA1 mGa1;
     GA2 mGa2;
-    Individual mOptimum1, mOptimum2;
+
+    // Statistics of both player's populations
     std::pair<Statistics,Statistics> mStats1, mStats2;
     double mOfflinePerformance = 0.0;
     double mOnlinePerformance = 0.0;
+
+    // Number of strategies used for fitness evaluation
     size_t mNGoals;
+
+    // Multiple colonies?
     bool mMPI;
-    std::string mDirPath;
+
+    //
+    std::string mResDirPath;
 
 
+    // Simulation used for the final comparison
     MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
 
 
 public:
-    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals, std::string const& dirPath)
+    Optimizer(Vec2D const& minPos, Vec2D const& maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildOrder1, std::vector<std::string> const & buildOrder2, size_t const nGoals, std::string const& resDirPath)
         : mPopSize(popSize),
-          mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
-          mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildList1, buildList2, nGoals),
+          mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals),
+          mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals),
           mNGoals(nGoals),
           mSim(minPos, maxPos, filePath1, filePath2),
-          mDirPath(dirPath)
+          mResDirPath(resDirPath)
     {
-        mSim.initBothPlayers(buildList1, buildList2);
+        mSim.initBothPlayers(buildOrder1, buildOrder2);
     }
 
     void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants, bool saveStatistics)
@@ -78,16 +90,19 @@ public:
         std::ofstream stdevFile2;
         if(saveStatistics)
         {
-            avgFile1.open(mDirPath+"/avgPlayer1.dat");
-            avgFile2.open(mDirPath+"/avgPlayer2.dat");
-            stdevFile1.open(mDirPath+"/stdevPlayer1.dat");
-            stdevFile2.open(mDirPath+"/stdevPlayer2.dat");
+            avgFile1.open(mResDirPath+"/avgPlayer1.dat");
+            avgFile2.open(mResDirPath+"/avgPlayer2.dat");
+            stdevFile1.open(mResDirPath+"/stdevPlayer1.dat");
+            stdevFile2.open(mResDirPath+"/stdevPlayer2.dat");
             mGa1.writeOutStatistics(avgFile1, stdevFile1);
             mGa2.writeOutStatistics(avgFile2, stdevFile2);
         }
 
+        // Perform the optimization competitively for both players for iterations x genPerIt generations
         for(size_t i = 0; i < iterations; ++i)
         {
+
+            // Migration
             if(mMPI)
             {
                 migrate(buf1, migrants, mGa1, rank, procs);
@@ -97,9 +112,11 @@ public:
             std::vector<Chromosome> optima1(mGa1.getBestChromosomes(mNGoals));
             std::vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
+            // Optimize using the mNGoals best chromosomes of the opponent for fitness evaluation
             mGa1.optimize(optima2, genPerIt, generator, rank, procs);
             mGa2.optimize(optima1, genPerIt, generator, rank, procs);
 
+            // Get process-local statistics
             mStats1 = mGa1.getStatistics();
             mStats2 = mGa2.getStatistics();
 
@@ -110,12 +127,6 @@ public:
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
             }
-//            if(rank == 0)
-//            {
-//                std::cout << "Iteration " << i << std::endl;
-//                printStatistics();
-//                std::cout << std::endl;
-//            }
 
         }
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
@@ -230,6 +241,7 @@ public:
 
     bool determineWinner(std::ostream& stream, int const rank, int const procs, bool saveStatistics)
     {
+        // Gather the combined population of all colonies
         if(mMPI)
         {
             gatherPopulation(mGa1, rank, procs);
@@ -238,6 +250,8 @@ public:
 
         if(rank == 0)
         {
+
+            // Final comparison of the 100 best individuals of the opponents
             std::vector<Individual> pop1(mGa1.getPopulation());
             std::vector<Individual> pop2(mGa2.getPopulation());
 
@@ -252,6 +266,8 @@ public:
             }
 
             Fitness res;
+
+            // Increase the time step size
             mSim.setTimeSteps(30000);
             for(size_t i = 0; i < minSize; ++i)
             {
@@ -272,6 +288,7 @@ public:
                 pop2[i].fitness /= minSize;
             }
 
+            // Sort the individuals of the final comparison according to their performance
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
             {
                 if(lhs.dominates(rhs))
@@ -290,14 +307,15 @@ public:
             std::sort(pop1.begin(), pop1.end(), cmp);
             std::sort(pop2.begin(), pop2.end(), cmp);
 
+            // Compute and store the result
             double const damage1 = (res.damage/(minSize * minSize));
             double const damage2 = (1.0-(res.health/(minSize * minSize)));
-            stream << "Average of Player 1: " << "\n";
-            stream << "Damage: " << mStats1.first.mean << "\n";
-            stream << "Health: " << mStats1.second.mean << "\n";
-            stream << "Average of Player 2: " << "\n";
-            stream << "Damage: " << mStats2.first.mean << "\n";
-            stream << "Health: " << mStats2.second.mean << "\n";
+//            stream << "Average of Player 1: " << "\n";
+//            stream << "Damage: " << mStats1.first.mean << "\n";
+//            stream << "Health: " << mStats1.second.mean << "\n";
+//            stream << "Average of Player 2: " << "\n";
+//            stream << "Damage: " << mStats2.first.mean << "\n";
+//            stream << "Health: " << mStats2.second.mean << "\n";
             stream << "Comparison of the final populations" << std::endl;
             stream << "Damage caused by Player 1: " << damage1*100 << " %" << std::endl;
             stream << "Remaining health for Player 1: " << (1.0-damage2)*100 << " %" << std::endl;
@@ -314,8 +332,8 @@ public:
                     {
                         mSim.setPlayer1Chromosome(pop1[i].chromosome);
                         mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                        mSim.enableTracking(mDirPath+"/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat",
-                                            mDirPath+"/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat");
+                        mSim.enableTracking(mResDirPath+"/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat",
+                                            mResDirPath+"/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat");
                         mSim.run(true, Player::first);
                         mSim.disableTracking();
                     }
@@ -324,9 +342,12 @@ public:
         }
     }
 
+    // Migration of migrants individuals
+    // buf: Buffer for receiving the data
     template<typename GA>
     void migrate(Chromosome& buf, size_t const migrants, GA& ga, int const rank, int const procs)
     {
+        // Contains the concatenated chromosomes of multiple individuals
         Chromosome sendData = std::move(ga.getChromosomes(migrants));
         MPI_Allgather(sendData.data(), sendData.size(), MPI_DOUBLE, buf.data(), sendData.size(), MPI_DOUBLE, MPI_COMM_WORLD);
         ga.includeDecodedChromosomes(buf, migrants, rank, procs);
@@ -353,6 +374,7 @@ public:
         }
     }
 
+    // Gather the population of all colonies at the root process
     template<typename GA>
     void gatherPopulation(GA& ga, int const rank, int const procs)
     {

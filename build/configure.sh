@@ -1,2 +1,2 @@
 #!/bin/bash
-cmake . -DCMAKE_CXX_COMPILER=g++-5
+cmake . -DCMAKE_CXX_COMPILER=g++

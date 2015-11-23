@@ -6,6 +6,7 @@
 
 #include "Unit.h"
 
+// Type definitions for the race types
 
 struct Terran
 {

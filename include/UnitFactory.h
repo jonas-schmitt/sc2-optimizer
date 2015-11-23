@@ -14,7 +14,7 @@
 #include "Unit.h"
 #include "PlayerState.h"
 
-
+// Factory class for creating units
 template <class Race> 
 class UnitFactory final : public Race
 {
@@ -68,6 +68,7 @@ public:
         return mHashMap.empty();
 	}
 
+    // Create a list of units of the same type
     template<typename T>
     void createUnit(const std::string& name, std::vector<T>& unitListX, int x)
     {
@@ -98,6 +99,7 @@ public:
         unitListX.push_back (std::move(unit));
     }
 
+    // Set pointers to a list of units of the same type
     template<typename T>
     void setPointer(PlayerState<Race>& pl, std::vector<T>& unitListX)
     {
@@ -109,6 +111,8 @@ public:
         }
     }
 
+    // Create a unit
+    // name: name of the unit
     void create(const std::string& name, PlayerState<Race>& pl)
 	{
         if (name == "ZergUnit" || name == "TerranUnit" || name == "ProtossUnit")
@@ -188,12 +192,18 @@ public:
             createUnit(name, pl.unitList17, 17);
 		}
 	}
+
+    // Create a number of units and store them in the PlayerState
+    // names: Names of the units
+    // pl: State of the player for whom the units should be created
     void create(const std::vector<std::string>& names, PlayerState<Race>& pl)
 	{
         for (const std::string& name : names)
 		{
             create(name, pl);
 		}
+
+        // Set the pointers in pl accordingly
         setPointer(pl, pl.unitList0);
         setPointer(pl, pl.unitList1);
         setPointer(pl, pl.unitList2);

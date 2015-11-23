@@ -12,9 +12,7 @@
 #include"Chromosome.h"
 
 
-using std::vector;
-using std::deque;
-
+// Struct representing a potential field
 template<typename Race> struct PotentialField final : public Race
 {
     PotentialField(Vec2D p, std::function<Vec2D(Vec2D const&,typename Race::BUT const&)> f)
@@ -32,15 +30,8 @@ private:
 };
 
 
-struct SimulationResult final
-{
-    double damage = 0;
-    double damagePercent = 0;
-    double minerals = 0, gas = 0;
-    size_t survivors = 0;
-    std::vector<std::vector<Vec2Df>> paths;
-};
 
+// Struct containing all the data associated with a player
 template <class Race> struct PlayerState final : public Race
 {
 
@@ -52,12 +43,18 @@ template <class Race> struct PlayerState final : public Race
     Vec2D fieldSize;
     double maxUnitSize;
 
+    // Potential fields that are present independent of the units
     std::vector<PotentialField<Race>> potentialList;
+
+    // Force fields (special ability of the sentry)
+    // In case that no sentry is present, this data structure is always empty
     std::deque<std::pair<int,PotentialField<Race>>> forceFieldQueue;
 
+    // Combined (concatenated) chromosome of all units
     Chromosome chromosome;
 
 
+    // Vectors used for storing the actual units
     std::vector<typename Race::UT0> unitList0;
     std::vector<typename Race::UT1> unitList1;
     std::vector<typename Race::UT2> unitList2;
@@ -77,7 +74,11 @@ template <class Race> struct PlayerState final : public Race
     std::vector<typename Race::UT16> unitList16;
     std::vector<typename Race::UT17> unitList17;
 
+    // Pointers to the base class of the race
+    // Allows easy iteration over all units when no unit specific abilities and characteristics are required
     std::vector<typename Race::RUT*>unitList;
+
+    // Number of units that are alive
     size_t unitCount;
 
     int timeSlice = 10;
@@ -86,6 +87,7 @@ template <class Race> struct PlayerState final : public Race
 
     int regenerationUpdate = 1000;
 
+    // Length of the combined chromosome
     int NGenes = 0;
 
 
@@ -226,36 +228,6 @@ template <class Race> struct PlayerState final : public Race
         regenerationTimer = regenerationUpdate;
 
     }
-
-
-
-    SimulationResult calculateResult() const
-    {
-        SimulationResult res;
-        double maxDamage = 0;
-        res.paths.reserve(unitList.size());
-        for(auto unit : unitList)
-        {
-            maxDamage += unit->getMaxHealth()+unit->getMaxShield();
-            res.damage += unit->getMaxHealth()+unit->getMaxShield()-unit->getHealth()-unit->getShield();
-            res.minerals += unit->getMinerals();
-            res.gas += unit->getGas();
-            if(unit->getHealth() > EPS)
-            {
-                ++res.survivors;
-            }
-            res.paths.push_back(unit->getPath());
-        }
-        res.damagePercent = res.damage*100. / maxDamage;
-        auto cmp = [] (std::vector<Vec2Df> const& a, std::vector<Vec2Df> const& b)
-        {
-            return a.size() > b.size();
-        };
-        sort(res.paths.begin(),res.paths.end(),cmp);
-
-        return res;
-    }
-
 
 };
 

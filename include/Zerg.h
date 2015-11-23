@@ -19,6 +19,7 @@
 #include "Chromosome.h"
 #include "BaseUnit.h"
 
+// Zerg specific unit implementations
 
 class ZergUnit : public BaseUnit
 {

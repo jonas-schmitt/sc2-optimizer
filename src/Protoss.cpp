@@ -46,7 +46,7 @@ void ProtossUnit::subHealth(double const value)
     BaseUnit::subHealth(value);
 }
 
-void ProtossUnit::initUpgrades (vector<int> const &flags)
+void ProtossUnit::initUpgrades (std::vector<int> const &flags)
 {
     BaseUnit::initUpgrades(flags);
     if(flags.size() < 3)
@@ -56,7 +56,7 @@ void ProtossUnit::initUpgrades (vector<int> const &flags)
     mShieldUpgrade = flags[2];
 }
 
-void Zealot::initUpgrades(const vector<int> &flags)
+void Zealot::initUpgrades(const std::vector<int> &flags)
 {
     ProtossUnit::initUpgrades(flags);
     if(flags.size() < 4)
@@ -71,7 +71,7 @@ void Zealot::initUpgrades(const vector<int> &flags)
 
 }
 
-void Stalker::initUpgrades (const vector<int> &flags)
+void Stalker::initUpgrades (const std::vector<int> &flags)
 {
     ProtossUnit::initUpgrades(flags);
     if(flags.size() < 4)

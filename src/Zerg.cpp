@@ -31,7 +31,7 @@
 //    : BaseUnit(baseUnit)
 //{}
 
-void ZergUnit::initUpgrades (vector<int> const &flags)
+void ZergUnit::initUpgrades (std::vector<int> const &flags)
 {
     BaseUnit::initUpgrades (flags);
     if(flags.size () < 3)
@@ -44,7 +44,7 @@ void ZergUnit::initUpgrades (vector<int> const &flags)
     }
 }
 
-void Zergling::initUpgrades (vector<int> const& flags)
+void Zergling::initUpgrades (std::vector<int> const& flags)
 {
     ZergUnit::initUpgrades (flags);
     if(flags.size () < 5)
@@ -62,7 +62,7 @@ void Zergling::initUpgrades (vector<int> const& flags)
     }
 }
 
-void Baneling::initUpgrades (vector<int> const& flags)
+void Baneling::initUpgrades (std::vector<int> const& flags)
 {
     ZergUnit::initUpgrades (flags);
     if(flags.size () < 4)
@@ -82,7 +82,7 @@ void Baneling::initUpgrades (vector<int> const& flags)
 
 
 
-void Roach::initUpgrades (vector<int> const& flags)
+void Roach::initUpgrades (std::vector<int> const& flags)
 {
     ZergUnit::initUpgrades (flags);
     if(flags.size () < 4)

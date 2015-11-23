@@ -5,10 +5,8 @@
 #include<cmath>
 
 
-//static size_t const NBITS = 32;
-
-//typedef std::vector<bitset<NBITS>> Chromosome;
 typedef std::vector<double> Chromosome;
+
 
 struct Fitness final
 {
@@ -71,6 +69,7 @@ struct Fitness final
 
 };
 
+// Struct containing all information associated to an individual
 struct Individual
 {
     Fitness fitness;
@@ -89,45 +88,12 @@ struct Individual
     Individual() {}
     Individual(size_t const N) : chromosome(N) {}
 
-    size_t computeHash() const
-    {
-        size_t hash = 0;
-        //std::hash<bitset<NBITS> > hash_func;
-        std::hash<double > hash_func;
-        for(auto const gene : chromosome)
-        {
-            hash ^= hash_func(gene) + 0x9e3779b9 + (hash<<6) + (hash>>2);
-        }
-        return hash;
-    }
-
     bool dominates(Individual const& ind) const
     {
         return fitness.dominates(ind.fitness);
     }
 
-
-
-
 };
-
-//inline bool operator< (Individual const& lhs, Individual const& rhs)
-//{
-//    if(lhs.rank < rhs.rank)
-//    {
-//        return true;
-//    }
-//    else if(lhs.rank == rhs.rank)
-//    {
-//        return lhs.distance > rhs.distance;
-//    }
-//    else
-//    {
-//        return false;
-//    }
-//}
-
-
 
 
 #endif // CHROMOSOME
