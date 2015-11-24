@@ -21,9 +21,8 @@ The binary can then be executed in the following way:
 * dir: Path to the directory where the additional files should be saved, can be only specified in case of -stats. Default value: "./"
 
 For execution with multiple processes a wrapper like mpirun must be used.  
-Different example scripts for executing the binary on a single node (run.sh and execute.sh) and on a cluster using PBS (submit.sh and job.sh) can be found in the folder "scripts".
 
-In the directory "lists" a number of sample build orders are provided.  
+In the directory "lists" a number of sample build orders is provided.  
 To enable upgrades for specific units, the respective configuration files in the directory "data/Race/upgrades" must be adapted. 0 denotes that a specific upgrade is disabled, 1 that it is enabled.  
 
 ## Visualization

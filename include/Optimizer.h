@@ -102,6 +102,12 @@ public:
         for(size_t i = 0; i < iterations; ++i)
         {
 
+            if(rank == 0)
+            {
+                std::cout << "Progress: " << static_cast<double>(i)/iterations*100 << " %" << "\r" << std::flush;
+                printf("%c[2K", 27);
+            }
+
             // Migration
             if(mMPI)
             {

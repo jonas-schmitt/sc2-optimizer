@@ -207,22 +207,26 @@ int main(int argc, char *argv[])
     p.buildOrder2 = &buildOrder2;
 
 
-    p.popSize = atoi(argv[3]);
-    if(p.popSize <= 0)
+    int popSize = atoi(argv[3]);
+    if(popSize <= 0)
     {
         exit_with_error("Error: The population size must be greater zero", p.rank);
     }
-    p.iterations = atoi(argv[4]);
-    p.generations = atoi(argv[5]);
-    if(p.iterations <= 0 ||  p.generations <= 0)
+    p.popSize = popSize;
+    int iterations = atoi(argv[4]);
+    int generations = atoi(argv[5]);
+    if(iterations <= 0 ||  generations <= 0)
     {
         exit_with_error("Error: The total number of generations must be greater zero", p.rank);
     }
-    p.nGoals = std::min(p.popSize, static_cast<size_t>(atoi(argv[6])));
-    if(p.nGoals <= 0)
+    p.iterations = iterations;
+    p.generations = generations;
+    int nGoals = std::min(p.popSize, static_cast<size_t>(atoi(argv[6])));
+    if(nGoals <= 0)
     {
         exit_with_error("Error: The number of strategies used for fitness evaluation must be greater zero", p.rank);
     }
+    p.nGoals = nGoals;
     p.migrants = std::max(static_cast<size_t>(10), p.popSize / p.procs);
     p.dirPath = "./";
 
