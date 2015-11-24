@@ -1,7 +1,7 @@
 # sc2-optimizer
 
 ## Building
-Requirements: gcc >= 5.1.0 (or any other compiler that fully supports the C++11-standard), OpenMP, MPI  
+Requirements: gcc >= 5.1.0 (other compilers are currently untested), OpenMP, MPI  
 Additional requirements for the visualization: python-matplotlib, ffmpeg  
 
 To build the project under linux, the following script can be used:  

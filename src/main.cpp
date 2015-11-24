@@ -16,6 +16,16 @@
 #include "../include/OptimizerInterface.h"
 #include "../include/Race.h"
 
+void exit_with_error(std::string error_msg, int rank)
+{
+    if(rank == 0)
+    {
+        std::cerr << error_msg << "\n";
+        std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
+    }
+    MPI_Finalize();
+    exit(EXIT_FAILURE);
+}
 
 struct OptimizationParameter
 {
@@ -78,9 +88,7 @@ int main(int argc, char *argv[])
     // Parse the command line arguments
     if(argc < 7 || argc > 9)
     {
-        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-        MPI_Finalize();
-        return -1;
+        exit_with_error("Error: Invalid number of command line arguments", p.rank);
     }
 
     if(argc >= 8)
@@ -88,9 +96,7 @@ int main(int argc, char *argv[])
         std::string arg(argv[7]);
         if(arg != "-stats")
         {
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid command line arguments", p.rank);
         }
         p.saveStatistics = true;
     }
@@ -103,10 +109,7 @@ int main(int argc, char *argv[])
     std::ifstream file1(argv[1]), file2(argv[2]);
     if(!file1 || !file2)
     {
-        if(p.rank == 0) std::cerr << "Error: Could not open build order file" << std::endl;
-        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-        MPI_Finalize();
-        return -1;
+        exit_with_error("Error: Could not open build order file", p.rank);
     }
     std::string buf;
     std::vector<std::string> buildOrder1, buildOrder2;
@@ -137,37 +140,25 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(p.rank == 0) std::cerr << "Error: Couldn't determine first Race" << std::endl;
-        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-        MPI_Finalize();
-        return -1;
+        exit_with_error("Error: Could not determine first Race", p.rank);
     }
 
     for(size_t i = 1; i < buildOrder1.size(); ++i)
     {
         if(race1 == "Terran" && std::find(terran.nameList.begin(), terran.nameList.end(), buildOrder1[i]) == terran.nameList.end())
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid build order for player 1" << std::endl;
             if(p.rank == 0) std::cerr << "The unit " << buildOrder1[i] << " is not a " << race1 << " unit!" << std::endl;
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid build order for player 1", p.rank);
         }
         else if(race1 == "Zerg" && std::find(zerg.nameList.begin(), zerg.nameList.end(), buildOrder1[i]) == zerg.nameList.end())
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid build order for player 1" << std::endl;
             if(p.rank == 0) std::cerr << "The unit " << buildOrder1[i] << " is not a " << race1 << " unit!" << std::endl;
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid build order for player 1", p.rank);
         }
         else if(race1 == "Protoss" && std::find(protoss.nameList.begin(), protoss.nameList.end(), buildOrder1[i]) == protoss.nameList.end())
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid build order for player 1" << std::endl;
             if(p.rank == 0) std::cerr << "The unit " << buildOrder1[i] << " is not a " << race1 << " unit!" << std::endl;
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid build order for player 1", p.rank);
         }
     }
 
@@ -186,37 +177,25 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(p.rank == 0) std::cerr << "Error: Couldn't determine second Race" << std::endl;
-        if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-        MPI_Finalize();
-        return -1;
+        exit_with_error("Error: Could not determine second Race", p.rank);
     }
 
     for(size_t i = 1; i < buildOrder2.size(); ++i)
     {
         if(race2 == "Terran" && std::find(terran.nameList.begin(), terran.nameList.end(), buildOrder2[i]) == terran.nameList.end())
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid build order for player 2" << std::endl;
             if(p.rank == 0) std::cerr << "The unit " << buildOrder2[i] << " is not a " << race2 << " unit!" << std::endl;
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid build order for player 2", p.rank);
         }
         else if(race2 == "Zerg" && std::find(zerg.nameList.begin(), zerg.nameList.end(), buildOrder2[i]) == zerg.nameList.end())
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid build order for player 2" << std::endl;
             if(p.rank == 0) std::cerr << "The unit " << buildOrder2[i] << " is not a " << race2 << " unit!" << std::endl;
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid build order for player 2", p.rank);
         }
         else if(race2 == "Protoss" && std::find(protoss.nameList.begin(), protoss.nameList.end(), buildOrder2[i]) == protoss.nameList.end())
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid build order for player 2" << std::endl;
             if(p.rank == 0) std::cerr << "The unit " << buildOrder2[i] << " is not a " << race2 << " unit!" << std::endl;
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid build order for player 2", p.rank);
         }
     }
 
@@ -229,9 +208,21 @@ int main(int argc, char *argv[])
 
 
     p.popSize = atoi(argv[3]);
+    if(p.popSize <= 0)
+    {
+        exit_with_error("Error: The population size must be greater zero", p.rank);
+    }
     p.iterations = atoi(argv[4]);
     p.generations = atoi(argv[5]);
+    if(p.iterations <= 0 ||  p.generations <= 0)
+    {
+        exit_with_error("Error: The total number of generations must be greater zero", p.rank);
+    }
     p.nGoals = std::min(p.popSize, static_cast<size_t>(atoi(argv[6])));
+    if(p.nGoals <= 0)
+    {
+        exit_with_error("Error: The number of strategies used for fitness evaluation must be greater zero", p.rank);
+    }
     p.migrants = std::max(static_cast<size_t>(10), p.popSize / p.procs);
     p.dirPath = "./";
 
@@ -240,10 +231,7 @@ int main(int argc, char *argv[])
         struct stat info;
         if(stat(argv[8], &info ) != 0)
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid directory\n";
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid directory", p.rank);
         }
         else if(info.st_mode & S_IFDIR)
         {
@@ -251,10 +239,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            if(p.rank == 0) std::cerr << "Error: Invalid directory\n";
-            if(p.rank == 0) std::cout << "Usage: opt buildOrder1 buildOrder2 population iterations generations goals [-stats] [directory]" << std::endl;
-            MPI_Finalize();
-            return -1;
+            exit_with_error("Error: Invalid directory", p.rank);
         }
     }
 
@@ -337,6 +322,6 @@ int main(int argc, char *argv[])
     }
 
     MPI_Finalize();
-    return 0;
+    return EXIT_SUCCESS;
 }
 
