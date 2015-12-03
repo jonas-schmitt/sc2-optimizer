@@ -274,7 +274,6 @@ public:
             Fitness res;
 
             // Increase the time step size
-            mSim.setTimeSteps(30000);
             for(size_t i = 0; i < minSize; ++i)
             {
                 for(size_t j = 0; j < minSize; ++j)
@@ -297,18 +296,7 @@ public:
             // Sort the individuals of the final comparison according to their performance
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
             {
-                if(lhs.dominates(rhs))
-                {
-                    return true;
-                }
-                else if(rhs.dominates(lhs))
-                {
-                    return false;
-                }
-                else
-                {
-                    return lhs.fitness.score > rhs.fitness.score;
-                }
+                return lhs.fitness.damage > rhs.fitness.damage;
             };
             std::sort(pop1.begin(), pop1.end(), cmp);
             std::sort(pop2.begin(), pop2.end(), cmp);
@@ -332,9 +320,9 @@ public:
 
             if(saveStatistics)
             {
-                for(size_t i = 0; i < std::min(static_cast<size_t>(5), minSize); ++i)
+                for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
                 {
-                    for(size_t j = 0; j < std::min(static_cast<size_t>(5), minSize); ++j)
+                    for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
                     {
                         mSim.setPlayer1Chromosome(pop1[i].chromosome);
                         mSim.setPlayer2Chromosome(pop2[j].chromosome);

@@ -47,7 +47,7 @@ private:
     PlayerState<U> pl2;
     bool mTracking = false;
     // Maximum number of time steps
-    long mTimeSteps = 6000;
+    long mTimeSteps = 12000;
     // Length of a time step
     int mTimeSlice = 10;
 
