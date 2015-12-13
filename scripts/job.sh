@@ -19,4 +19,4 @@ cd ..
 mkdir -p ./results
 OMP_NUM_THREADS=8 mpirun --npersocket 1 \
     -mca orte_num_sockets 4 -mca orte_num_cores 8 \
-        ./build/opt lists/Zerg.txt lists/Protoss.txt 250 30 10 10 -stats ./results > debug.out
+        ./build/opt lists/Terran.txt lists/Protoss.txt 250 20 10 10 -stats ./results > debug.out
