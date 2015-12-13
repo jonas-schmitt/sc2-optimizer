@@ -458,43 +458,106 @@ public:
         }
         if(mMovementTimer <= 0)
         {
-            Vec2D force(0.0);
-            for(const auto& pot : own.potentialList)
+            if(this->getGroundRange() < 1.0 + EPS && this->getAirAttack() == 0)
             {
-                Vec2D const generatedForce = std::move(pot.computeForce(*this));
-                force.x += generatedForce.x;
-                force.y += generatedForce.y;
-            }
-            for(auto buddy :  own.unitList)
-            {
-                if(buddy->isDead() || static_cast<BaseUnit*>(buddy) == this)
+                Vec2D force(0.0);
+                double max_dmg = 0.0;
+                double min_dist = std::numeric_limits<double>::max();
+                double min_speed = std::numeric_limits<double>::max();
+                bool collision = false;
+
+                for(auto buddyPtr :  own.unitList)
                 {
-                    continue;
+                    auto& buddy = *buddyPtr;
+                    if(buddy.isDead() || static_cast<BaseUnit*>(buddyPtr) == this)
+                    {
+                        continue;
+                    }
+                    Vec2D distVec(buddy.getX() - getX(), buddy.getY() - getY());
+                    double const dist = distVec.computeLength ();
+                    // Collision avoidance
+                    if(dist < getSize() + buddy.getSize())
+                    {
+                        collision = true;
+                        Vec2D tmp = std::move(distVec.getNormedVec(dist));
+                        tmp = std::move(Vec2D(-1e6*tmp.x, -1e6*tmp.y));
+                        force.x += tmp.x;
+                        force.y += tmp.y;
+                    }
                 }
-                Vec2D const generatedForce = std::move(this->computeFriendForce(*buddy));
-                force.x += generatedForce.x;
-                force.y += generatedForce.y;
-            }
-            for(auto enemy :  other.unitList)
-            {
-                if(enemy->isDead())
+                for(auto enemyPtr : other.unitList)
                 {
-                    continue;
+                    auto& enemy = *enemyPtr;
+                    if(enemy.isDead())
+                    {
+                        continue;
+                    }
+                    Vec2D distVec(enemy.getX() - getX(), enemy.getY() - getY());
+                    double const dist = distVec.computeLength ();
+                    // Collision avoidance
+                    if(dist < getSize() + enemy.getSize())
+                    {
+                        collision = true;
+                        Vec2D tmp = std::move(distVec.getNormedVec(dist));
+                        tmp = std::move(Vec2D(-1e6*tmp.x, -1e6*tmp.y));
+                        force.x += tmp.x;
+                        force.y += tmp.y;
+                    }
+                    else if(!collision && (enemy.getSpeed() < this->getSpeed() || enemy.getSpeed() < min_speed))
+                    {
+                        Damage dmg = this->computeDamage(enemy);
+                        if(dmg.total > max_dmg || (std::abs(dmg.total - max_dmg) < EPS && dist < min_dist))
+                        {
+                            force = distVec;
+                            max_dmg = dmg.total;
+                            min_speed = enemy.getSpeed();
+                            min_dist = dist;
+                        }
+                    }
+                }
+                currentForce = std::move(force.getNormedVec());
+                mMovementTimer = mMovementUpdate;
+            }
+            else
+            {
+                Vec2D force(0.0);
+                for(const auto& pot : own.potentialList)
+                {
+                    Vec2D const generatedForce = std::move(pot.computeForce(*this));
+                    force.x += generatedForce.x;
+                    force.y += generatedForce.y;
+                }
+                for(auto buddy :  own.unitList)
+                {
+                    if(buddy->isDead() || static_cast<BaseUnit*>(buddy) == this)
+                    {
+                        continue;
+                    }
+                    Vec2D const generatedForce = std::move(this->computeFriendForce(*buddy));
+                    force.x += generatedForce.x;
+                    force.y += generatedForce.y;
+                }
+                for(auto enemy :  other.unitList)
+                {
+                    if(enemy->isDead())
+                    {
+                        continue;
+                    }
+
+                    Vec2D const generatedForce = std::move(this->computeEnemyForce(*enemy));
+                    force.x += generatedForce.x;
+                    force.y += generatedForce.y;
+                }
+                for(auto const& forceField : own.forceFieldQueue)
+                {
+                    Vec2D const generatedForce = std::move(forceField.second.computeForce(*this));
+                    force.x += generatedForce.x;
+                    force.y += generatedForce.y;
                 }
 
-                Vec2D const generatedForce = std::move(this->computeEnemyForce(*enemy));
-                force.x += generatedForce.x;
-                force.y += generatedForce.y;
+                currentForce = std::move(force.getNormedVec());
+                mMovementTimer = mMovementUpdate;
             }
-            for(auto const& forceField : own.forceFieldQueue)
-            {
-                Vec2D const generatedForce = std::move(forceField.second.computeForce(*this));
-                force.x += generatedForce.x;
-                force.y += generatedForce.y;
-            }
-
-            currentForce = std::move(force.getNormedVec());
-            mMovementTimer = mMovementUpdate;
         }
 
         setPos (currentForce.x*mMoveDist + mPos.x, currentForce.y*mMoveDist + mPos.y);
