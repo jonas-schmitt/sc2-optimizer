@@ -73,7 +73,7 @@ private:
     //std::vector<std::string> mSelectionFuncNames = {"Tournament Selection", "Roulette Wheel Selection", "Stochastic Universal Sampling"};
     // Names of the available crossover and mutation operators
     std::vector<std::string> mCrossoverFuncNames = {"Self-Adaptive Simulated Binary Crossover", "Simulated Binary Crossover", "N-Point Crossover", "Uniform Crossover", "Intermediate Crossover", "Line Crossover", "Arithmetic Crossover"};
-    std::vector<std::string> mMutationFuncNames = {"Gaussian Mutation", "Polynomial Mutation", "Uniform Mutation"};
+    std::vector<std::string> mMutationFuncNames = {"Uniform Mutation", "Gaussian Mutation", "Polynomial Mutation"};
 
     //size_t mSelectionChoice = 0;
 
@@ -753,7 +753,7 @@ private:
 
     // Vectors for dynamically choosing the crossover and mutation operators
     std::vector<std::function<std::pair<Individual, Individual>(CrossoverParameter)> > crossoverFuncs = {adaptiveSBX, simulatedBinaryCrossover, nPointCrossover, uniformCrossover, intermediateCrossover, lineCrossover, arithmeticCrossover};
-    std::vector<std::function<void(MutationParameter) > > mutationFuncs = {gaussianMutation, polynomialMutation, uniformMutation};
+    std::vector<std::function<void(MutationParameter) > > mutationFuncs = {uniformMutation, gaussianMutation, polynomialMutation};
 
     void mutationClock(std::mt19937& generator)
     {
