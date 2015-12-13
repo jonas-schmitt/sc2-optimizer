@@ -296,7 +296,18 @@ public:
             // Sort the individuals of the final comparison according to their performance
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
             {
-                return lhs.fitness.damage > rhs.fitness.damage;
+                if(lhs.dominates(rhs))
+                {
+                    return true;
+                }
+                else if(rhs.dominates(lhs))
+                {
+                    return false;
+                }
+                else
+                {
+                    return lhs.fitness.score > rhs.fitness.score;
+                }
             };
             std::sort(pop1.begin(), pop1.end(), cmp);
             std::sort(pop2.begin(), pop2.end(), cmp);
