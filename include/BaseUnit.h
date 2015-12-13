@@ -458,10 +458,10 @@ public:
         }
         if(mMovementTimer <= 0)
         {
-            if(this->getGroundRange() < 1.0 + EPS && this->getAirAttack() == 0)
+            if(this->getGroundRange() < 1.0 + EPS && this->getAirRange() < 1.0 + EPS)
             {
                 Vec2D force(0.0);
-                double max_dmg = 0.0;
+                double max_diff = std::numeric_limits<double>::min();
                 double min_dist = std::numeric_limits<double>::max();
                 double min_speed = std::numeric_limits<double>::max();
                 bool collision = false;
@@ -505,11 +505,13 @@ public:
                     }
                     else if(!collision && (enemy.getSpeed() < this->getSpeed() || enemy.getSpeed() < min_speed))
                     {
-                        Damage dmg = this->computeDamage(enemy);
-                        if(dmg.total > max_dmg || (std::abs(dmg.total - max_dmg) < EPS && dist < min_dist))
+                        Damage dmg_own = this->computeDamage(enemy);
+                        Damage dmg_enemy = enemy.computeDamage(*this);
+                        double const diff = dmg_own.total - dmg_enemy.total;
+                        if(dist < min_dist || (std::abs(dist - min_dist) < EPS && max_diff < diff))
                         {
                             force = distVec;
-                            max_dmg = dmg.total;
+                            max_diff = diff;
                             min_speed = enemy.getSpeed();
                             min_dist = dist;
                         }
