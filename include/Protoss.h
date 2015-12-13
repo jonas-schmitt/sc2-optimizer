@@ -120,7 +120,7 @@ private:
     }
 
 public:
-    int const mNGenes = ProtossUnit::mNGenes + 1;
+    int const mNGenes = 1 + 1;//ProtossUnit::mNGenes + 1;
     void initUpgrades(std::vector<int> const& flags);
     template <typename T, typename U> void timestep(PlayerState<T>& own, PlayerState<U>& other)
     {

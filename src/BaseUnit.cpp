@@ -757,15 +757,23 @@ void BaseUnit::computeTemporaryValues()
     mMoveDist = getSpeed()*mTimeSlice*1e-3;
     mMovementUpdateBackup = mMovementUpdate;
     mMovementUpdateDist = getSpeed()*mMovementUpdate*1e-3;
-    tmp[0] = getMaxDist()*getPhenotype(0);
-    tmp[1] = getMaxDist()*getPhenotype(1) + getSize();
-    tmp[2] = 1e3*getPhenotype(2) + 1e1*getResources()*getPhenotype(3);
-    tmp[3] = 1e1*getPhenotype(5);
-    tmp[4] = 1e2*getPhenotype(7);
-    tmp[5] = 1e3*getPhenotype(8);
-    tmp[6] = 1e1*getPhenotype(11);
-    tmp[7] = 1e2*getPhenotype(12);
-    tmp[8] = 1e3*getPhenotype(13);
+    if(this->getGroundRange() < 1.0 + EPS && this->getAirRange() < 1.0 + EPS)
+    {
+        mMelee = true;
+    }
+    else
+    {
+        mMelee = false;
+        tmp[0] = getMaxDist()*getPhenotype(1);
+        tmp[1] = getMaxDist()*getPhenotype(2) + getSize();
+        tmp[2] = 1e3*getPhenotype(3) + 1e1*getResources()*getPhenotype(4);
+        tmp[3] = 1e1*getPhenotype(6);
+        tmp[4] = 1e2*getPhenotype(8);
+        tmp[5] = 1e3*getPhenotype(9);
+        tmp[6] = 1e1*getPhenotype(12);
+        tmp[7] = 1e2*getPhenotype(13);
+        tmp[8] = 1e3*getPhenotype(14);
+    }
 }
 
 void BaseUnit::initUpgrades (std::vector<int> const& flags)

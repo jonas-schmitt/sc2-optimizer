@@ -145,6 +145,18 @@ protected:
 
     bool mHasAttacked = false;
 
+    bool mMelee = false;
+
+
+//    tmp[0] = getMaxDist()*getPhenotype(1);
+//    tmp[1] = getMaxDist()*getPhenotype(2) + getSize();
+//    tmp[2] = 1e3*getPhenotype(3) + 1e1*getResources()*getPhenotype(4);
+//    tmp[3] = 1e1*getPhenotype(6);
+//    tmp[4] = 1e2*getPhenotype(8);
+//    tmp[5] = 1e3*getPhenotype(9);
+//    tmp[6] = 1e1*getPhenotype(12);
+//    tmp[7] = 1e2*getPhenotype(13);
+//    tmp[8] = 1e3*getPhenotype(14);
 
 
     // Computes the force resulting from the attractive potential of friendly units
@@ -194,7 +206,7 @@ protected:
         double const ownRange = own.computeRange (enemy);
 
         // Attraction
-        if(dist > ownRange*own.getPhenotype(4))
+        if(dist > ownRange*own.getPhenotype(5))
         {
             int const enemyId = enemy.getIdentifier();
             if(!own.mPossibleDamage[enemyId].valid)
@@ -206,7 +218,7 @@ protected:
             double const b = enemy.isAirUnit () ? std::max(own.getAACooldown () - own.getAttackTimer(),0)
                                              : std::max(own.getGACooldown () - own.getAttackTimer (),0);
             res1 = normedDistVec;
-            double const val = a*own.tmp[3] + b * own.getPhenotype(6) + ownDamage.total*own.tmp[4] + own.tmp[5];
+            double const val = a*own.tmp[3] + b * own.getPhenotype(7) + ownDamage.total*own.tmp[4] + own.tmp[5];
             res1.x *= val;
             res1.y *= val;
         }
@@ -231,7 +243,7 @@ protected:
                                            : std::max(enemy.getGACooldown () - enemy.getAttackTimer (),0);
 
 
-            double const val = a*own.tmp[6] + b*own.getPhenotype(9) + enemyDamage.total*own.tmp[7] + own.tmp[8];
+            double const val = a*own.tmp[6] + b*own.getPhenotype(11) + enemyDamage.total*own.tmp[7] + own.tmp[8];
             res2.x *= val;
             res2.y *= val;
         }
@@ -249,7 +261,7 @@ protected:
 public:
 
     // Length of the chromosome
-    int const mNGenes = 14;
+    int const mNGenes = 15;
 
     // Possible damage that can be applied to units with identifier = position in array
     Damage mPossibleDamage[18];
@@ -458,7 +470,7 @@ public:
         }
         if(mMovementTimer <= 0)
         {
-            if(this->getGroundRange() < 1.0 + EPS && this->getAirRange() < 1.0 + EPS)
+            if(mMelee)
             {
                 Vec2D force(0.0);
                 double max_diff = std::numeric_limits<double>::min();
@@ -466,6 +478,16 @@ public:
                 double min_speed = std::numeric_limits<double>::max();
                 bool collision = false;
 
+                for(const auto& pot : own.potentialList)
+                {
+                    Vec2D const generatedForce = std::move(pot.computeForce(*this));
+                    if(std::abs(generatedForce.x) > 1e5 || std::abs(generatedForce.y) > 1e5)
+                    {
+                        collision = true;
+                        force.x += generatedForce.x;
+                        force.y += generatedForce.y;
+                    }
+                }
                 for(auto buddyPtr :  own.unitList)
                 {
                     auto& buddy = *buddyPtr;
@@ -592,7 +614,7 @@ public:
                 continue;
             }
 
-            bool const newKill = getPhenotype(13) * damage.total > enemy->getHealth() + enemy->getShield();
+            bool const newKill = getPhenotype(0) * damage.total > enemy->getHealth() + enemy->getShield();
             bool const higher = damage.total > maxDamage;
             if(newKill)
             {

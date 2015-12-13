@@ -127,13 +127,14 @@ public:
 class Zergling final : public ZergUnit
 {
 public:
+    int const mNGenes = 1;
     void initUpgrades(std::vector<int> const& flags);
 };
 
 class Baneling final : public ZergUnit
 {
 public:
-    int const mNGenes = ZergUnit::mNGenes + 2;
+    int const mNGenes = 1 + 2;//ZergUnit::mNGenes + 2;
 
     void initUpgrades (std::vector<int> const& flags);
     template<typename U, typename T> bool attack(PlayerState<U>& own, PlayerState<T>& other)
