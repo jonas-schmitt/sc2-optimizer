@@ -765,7 +765,7 @@ void BaseUnit::computeTemporaryValues()
     {
         mMelee = false;
         tmp[0] = getMaxDist()*getPhenotype(1);
-        tmp[1] = getMaxDist()*getPhenotype(2) + getSize();
+        tmp[1] = getMaxDist()*getPhenotype(2);
         tmp[2] = 1e3*getPhenotype(3) + 1e1*getResources()*getPhenotype(4);
         tmp[3] = 1e1*getPhenotype(6);
         tmp[4] = 1e2*getPhenotype(8);

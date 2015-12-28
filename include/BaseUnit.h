@@ -166,14 +166,16 @@ protected:
         Vec2D distVec(buddy.getX() - own.getX(), buddy.getY() - own.getY());
         double const dist = distVec.computeLength();
 
+        double const d_0 = own.getSize () + buddy.getSize();
         // Collision avoidance
-        if(dist < own.getSize () + buddy.getSize())
+        if(dist < d_0)
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
             return Vec2D(-1e6*force.x, -1e6*force.y);
         }
-
-        if(dist < own.tmp[0] && dist > own.tmp[1] + buddy.getSize())
+        double const d_1 = d_0 + own.tmp[0];
+        double const d_2 = d_1 + own.tmp[1];
+        if(dist > d_1 && dist < d_2)
         {
             Vec2D res = std::move(distVec.getNormedVec(dist));
             res.x *= own.tmp[2];
@@ -193,8 +195,9 @@ protected:
     {
         Vec2D distVec(enemy.getX() - own.getX(), enemy.getY() - own.getY());
         double const dist = distVec.computeLength ();
+        double const d_0 = own.getSize() + enemy.getSize();
         // Collision avoidance
-        if(dist < own.getSize() + enemy.getSize())
+        if(dist < d_0)
         {
             Vec2D force = std::move(distVec.getNormedVec(dist));
             return Vec2D(-1e6*force.x, -1e6*force.y);
