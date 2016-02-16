@@ -119,8 +119,8 @@ public:
             std::vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
             // Optimize using the mNGoals best chromosomes of the opponent for fitness evaluation
-            mGa1.optimize(optima2, genPerIt, generator, rank, procs);
-            mGa2.optimize(optima1, genPerIt, generator, rank, procs);
+            bool retVal1 = mGa1.optimize(optima2, genPerIt, generator, rank, procs);
+            bool retVal2 = mGa2.optimize(optima1, genPerIt, generator, rank, procs);
 
             // Get process-local statistics
             mStats1 = mGa1.getStatistics();
@@ -132,6 +132,10 @@ public:
                 computeGlobalStatistics(mStats1.second, rank, procs);
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
+            }
+            if(retVal1 && retVal2)
+            {
+                break;
             }
 
         }

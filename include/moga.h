@@ -99,6 +99,11 @@ private:
     std::ofstream* mAvgFile = nullptr;
     std::ofstream* mStdevFile = nullptr;
 
+    size_t mIteration = 0;
+
+    double mDamageAverages[20];
+    double mHealthAverages[20];
+
     // Crossover operators
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
@@ -1155,7 +1160,22 @@ public:
 
     }
 
-    void optimize(std::vector<Chromosome> const& goals, size_t const generations, std::mt19937& generator, int rank, int procs)
+    double computeStdev(double data[], int n)
+    {
+        double mean = 0.0, sum = 0.0;
+        for(int i = 0; i < n; ++i)
+        {
+            mean += data[i];
+        }
+        mean /= n;
+        for(int i = 0; i < n; ++i)
+        {
+            sum += (data[i] - mean) * (data[i] - mean);
+        }
+        return std::sqrt(sum / n);
+    }
+
+    bool optimize(std::vector<Chromosome> const& goals, size_t const generations, std::mt19937& generator, int rank, int procs)
     {
         mMutationCount = 0;
         mIndividualToMutate = 0;
@@ -1256,23 +1276,35 @@ public:
                 v[i] = mPop[i].fitness.health;
             }
             computeStatistics(mStats.second, v);
+            if(procs > 1)
+            {
+                computeGlobalStatistics(mStats.first, rank, procs);
+                computeGlobalStatistics(mStats.second, rank, procs);
+            }
+            mDamageAverages[mIteration % 20] = mStats.first.mean;
+            mHealthAverages[mIteration % 20] = mStats.second.mean;
 
             if(mAvgFile != nullptr && mStdevFile != nullptr)
             {
                 // In case that additional informationm about the optimization should be saved, compute the global statistics
-                if(procs > 1)
-                {
-                    computeGlobalStatistics(mStats.first, rank, procs);
-                    computeGlobalStatistics(mStats.second, rank, procs);
-                }
                 if(rank == 0)
                 {
-                    *mAvgFile << mStats.first.iteration << "\t" << mStats.first.mean << "\t" << mStats.second.mean << std::endl;
-                    *mStdevFile << mStats.first.iteration << "\t" << mStats.first.stdev << "\t" << mStats.second.stdev << std::endl;
+                    *mAvgFile << mIteration << "\t" << mStats.first.mean << "\t" << mStats.second.mean << std::endl;
+                    *mStdevFile << mIteration << "\t" << mStats.first.stdev << "\t" << mStats.second.stdev << std::endl;
+                }
+            }
+            ++mIteration;
+            if(mIteration % 20 == 0)
+            {
+                double const damageStdev = computeStdev(mDamageAverages, 20);
+                double const healthStdev = computeStdev(mHealthAverages, 20);
+                if(damageStdev < 0.05 && healthStdev < 0.05)
+                {
+                    return true;
                 }
             }
         }
-
+        return false;
 
     }
 
