@@ -87,8 +87,6 @@ void InitPlayerUnits<Race>::readStats()
             continue;
         }
 
-
-
         if(!(stream >> str))
         {
             continue;
@@ -522,7 +520,8 @@ void InitPlayerUnits<Race>::init(const std::vector<std::string> &unitVec, const 
         return lhs->getSpeed() < rhs->getSpeed();
     };
     std::sort(pl.unitList.begin(), pl.unitList.end(), cmp_speed);
-			 
+
+    pl.adjustActionsPerUnit();
 }
 
 

@@ -79,6 +79,7 @@ private:
     // Helper functions for parsing
     std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &tokens);
     std::vector<std::string> split(std::string const &s, char delim);
+
 public:
 	InitPlayerUnits();
     InitPlayerUnits(const std::string& path);

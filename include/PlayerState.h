@@ -90,8 +90,9 @@ template <class Race> struct PlayerState final : public Race
     // Length of the combined chromosome
     int NGenes = 0;
 
+    double APM = 400;
 
-
+    bool kill = false;
 
     template<typename T> void timestep(PlayerState<T>& other)
     {
@@ -188,6 +189,11 @@ template <class Race> struct PlayerState final : public Race
         {
             regenerationTimer = regenerationUpdate;
         }
+        if(kill)
+        {
+            adjustActionsPerUnit();
+            kill = false;
+        }
         time += timeSlice;
 
     }
@@ -220,6 +226,7 @@ template <class Race> struct PlayerState final : public Race
     void reset()
     {
         unitCount = unitList.size();
+        kill = false;
         for(auto unit : unitList)
         {
             unit->reset();
@@ -227,6 +234,22 @@ template <class Race> struct PlayerState final : public Race
         time = 0;
         regenerationTimer = regenerationUpdate;
 
+    }
+
+    void decUnitCount()
+    {
+        --unitCount;
+        kill = true;
+    }
+
+    void adjustActionsPerUnit()
+    {
+        double const actionsPerUnit = APM/unitCount;
+        int const update = static_cast<int>(std::round(60000.0/actionsPerUnit));
+        for(auto unit : unitList)
+        {
+            unit->setMovementUpdate(update);
+        }
     }
 
 };

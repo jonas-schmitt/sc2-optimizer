@@ -278,7 +278,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking && i < 15000)
+        if(mTracking)
         {
             // Save paths and sum of health and shield
             for(auto const unitPtr : pl1.unitList)
