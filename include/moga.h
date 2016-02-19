@@ -101,8 +101,11 @@ private:
 
     size_t mIteration = 0;
 
-    double mDamageAverages[20];
-    double mHealthAverages[20];
+    size_t mNSamples = 20;
+    std::vector<double> mDamageAverages;
+    std::vector<double> mHealthAverages;
+    std::vector<double> mDamageMaxima;
+    std::vector<double> mHealthMaxima;
 
     // Crossover operators
 
@@ -913,19 +916,30 @@ private:
         }
     }
 
-
-    // Compute statistics locally
-    void computeStatistics(Statistics& stats, std::vector<double> const& v)
+    double computeStdev(std::vector<double> v, double sum) const
     {
-        double sum = std::accumulate(v.begin(), v.end(), 0.0);
         double mean = sum / v.size();
         std::vector<double> diff(v.size());
         std::transform(v.begin(), v.end(), diff.begin(),
                        std::bind2nd(std::minus<double>(), mean));
         double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-        double stdev = std::sqrt(sq_sum / v.size());
+        return std::sqrt(sq_sum / v.size());
+    }
+
+    double computeStdev(std::vector<double> v) const
+    {
+        double sum = std::accumulate(v.begin(), v.end(), 0.0);
+        return computeStdev(v, sum);
+    }
+
+
+    // Compute statistics locally
+    void computeStatistics(Statistics& stats, std::vector<double> const& v)
+    {
+        double sum = std::accumulate(v.begin(), v.end(), 0.0);
+        double stdev = computeStdev(v, sum);
         stats.sum = sum;
-        stats.mean = mean;
+        stats.mean = sum/v.size();
         stats.max = *std::max_element(v.begin(), v.end());
         stats.stdev = stdev;
         stats.onlinePerformance += stats.mean;
@@ -1073,7 +1087,7 @@ public:
 
     // Initialize the population and the simulations used for fitness evaluation
     MOGA(Vec2D const minPos, Vec2D const maxPos, std::string const& filePath1, std::string const& filePath2, size_t popSize, std::vector<std::string> const & buildList1, std::vector<std::string> const & buildList2, size_t const nGoals)
-        :  mPopSize(popSize), mDistribution(0,1.0), mNGoals(nGoals)
+        :  mPopSize(popSize), mDistribution(0,1.0), mNGoals(nGoals), mDamageAverages(20), mHealthAverages(20)
     {
 
         // Initialize the simulations
@@ -1157,24 +1171,18 @@ public:
         mStats.first.offlinePerformance = 0.0;
         mStats.second.onlinePerformance = 0.0;
         mStats.second.offlinePerformance = 0.0;
+        setNumberOfSamples(20);
 
     }
-
-    double computeStdev(double data[], int n)
+    void setNumberOfSamples(size_t nSamples)
     {
-        double mean = 0.0, sum = 0.0;
-        for(int i = 0; i < n; ++i)
-        {
-            mean += data[i];
-        }
-        mean /= n;
-        for(int i = 0; i < n; ++i)
-        {
-            sum += (data[i] - mean) * (data[i] - mean);
-        }
-        return std::sqrt(sum / n);
+        mNSamples = nSamples;
+        mDamageAverages.resize(nSamples);
+        mHealthAverages.resize(nSamples);
+        mDamageMaxima.resize(nSamples);
+        mHealthMaxima.resize(nSamples);
     }
-
+    
     bool optimize(std::vector<Chromosome> const& goals, size_t const generations, std::mt19937& generator, int rank, int procs)
     {
         mMutationCount = 0;
@@ -1281,8 +1289,10 @@ public:
                 computeGlobalStatistics(mStats.first, rank, procs);
                 computeGlobalStatistics(mStats.second, rank, procs);
             }
-            mDamageAverages[mIteration % 20] = mStats.first.mean;
-            mHealthAverages[mIteration % 20] = mStats.second.mean;
+            mDamageAverages[mIteration % mNSamples] = mStats.first.mean;
+            mHealthAverages[mIteration % mNSamples] = mStats.second.mean;
+            mDamageMaxima[mIteration % mNSamples] = mStats.first.max;
+            mHealthMaxima[mIteration % mNSamples] = mStats.second.max;
 
             if(mAvgFile != nullptr && mStdevFile != nullptr)
             {
@@ -1294,18 +1304,18 @@ public:
                 }
             }
             ++mIteration;
-            if(mIteration % 20 == 0)
+            if(checkConvergence())
             {
-                double const damageStdev = computeStdev(mDamageAverages, 20);
-                double const healthStdev = computeStdev(mHealthAverages, 20);
-                if(damageStdev < 0.05 && healthStdev < 0.05)
-                {
-                    return true;
-                }
+                return true;
             }
         }
         return false;
 
+    }
+    bool checkConvergence() const
+    {
+        double const threshold = 0.01;
+        return computeStdev(mDamageAverages) < threshold && computeStdev(mHealthAverages) < threshold && computeStdev(mDamageMaxima) < threshold && computeStdev(mHealthMaxima) < threshold;
     }
 
 

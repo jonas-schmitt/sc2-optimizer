@@ -98,6 +98,8 @@ public:
             mGa2.writeOutStatistics(avgFile2, stdevFile2);
         }
 
+        mGa1.setNumberOfSamples(2*genPerIt);
+        mGa2.setNumberOfSamples(2*genPerIt);
         // Perform the optimization competitively for both players for iterations x genPerIt generations
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -119,8 +121,8 @@ public:
             std::vector<Chromosome> optima2(mGa2.getBestChromosomes(mNGoals));
 
             // Optimize using the mNGoals best chromosomes of the opponent for fitness evaluation
-            bool retVal1 = mGa1.optimize(optima2, genPerIt, generator, rank, procs);
-            bool retVal2 = mGa2.optimize(optima1, genPerIt, generator, rank, procs);
+            bool const retVal1 = mGa1.optimize(optima2, genPerIt, generator, rank, procs);
+            bool const retVal2 = mGa2.optimize(optima1, genPerIt, generator, rank, procs);
 
             // Get process-local statistics
             mStats1 = mGa1.getStatistics();
