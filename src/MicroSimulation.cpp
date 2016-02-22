@@ -236,7 +236,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
 {
 
     ++mRuns;
-
+/*
     if(mTracking)
     {
         // Save the unit names
@@ -269,7 +269,7 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
         mFile2.setf(std::ios::fixed,std::ios::floatfield);
         mFile2.precision(2);
     }
-
+*/
     for(int i = 0; i < mTimeSteps; ++i)
     {
         // If all units of one player are dead, stop the simulation
@@ -278,7 +278,8 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
             break;
         }
         timestep();
-        if(mTracking)
+        /*
+        if(mTracking && mTimeSteps % 2 == 0)
         {
             // Save paths and sum of health and shield
             for(auto const unitPtr : pl1.unitList)
@@ -306,13 +307,14 @@ Fitness MicroSimulation<T, U>::run(bool const reset, Player const player)
                 }
             }
             mFile2 << std::endl;
-        }
+        }*/
     }
+    /*
     if(mTracking)
     {
         mFile1.close();
         mFile2.close();
-    }
+    }*/
 
     // Evaluate the outcome
     Fitness res;

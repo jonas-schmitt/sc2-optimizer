@@ -1304,12 +1304,15 @@ public:
                 }
             }
             ++mIteration;
-            if(checkConvergence())
-            {
-                return true;
-            }
         }
-        return false;
+        if(mIteration > mNSamples)
+        {
+            return checkConvergence();
+        }
+        else
+        {
+            return false;
+        }
 
     }
     bool checkConvergence() const

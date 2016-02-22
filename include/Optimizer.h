@@ -98,8 +98,8 @@ public:
             mGa2.writeOutStatistics(avgFile2, stdevFile2);
         }
 
-        mGa1.setNumberOfSamples(2*genPerIt);
-        mGa2.setNumberOfSamples(2*genPerIt);
+        mGa1.setNumberOfSamples(3*genPerIt);
+        mGa2.setNumberOfSamples(3*genPerIt);
         // Perform the optimization competitively for both players for iterations x genPerIt generations
         for(size_t i = 0; i < iterations; ++i)
         {
