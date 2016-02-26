@@ -83,6 +83,7 @@ struct Individual
     int rank;
     double distance;
     bool evaluated = false;
+    bool extinction = false;
 
 
     Individual() {}

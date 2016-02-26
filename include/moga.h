@@ -24,9 +24,9 @@
 
 struct CrossoverParameter
 {
-    CrossoverParameter(std::vector<Individual> const& parents_, std::mt19937& generator_, size_t crossoverPoints_)
-        : parents(&parents_), generator(&generator_), crossoverPoints(crossoverPoints_) {}
-    std::vector<Individual> const * parents;
+    CrossoverParameter(std::vector<Individual *> parents_, std::mt19937& generator_, size_t crossoverPoints_)
+        : parents(parents_), generator(&generator_), crossoverPoints(crossoverPoints_) {}
+    std::vector<Individual *> parents;
     std::mt19937 *generator;
     size_t crossoverPoints;
 };
@@ -111,12 +111,12 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> simulatedBinaryCrossover = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+        std::vector<Individual *>& parents = params.parents;
         std::mt19937 &generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const NGenes = mNGenes;
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual& parent1 = *parents.at(0);
+        Individual& parent2 = *parents.at(1);
 
         Individual child1(NGenes), child2(NGenes);
 
@@ -146,12 +146,12 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> adaptiveSBX = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+        std::vector<Individual *>& parents = params.parents;
         std::mt19937 &generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const NGenes = mNGenes;
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual& parent1 = *parents.at(0);
+        Individual& parent2 = *parents.at(1);
 
         Individual child1(NGenes), child2(NGenes);
         double const u = dist(generator);
@@ -529,6 +529,14 @@ private:
                 }
             }
         }
+        if(!(parent1.dominates(child1)) && !(parent1.dominates(child2)))
+        {
+            parent1.extinction = true;
+        }
+        if(!(parent2.dominates(child1)) && !(parent2.dominates(child2)))
+        {
+            parent2.extinction = true;
+        }
 
         return std::make_pair(child1, child2);
 
@@ -538,13 +546,14 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> nPointCrossover = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+
+        std::vector<Individual *>& parents = params.parents;
         std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
         size_t const crossoverPoints = params.crossoverPoints;
 
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual& parent1 = *parents.at(0);
+        Individual& parent2 = *parents.at(1);
         std::uniform_int_distribution<size_t> dist(1,NGenes-2);
 
         std::vector<size_t> posArray(crossoverPoints);
@@ -589,11 +598,11 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> uniformCrossover = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+        std::vector<Individual *>& parents = params.parents;
         std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual& parent1 = *parents.at(0);
+        Individual& parent2 = *parents.at(1);
 
         std::bernoulli_distribution dist(0.5);
         Individual child1(NGenes), child2(NGenes);
@@ -616,11 +625,11 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> intermediateCrossover = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+        std::vector<Individual *> & parents = params.parents;
         std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual & parent1 = *parents.at(0);
+        Individual & parent2 = *parents.at(1);
 
         std::uniform_real_distribution<double> dist(0.25,1.25);
         Individual child1(NGenes), child2(NGenes);
@@ -635,11 +644,11 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> lineCrossover = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+        std::vector<Individual *> & parents = params.parents;
         std::mt19937 &generator = *params.generator;
         size_t const NGenes = mNGenes;
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual & parent1 = *parents.at(0);
+        Individual & parent2 = *parents.at(1);
 
         std::uniform_real_distribution<double> dist(0.25,1.25);
         Individual child1(NGenes), child2(NGenes);
@@ -657,12 +666,12 @@ private:
 
     std::function<std::pair<Individual, Individual>(CrossoverParameter)> arithmeticCrossover = [&] (CrossoverParameter params)
     {
-        std::vector<Individual> const& parents = *params.parents;
+        std::vector<Individual *> & parents = params.parents;
         std::mt19937 &generator = *params.generator;
         std::uniform_real_distribution<double>& dist = mDistribution;
         size_t const NGenes = mNGenes;
-        Individual const& parent1 = parents.at(0);
-        Individual const& parent2 = parents.at(1);
+        Individual & parent1 = *parents.at(0);
+        Individual & parent2 = *parents.at(1);
 
         Individual child1(NGenes), child2(NGenes);
 
@@ -1066,7 +1075,10 @@ private:
             for(size_t const p : front)
             {
                 if(newPop.size() == mPopSize) break;
-                newPop.push_back(mPop[p]);
+                if(!mPop[p].extinction)
+                {
+                    newPop.push_back(mPop[p]);
+                }
             }
         }
         // replace the old population with the new one
@@ -1229,7 +1241,8 @@ public:
                 for(size_t j = 0; j < selected.size()-1; j += 2)
                 {
                     std::pair<Individual, Individual> children;
-                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({*selected[j], *selected[j+1]}, generator, mNCrossoverPoints));
+
+                    children = crossoverFuncs[mCrossoverChoice](CrossoverParameter({selected[j], selected[j+1]}, generator, mNCrossoverPoints));
                     newPop_local.push_back(children.first);
                     newPop_local.push_back(children.second);
                 }
