@@ -983,6 +983,7 @@ private:
                 mPop[i].rank = 1;
             }
         }
+        std::cerr << "Size of the first non-dominated front: " << fronts[0].size() << std::endl;
 
         // determine the individuals in each subsequent front
         size_t r = 1;

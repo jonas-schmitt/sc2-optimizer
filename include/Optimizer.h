@@ -98,8 +98,8 @@ public:
             mGa2.writeOutStatistics(avgFile2, stdevFile2);
         }
 
-        mGa1.setNumberOfSamples(3*genPerIt);
-        mGa2.setNumberOfSamples(3*genPerIt);
+        mGa1.setNumberOfSamples(2*genPerIt+1);
+        mGa2.setNumberOfSamples(2*genPerIt+1);
         // Perform the optimization competitively for both players for iterations x genPerIt generations
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -266,6 +266,14 @@ public:
             // Final comparison of the 100 best individuals of the opponents
             std::vector<Individual> pop1(mGa1.getPopulation());
             std::vector<Individual> pop2(mGa2.getPopulation());
+            auto cmp = [] (Individual const& lhs, Individual const& rhs)
+            {        
+                return lhs.fitness.score > rhs.fitness.score;
+            };
+            std::stable_sort(pop1.begin(), pop1.end(), cmp);
+            std::stable_sort(pop2.begin(), pop2.end(), cmp);
+
+
 
             size_t const minSize = std::min(static_cast<size_t>(100), std::min(pop1.size(), pop2.size()));
 
@@ -300,21 +308,6 @@ public:
             }
 
             // Sort the individuals of the final comparison according to their performance
-            auto cmp = [] (Individual const& lhs, Individual const& rhs)
-            {
-                if(lhs.dominates(rhs))
-                {
-                    return true;
-                }
-                else if(rhs.dominates(lhs))
-                {
-                    return false;
-                }
-                else
-                {
-                    return lhs.fitness.score > rhs.fitness.score;
-                }
-            };
             std::sort(pop1.begin(), pop1.end(), cmp);
             std::sort(pop2.begin(), pop2.end(), cmp);
 
