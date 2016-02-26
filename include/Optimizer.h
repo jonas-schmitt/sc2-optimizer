@@ -38,7 +38,7 @@ private:
 
 
     // Simulation used for the final comparison
-    MicroSimulation<typename GA1::race1, typename GA2::race2> mSim;
+    std::vector<MicroSimulation<typename GA1::race1, typename GA2::race2>> mSim;
 
 
 public:
@@ -47,10 +47,18 @@ public:
           mGa1(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals),
           mGa2(minPos, maxPos, filePath1, filePath2, popSize, buildOrder1, buildOrder2, nGoals),
           mNGoals(nGoals),
-          mSim(minPos, maxPos, filePath1, filePath2),
           mResDirPath(resDirPath)
     {
-        mSim.initBothPlayers(buildOrder1, buildOrder2);
+        size_t nthreads = 1;
+        #pragma omp parallel
+        {
+            nthreads = omp_get_num_threads();
+        }
+        for(size_t i = 0; i < nthreads; ++i)
+        {
+            mSim.emplace_back(minPos, maxPos, filePath1, filePath2);
+            mSim.back().initBothPlayers(buildOrder1, buildOrder2);
+        }
     }
 
     void optimize(size_t const tournamentSize, size_t const co, size_t const mut, size_t const iterations, size_t const genPerIt, int const rank, int const procs, size_t migrants, bool saveStatistics)
@@ -267,15 +275,15 @@ public:
             std::vector<Individual> pop1(mGa1.getPopulation());
             std::vector<Individual> pop2(mGa2.getPopulation());
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
-            {        
+            {
                 return lhs.fitness.score > rhs.fitness.score;
             };
-            std::stable_sort(pop1.begin(), pop1.end(), cmp);
-            std::stable_sort(pop2.begin(), pop2.end(), cmp);
+//            std::stable_sort(pop1.begin(), pop1.end(), cmp);
+//            std::stable_sort(pop2.begin(), pop2.end(), cmp);
 
 
 
-            size_t const minSize = std::min(static_cast<size_t>(100), std::min(pop1.size(), pop2.size()));
+            size_t const minSize = std::min(pop1.size(), pop2.size());
 
             pop1.resize(minSize);
             pop2.resize(minSize);
@@ -288,23 +296,30 @@ public:
             Fitness res;
 
             // Increase the time step size
+            #pragma omp parallel for schedule(static)
             for(size_t i = 0; i < minSize; ++i)
             {
                 for(size_t j = 0; j < minSize; ++j)
                 {
-                    mSim.setPlayer1Chromosome(pop1[i].chromosome);
-                    mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                    Fitness tmp1 = mSim.run(true, Player::first);
+                    mSim[omp_get_thread_num()].setPlayer1Chromosome(pop1[i].chromosome);
+                    mSim[omp_get_thread_num()].setPlayer2Chromosome(pop2[j].chromosome);
+                    Fitness tmp1 = mSim[omp_get_thread_num()].run(true, Player::first);
                     res += tmp1;
                     pop1[i].fitness += tmp1;
                     Fitness tmp2;
                     tmp2.damage = 1.0 - tmp1.health;
                     tmp2.health = 1.0 - tmp1.damage;
                     tmp2.score = 50.0*(tmp2.damage + tmp2.health);
-                    pop2[j].fitness += tmp2;
+                    #pragma omp critical
+                    {
+                        pop2[j].fitness += tmp2;
+                    }
                 }
                 pop1[i].fitness /= minSize;
-                pop2[i].fitness /= minSize;
+                #pragma omp critical
+                {
+                    pop2[i].fitness /= minSize;
+                }
             }
 
             // Sort the individuals of the final comparison according to their performance
@@ -334,12 +349,12 @@ public:
                 {
                     for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
                     {
-                        mSim.setPlayer1Chromosome(pop1[i].chromosome);
-                        mSim.setPlayer2Chromosome(pop2[j].chromosome);
-                        mSim.enableTracking(mResDirPath+"/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat",
+                        mSim.front().setPlayer1Chromosome(pop1[i].chromosome);
+                        mSim.front().setPlayer2Chromosome(pop2[j].chromosome);
+                        mSim.front().enableTracking(mResDirPath+"/pl1_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat",
                                             mResDirPath+"/pl2_paths_" + std::to_string(i) + "_" + std::to_string(j) + ".dat");
-                        mSim.run(true, Player::first);
-                        mSim.disableTracking();
+                        mSim.front().run(true, Player::first);
+                        mSim.front().disableTracking();
                     }
                 }
             }

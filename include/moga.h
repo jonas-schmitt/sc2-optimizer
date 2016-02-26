@@ -529,15 +529,6 @@ private:
                 }
             }
         }
-        if(!(parent1.dominates(child1)) && !(parent1.dominates(child2)))
-        {
-            parent1.extinction = true;
-        }
-        if(!(parent2.dominates(child1)) && !(parent2.dominates(child2)))
-        {
-            parent2.extinction = true;
-        }
-
         return std::make_pair(child1, child2);
 
 
@@ -894,13 +885,14 @@ private:
                     }
                     pop[i].alternative.clear();
                 }
-		else
-		{
-		    pop[i].fitness = fn;
-		}
+                else
+                {
+                    pop[i].fitness = fn;
+                }
             }
         }
     }
+
 
     // Set the strategies for fitness evaluations
     void setGoals(std::vector<Chromosome> const& goals)
@@ -1075,10 +1067,8 @@ private:
             for(size_t const p : front)
             {
                 if(newPop.size() == mPopSize) break;
-                if(!mPop[p].extinction)
-                {
-                    newPop.push_back(mPop[p]);
-                }
+                newPop.push_back(mPop[p]);
+
             }
         }
         // replace the old population with the new one
