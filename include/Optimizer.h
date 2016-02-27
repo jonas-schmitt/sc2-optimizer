@@ -52,12 +52,18 @@ public:
         size_t nthreads = 1;
         #pragma omp parallel
         {
-            nthreads = omp_get_num_threads();
+            #pragma omp single nowait
+            {
+                nthreads = omp_get_num_threads();
+            }
         }
         for(size_t i = 0; i < nthreads; ++i)
         {
             mSim.emplace_back(minPos, maxPos, filePath1, filePath2);
-            mSim.back().initBothPlayers(buildOrder1, buildOrder2);
+        }
+        for(size_t i = 0; i < nthreads; ++i)
+        {
+            mSim[i].initBothPlayers(buildOrder1, buildOrder2);
         }
     }
 
@@ -296,6 +302,8 @@ public:
             Fitness res;
 
             // Increase the time step size
+            std::cout << "Generating final result" << std::endl;
+            size_t progress = 0;
             #pragma omp parallel for schedule(static)
             for(size_t i = 0; i < samples; ++i)
             {
@@ -316,6 +324,12 @@ public:
                         res += tmp1;
                         pop2[j].fitness += tmp2;
                     }
+                }
+                #pragma omp critical
+                {
+                    ++progress;
+                    std::cout << "Progress: " << static_cast<double>(progress)/static_cast<double>(samples)*100.0 << " %" << "\r" << std::flush;
+                    printf("%c[2K", 27);
                 }
             }
 
