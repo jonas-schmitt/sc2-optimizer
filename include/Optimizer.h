@@ -283,11 +283,11 @@ public:
 
 
 
-            size_t const minSize = std::min(pop1.size(), pop2.size());
+            size_t const samples = std::min(static_cast<size_t>(1000UL), std::min(pop1.size(), pop2.size()));
 
-            pop1.resize(minSize);
-            pop2.resize(minSize);
-            for(size_t i = 0; i < minSize; ++i)
+            pop1.resize(samples);
+            pop2.resize(samples);
+            for(size_t i = 0; i < samples; ++i)
             {
                 pop1[i].fitness = 0;
                 pop2[i].fitness = 0;
@@ -297,28 +297,25 @@ public:
 
             // Increase the time step size
             #pragma omp parallel for schedule(static)
-            for(size_t i = 0; i < minSize; ++i)
+            for(size_t i = 0; i < samples; ++i)
             {
-                for(size_t j = 0; j < minSize; ++j)
+                for(size_t j = 0; j < samples; ++j)
                 {
                     mSim[omp_get_thread_num()].setPlayer1Chromosome(pop1[i].chromosome);
                     mSim[omp_get_thread_num()].setPlayer2Chromosome(pop2[j].chromosome);
                     Fitness tmp1 = mSim[omp_get_thread_num()].run(true, Player::first);
-                    res += tmp1;
-                    pop1[i].fitness += tmp1;
                     Fitness tmp2;
                     tmp2.damage = 1.0 - tmp1.health;
                     tmp2.health = 1.0 - tmp1.damage;
                     tmp2.score = 50.0*(tmp2.damage + tmp2.health);
+                    tmp1 /= samples;
+                    pop1[i].fitness += tmp1;
+                    tmp2 /= samples;
                     #pragma omp critical
                     {
+                        res += tmp1;
                         pop2[j].fitness += tmp2;
                     }
-                }
-                pop1[i].fitness /= minSize;
-                #pragma omp critical
-                {
-                    pop2[i].fitness /= minSize;
                 }
             }
 
@@ -327,8 +324,8 @@ public:
             std::sort(pop2.begin(), pop2.end(), cmp);
 
             // Compute and store the result
-            double const damage1 = (res.damage/(minSize * minSize));
-            double const damage2 = (1.0-(res.health/(minSize * minSize)));
+            double const damage1 = (res.damage/(samples));
+            double const damage2 = (1.0-(res.health/(samples)));
 //            stream << "Average of Player 1: " << "\n";
 //            stream << "Damage: " << mStats1.first.mean << "\n";
 //            stream << "Health: " << mStats1.second.mean << "\n";
@@ -345,9 +342,9 @@ public:
 
             if(saveStatistics)
             {
-                for(size_t i = 0; i < std::min(static_cast<size_t>(10), minSize); ++i)
+                for(size_t i = 0; i < std::min(static_cast<size_t>(10), samples); ++i)
                 {
-                    for(size_t j = 0; j < std::min(static_cast<size_t>(10), minSize); ++j)
+                    for(size_t j = 0; j < std::min(static_cast<size_t>(10), samples); ++j)
                     {
                         mSim.front().setPlayer1Chromosome(pop1[i].chromosome);
                         mSim.front().setPlayer2Chromosome(pop2[j].chromosome);
