@@ -1321,7 +1321,7 @@ public:
     }
     bool checkConvergence() const
     {
-        double const threshold = 0.01;
+        double const threshold = 1e-2;
         return computeStdev(mDamageAverages) < threshold && computeStdev(mHealthAverages) < threshold && computeStdev(mDamageMaxima) < threshold && computeStdev(mHealthMaxima) < threshold;
     }
 

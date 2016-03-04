@@ -112,8 +112,9 @@ public:
             mGa2.writeOutStatistics(avgFile2, stdevFile2);
         }
 
-        mGa1.setNumberOfSamples(2*genPerIt+1);
-        mGa2.setNumberOfSamples(2*genPerIt+1);
+        size_t const nSamples = 3*genPerIt+1;
+        mGa1.setNumberOfSamples(nSamples);
+        mGa2.setNumberOfSamples(nSamples);
         // Perform the optimization competitively for both players for iterations x genPerIt generations
         for(size_t i = 0; i < iterations; ++i)
         {
@@ -293,6 +294,7 @@ public:
 
             pop1.resize(samples);
             pop2.resize(samples);
+            #pragma omp parallel for schedule(static)
             for(size_t i = 0; i < samples; ++i)
             {
                 pop1[i].fitness = 0;
@@ -356,9 +358,9 @@ public:
 
             if(saveStatistics)
             {
-                for(size_t i = 0; i < std::min(static_cast<size_t>(10), samples); ++i)
+                for(size_t i = 0; i < std::min(static_cast<size_t>(1), samples); ++i)
                 {
-                    for(size_t j = 0; j < std::min(static_cast<size_t>(10), samples); ++j)
+                    for(size_t j = 0; j < std::min(static_cast<size_t>(1), samples); ++j)
                     {
                         mSim.front().setPlayer1Chromosome(pop1[i].chromosome);
                         mSim.front().setPlayer2Chromosome(pop2[j].chromosome);
