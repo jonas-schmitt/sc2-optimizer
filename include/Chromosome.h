@@ -56,7 +56,7 @@ struct Fitness final
 
     bool dominates(Fitness const& other) const
     {
-        if(this->damage > other.damage && this->health > other.health)
+        if(this->damage >= other.damage && this->health >= other.health)
         {
             return true;
         }
