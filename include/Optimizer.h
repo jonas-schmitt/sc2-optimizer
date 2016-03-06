@@ -150,10 +150,10 @@ public:
                 computeGlobalStatistics(mStats2.first, rank, procs);
                 computeGlobalStatistics(mStats2.second, rank, procs);
             }
-            if(retVal1 && retVal2)
+            /*if(retVal1 && retVal2)
             {
                 break;
-            }
+            }*/
 
         }
         unsigned long evaluations = mGa1.getNumberOfEvaluations() + mGa2.getNumberOfEvaluations();
@@ -290,7 +290,7 @@ public:
 
 
 
-            size_t const samples = std::min(static_cast<size_t>(1000UL), std::min(pop1.size(), pop2.size()));
+            size_t const samples = std::min(static_cast<size_t>(100UL), std::min(pop1.size(), pop2.size()));
 
             pop1.resize(samples);
             pop2.resize(samples);
