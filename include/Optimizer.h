@@ -281,6 +281,16 @@ public:
             // Final comparison of the 100 best individuals of the opponents
             std::vector<Individual> pop1(mGa1.getPopulation());
             std::vector<Individual> pop2(mGa2.getPopulation());
+            std::ofstream file1(mResDirPath+"/paretoFront1.dat");
+            std::ofstream file2(mResDirPath+"/paretoFront2.dat");
+            for(size_t i = 0; pop1[i].rank == 1; ++i)
+            {
+                file1 << pop1[i].fitness.damage << "\t" << pop1[i].fitness.health << "\n";
+            }
+            for(size_t i = 0; pop2[i].rank == 1; ++i)
+            {
+                file2 << pop2[i].fitness.damage << "\t" << pop2[i].fitness.health << "\n";
+            }
             auto cmp = [] (Individual const& lhs, Individual const& rhs)
             {
                 return lhs.fitness.score > rhs.fitness.score;

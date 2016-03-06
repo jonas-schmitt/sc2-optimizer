@@ -529,6 +529,20 @@ private:
                 }
             }
         }
+        for(auto& c : child1.chromosome)
+        {
+            if(c < MIN || c > MAX)
+            {
+                c = std::abs(std::remainder(c, (MAX - MIN)));
+            }
+        }
+        for(auto& c : child2.chromosome)
+        {
+            if(c < MIN || c > MAX)
+            {
+                c = std::abs(std::remainder(c, (MAX - MIN)));
+            }
+        }
         return std::make_pair(child1, child2);
 
 
